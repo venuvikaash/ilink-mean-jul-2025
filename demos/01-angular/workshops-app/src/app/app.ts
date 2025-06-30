@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterOutlet } from '@angular/router';
 import { NgbAlert } from '@ng-bootstrap/ng-bootstrap'
 import { Menu } from './menu/menu';
 import { Home } from './home/home';
 
 @Component({
   selector: 'app-root',
-  imports: [NgbAlert, CommonModule, Menu, Home],
+  imports: [NgbAlert, CommonModule, Menu, Home, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
