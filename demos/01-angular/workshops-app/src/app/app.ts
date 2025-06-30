@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NgbAlert } from '@ng-bootstrap/ng-bootstrap'
 import { Menu } from './menu/menu';
+import { Home } from './home/home';
 
 @Component({
   selector: 'app-root',
-  imports: [NgbAlert, CommonModule, Menu],
+  imports: [NgbAlert, CommonModule, Menu, Home],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
