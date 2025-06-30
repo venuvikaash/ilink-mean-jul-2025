@@ -9,4 +9,9 @@ import { RouterOutlet } from '@angular/router';
 })
 export class App {
   protected title = 'Hello Angular v20!';
+  count = 0;
+
+  increment() {
+    this.count = this.count + 1;
+  }
 }
