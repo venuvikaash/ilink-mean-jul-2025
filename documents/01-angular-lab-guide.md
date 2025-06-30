@@ -176,7 +176,7 @@ export class MenuComponent {
 ```html
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container">
-    <a class="navbar-brand" href="#">Workshops App</a>
+    <a class="navbar-brand" href="/demos/">Workshops App</a>
     <button
       class="navbar-toggler"
       type="button"
@@ -195,13 +195,13 @@ export class MenuComponent {
       <!-- left menu -->
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="#">Home</a>
+          <a class="nav-link active" aria-current="page" href="/">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">List of workshops</a>
+          <a class="nav-link" href="/workshops">List of workshops</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Add a workshop</a>
+          <a class="nav-link" href="/workshops/add">Add a workshop</a>
         </li>
       </ul>
       
@@ -222,7 +222,7 @@ export class MenuComponent {
             aria-labelledby="navbarDropdown1"
             class="dropdown-menu"
           >
-            <a ngbDropdownItem href="#" (click)="$event.preventDefault()"
+            <a ngbDropdownItem href="/workshops/favorites"
               >Favorites</a
             >
             <a ngbDropdownItem href="#" (click)="$event.preventDefault()"
