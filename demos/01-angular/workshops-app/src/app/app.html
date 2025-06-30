@@ -1,3 +1,8 @@
+<ngb-alert type="info" *ngIf="isOpen" (closed)="toggle()">
+  Note that this app is built using Angular 18. The APIs in Angular <= 16 are
+  significantly different.
+</ngb-alert>
+
 <h2 class="highlight">App component</h2>
 <div>{{ title }}</div>
 <!-- <button (click)="count = count + 1">Click me</button> -->
