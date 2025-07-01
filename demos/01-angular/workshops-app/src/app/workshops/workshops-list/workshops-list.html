@@ -1,8 +1,8 @@
 <!-- Alternative to *ngIf -->
 @if(loading) {
-    <app-loading-spinner></app-loading-spinner>
+    <app-loading-spinner variant="success"></app-loading-spinner>
 } @else if( !loading && error ) {
-    <app-error-alert></app-error-alert>
+    <app-error-alert [error]="error"></app-error-alert>
 } @else {
     @for ( workshop of workshops; track workshop.id ) {
         <div>

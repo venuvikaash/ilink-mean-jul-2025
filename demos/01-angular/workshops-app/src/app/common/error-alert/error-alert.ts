@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { NgbAlert } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -10,5 +10,6 @@ import { NgbAlert } from '@ng-bootstrap/ng-bootstrap';
   styleUrl: './error-alert.scss'
 })
 export class ErrorAlert {
-
+  @Input()
+  error: Error | null = null;
 }
