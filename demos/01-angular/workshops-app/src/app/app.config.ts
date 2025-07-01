@@ -8,7 +8,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
-    provideRouter(workshopsRoutes)
+    provideRouter(workshopsRoutes),
+    provideRouter(routes), // the page ot found route will be matched at the very end
   ]
 };
