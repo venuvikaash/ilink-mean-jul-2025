@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { WorkshopsService } from '../workshops';
+import IWorkshop from '../models/IWorkshop';
 
 @Component({
   selector: 'app-workshops-list',
@@ -7,7 +8,7 @@ import { WorkshopsService } from '../workshops';
   templateUrl: './workshops-list.html',
   styleUrl: './workshops-list.scss'
 })
-export class WorkshopsList {
+export class WorkshopsList implements OnInit {
   // workshopsService = new WorkshopsService();
   // private workshopsService: WorkshopsService;
 
@@ -20,5 +21,12 @@ export class WorkshopsList {
   // short syntax for data member creation and initialization
   constructor(private workshopsService : WorkshopsService) {
     this.workshopsService.doSomething();
+  }
+
+  // Lifecycle method: executed when the component shows up on the screen
+  ngOnInit() {
+    console.log(
+      this.workshopsService.getWorkshops()
+    );
   }
 }
