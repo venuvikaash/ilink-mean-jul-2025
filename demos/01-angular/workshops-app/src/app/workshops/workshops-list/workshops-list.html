@@ -1,15 +1,13 @@
 <!-- Alternative to *ngIf -->
 @if(loading) {
-    <div class="d-flex justify-content-center">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
+    <app-loading-spinner></app-loading-spinner>
 } @else if( !loading && error ) {
-    <ngb-alert type="danger">{{ error.message }}</ngb-alert>
+    <app-error-alert></app-error-alert>
 } @else {
     @for ( workshop of workshops; track workshop.id ) {
-        <div>{{ workshop.name }}</div>
+        <div>
+            {{ workshop.name }}
+        </div>
     }
     <!-- <div *ngFor="let workshop of workshops">{{ workshop.name }}</div> -->
 }

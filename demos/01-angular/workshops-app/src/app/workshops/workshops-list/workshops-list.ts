@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NgbAlert } from '@ng-bootstrap/ng-bootstrap';
+import { LoadingSpinner } from '../../common/loading-spinner/loading-spinner';
+import { ErrorAlert } from '../../common/error-alert/error-alert';
 import { WorkshopsService } from '../workshops';
 import IWorkshop from '../models/IWorkshop';
 
@@ -8,7 +9,8 @@ import IWorkshop from '../models/IWorkshop';
   selector: 'app-workshops-list',
   imports: [
     CommonModule,
-    NgbAlert
+    LoadingSpinner,
+    ErrorAlert
   ],
   templateUrl: './workshops-list.html',
   styleUrl: './workshops-list.scss'
