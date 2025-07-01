@@ -1,22 +1,18 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { WorkshopsService } from '../workshops';
 import IWorkshop from '../models/IWorkshop';
 
 @Component({
   selector: 'app-workshops-list',
-  imports: [],
+  imports: [
+    CommonModule
+  ],
   templateUrl: './workshops-list.html',
   styleUrl: './workshops-list.scss'
 })
 export class WorkshopsList implements OnInit {
-  // workshopsService = new WorkshopsService();
-  // private workshopsService: WorkshopsService;
-
-  // constructor(workshopsService : WorkshopsService) {
-  //   this.workshopsService = workshopsService;
-
-  //   this.workshopsService.doSomething();
-  // }
+  workshops!: IWorkshop[];
 
   // short syntax for data member creation and initialization
   constructor(private workshopsService : WorkshopsService) {
@@ -25,8 +21,16 @@ export class WorkshopsList implements OnInit {
 
   // Lifecycle method: executed when the component shows up on the screen
   ngOnInit() {
-    const workshops : IWorkshop[] = this.workshopsService.getWorkshops();
-
-    // console.log( '***' + workshops[0].category * workshops[1].category );
+    this.workshopsService.getWorkshops().subscribe(
+      {
+        next: ( w ) => {
+          console.log( w );
+          this.workshops = w;
+        },
+        error: ( err ) => {
+          console.log( err );
+        }
+      }
+    );
   }
 }
