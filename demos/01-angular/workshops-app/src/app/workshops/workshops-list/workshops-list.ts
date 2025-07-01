@@ -25,8 +25,8 @@ export class WorkshopsList implements OnInit {
 
   // Lifecycle method: executed when the component shows up on the screen
   ngOnInit() {
-    console.log(
-      this.workshopsService.getWorkshops()
-    );
+    const workshops : IWorkshop[] = this.workshopsService.getWorkshops();
+
+    // console.log( '***' + workshops[0].category * workshops[1].category );
   }
 }
