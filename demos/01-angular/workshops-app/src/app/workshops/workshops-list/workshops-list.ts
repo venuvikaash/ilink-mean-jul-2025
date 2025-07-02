@@ -20,18 +20,16 @@ import IWorkshop from '../models/IWorkshop';
 export class WorkshopsList implements OnInit {
   workshops!: IWorkshop[];
   error: Error | null = null;
-  loading: boolean = true;
+  loading = true;
+  page = 1;
 
   // short syntax for data member creation and initialization
   constructor(private workshopsService : WorkshopsService) {
     this.workshopsService.doSomething();
   }
 
-  // Lifecycle method: executed when the component shows up on the screen
-  ngOnInit() {
-    this.loading = true;
-
-    this.workshopsService.getWorkshops().subscribe(
+  getWorkshops() {
+    this.workshopsService.getWorkshops(this.page).subscribe(
       {
         // called when operation (backend call) is successful - it is passed the data
         next: ( w ) => {
@@ -48,5 +46,22 @@ export class WorkshopsList implements OnInit {
         }
       }
     );
+  }
+
+  // Lifecycle method: executed when the component shows up on the screen
+  ngOnInit() {
+    this.loading = true;
+
+    this.getWorkshops();
+  }
+
+  changePage(by: number) {
+    if (this.page == 1 && by < 0) {
+        return;
+    }
+
+    this.page = this.page + by;
+
+    this.getWorkshops();
   }
 }

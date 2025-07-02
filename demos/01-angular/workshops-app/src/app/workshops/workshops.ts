@@ -14,9 +14,14 @@ export class WorkshopsService {
     console.log( 'I did something' );
   }
 
-  getWorkshops() {
+  getWorkshops(page: number = 1) {
     return this.http.get<IWorkshop[]>(
-      `https://workshops-server.onrender.com/workshops`
+      `https://workshops-server.onrender.com/workshops`,
+      {
+        params: {
+          _page: page
+        }
+      }
     );
   }
 }

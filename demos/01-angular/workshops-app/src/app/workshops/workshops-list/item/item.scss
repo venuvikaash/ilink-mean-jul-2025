@@ -1,6 +1,7 @@
 // :host targets the <app-item></app-item> element that "hosts" the HTML for this component
 :host {
     display: flex;
+    width: 100%;
 }
 
 .card-img-top-wrapper {
