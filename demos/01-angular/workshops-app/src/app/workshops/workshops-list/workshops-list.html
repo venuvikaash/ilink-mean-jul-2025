@@ -7,7 +7,10 @@
     -->
     <app-error-alert [error]="error"></app-error-alert>
 } @else {
-    <app-pagination [page]="page" (pageChange)="changePage($event)"></app-pagination>
+    <app-pagination
+        [page]="page"
+        (pageChange)="changePage($event)"
+    ></app-pagination>
     <div class="row">
         @for ( workshopItem of workshops; track workshopItem.id ) {
             <div class="col-12 col-lg-4 my-3 d-flex">

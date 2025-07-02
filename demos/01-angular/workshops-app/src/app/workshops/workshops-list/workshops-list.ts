@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { LoadingSpinner } from '../../common/loading-spinner/loading-spinner';
 import { ErrorAlert } from '../../common/error-alert/error-alert';
 import { Pagination } from '../../common/pagination/pagination';
@@ -26,7 +27,11 @@ export class WorkshopsList implements OnInit {
   page = 1;
 
   // short syntax for data member creation and initialization
-  constructor(private workshopsService : WorkshopsService) {
+  constructor(
+    private workshopsService : WorkshopsService,
+    private router : Router,
+    private activatedRoute : ActivatedRoute,
+  ) {
     this.workshopsService.doSomething();
   }
 
@@ -54,12 +59,37 @@ export class WorkshopsList implements OnInit {
   ngOnInit() {
     this.loading = true;
 
-    this.getWorkshops();
+    // this.getWorkshops();
+
+    // this.activatedRoute.queryParamMap is an Observable that tracks changes to the query string -> thus whenever `page` in the query string changes, the next() method is called
+    this.activatedRoute.queryParamMap.subscribe({
+        next: (queryParams) => {
+            const queryStr = queryParams.get('page'); // read as a string
+
+            // when the page loads for the first time, there is no `page` query string parameter -> so we set page to 1. Later on there is some `page` value
+            if (queryStr === null) {
+                this.page = 1;
+            } else {
+                this.page = +queryStr; // convert `page` from string type to number
+            }
+
+            this.getWorkshops(); // page has changed -> get fresh data
+        },
+    });
   }
 
   changePage(newPage: number) {
     this.page = newPage;
 
-    this.getWorkshops();
+    // this.getWorkshops();
+
+    this.router.navigate(
+        ['/workshops'],
+        {
+          queryParams: {
+              page: this.page,
+          },
+        }
+    );
   }
 }
