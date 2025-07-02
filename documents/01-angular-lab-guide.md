@@ -1022,7 +1022,12 @@ export class ItemComponent {
       <div>{{ workshop.startDate }} - {{ workshop.endDate }}</div>
       <div>{{ workshop.location.address }}, {{ workshop.location.city }}, {{ workshop.location.state }} </div>
     </div>
-    <a href="#" class="btn btn-primary">Know more</a>
+    <a
+      class="btn btn-primary btn-sm mt-4"
+      [routerLink]="[workshop.id]"
+      [attr.aria-label]="'Know more about ' + workshop.name"
+      >Know more</a
+    >
   </div>
 </div>
 }
@@ -1688,6 +1693,7 @@ imports: [
 
 ```html
 <div class="mt-5">
+    <!-- Alternatively, [routerLink]="['.']" -->
     <button
         [routerLink]="['/workshops', workshop.id]"
         routerLinkActive="btn-active"
@@ -1696,6 +1702,7 @@ imports: [
     >
         Sessions List
     </button>
+    <!-- Alternatively, [routerLink]="['add-session']" -->
     <button
         [routerLink]="['/workshops', workshop.id, 'add-session']"
         routerLinkActive="btn-active"
@@ -3366,7 +3373,7 @@ putWorkshop(workshop: Omit<IWorkshop, 'id'>, id: number) {
     );
 }
 ```
-- In `demos/10-angular/workshops-app/src/app/workshops/add-workshop/add-workshop.component.ts`,
+- In `src/app/workshops/add-workshop/add-workshop.component.ts`,
 ```ts
 import { ActivatedRoute, Router } from '@angular/router';
 ```
@@ -3472,3 +3479,468 @@ addWorkshop() {
 </button>
 ```
 - You should now be able to modify the details in the form, and submit it to update a workshop's details in the backend.
+
+## Step 42: Adding Favorites Service
+```sh
+ng g s workshops/favorites
+```
+- In `src/app/workshops/favorites.service.ts`
+```ts
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import IWorkshop from './models/IWorkshop';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class FavoritesService {
+  private favorites: {
+    [workshopId: number]: IWorkshop;
+  } = {};
+
+  private eventSource = new BehaviorSubject<IWorkshop[]>(
+    Object.values(this.favorites)
+  );
+
+  public favorites$ = this.eventSource.asObservable();
+
+  public addToFavorites(workshop: IWorkshop) {
+    if (this.isFavorite(workshop.id)) {
+      return;
+    }
+
+    this.favorites[workshop.id] = workshop;
+    this.eventSource.next(Object.values(this.favorites));
+  }
+
+  public removeFromFavorites(workshopId: number) {
+    delete this.favorites[workshopId];
+    this.eventSource.next(Object.values(this.favorites));
+  }
+
+  public toggleFavorite(workshop: IWorkshop) {
+    if (this.isFavorite(workshop?.id)) {
+      this.removeFromFavorites(workshop?.id);
+    } else {
+      this.addToFavorites(workshop);
+    }
+  }
+
+  public isFavorite(workshopId: number) {
+    return !!this.favorites[workshopId];
+  }
+
+  constructor() {}
+}
+```
+
+## Step 43: Setting up the Favorites Component
+- In `/src/app/workshops/favorites/favorites.component.ts`
+```ts
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { FavoritesService } from '../favorites.service';
+
+@Component({
+  selector: 'app-favorites',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: './favorites.component.html',
+  styleUrl: './favorites.component.css',
+})
+export class FavoritesComponent implements OnInit {
+  constructor(public favoritesService: FavoritesService) {}
+
+  ngOnInit() {}
+}
+```
+- In `/src/app/workshops/favorites/favorites.component.html`
+```html
+<h1>Favorites</h1>
+<hr />
+
+<div *ngIf="favoritesService.favorites$ | async as favorites; else loading">
+  <ul>
+    <li *ngFor="let favorite of favorites">
+      <a [routerLink]="['/workshops', favorite.id]">
+        {{ favorite.name }}
+      </a>
+    </li>
+  </ul>
+  <div *ngIf="favorites.length === 0">
+    You have not marked any workshops as favorites. We hope you'll soon find
+    some that pique your interest!
+  </div>
+</div>
+
+<ng-template #loading> Loading favorites... </ng-template>
+```
+
+## Step 44: Adding Favorites from the Workshops List
+- Add `FavoritesService` as a dependency in `/src/app/workshops/workshops-list/item/item.component.ts`
+```ts
+import { faPencil, faTrash, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faStar as faStarEmpty } from '@fortawesome/free-regular-svg-icons';
+
+import { FavoritesService } from 'app/workshops/favorites.service';
+```
+```ts
+icons = {
+    faPencil,
+    faTrash,
+    faStar,
+    faStarEmpty,
+};
+
+constructor(public favoritesService: FavoritesService) {}
+```
+- In `/src/app/workshops/workshops-list/item/item.component.html`
+```html
+<div class="card workshop-card w-100 p-3 text-center">
+  <span>
+    <fa-icon
+      [icon]="
+        favoritesService.isFavorite(workshop.id)
+          ? icons.faStar
+          : icons.faStarEmpty
+      "
+      class="favorite text-success"
+      (click)="favoritesService.toggleFavorite(workshop)"
+    ></fa-icon>
+  </span>
+  <div class="card-img-wrapper">
+    <img [src]="workshop.imageUrl" [alt]="workshop.name" class="card-img-top" />
+  </div>
+  <div class="card-body">
+    <div>
+      <h5 class="card-title">{{ workshop.name }}</h5>
+      <div class="workshop-location">
+        {{ workshop.location.address }}, {{ workshop.location.city }},
+        {{ workshop.location.state }}
+      </div>
+      <strong class="workshop-duration">
+        {{ workshop.startDate | date : "mediumDate" }} -
+        {{ workshop.endDate | date : "mediumDate" }},
+      </strong>
+    </div>
+    <div>
+      <a [routerLink]="['/workshops/edit', workshop.id]">
+        <fa-icon [icon]="icons.faPencil" class="me-2 text-success"></fa-icon>
+      </a>
+      <fa-icon [icon]="icons.faTrash" class="text-danger" (click)="deleteWorkshop()"></fa-icon>
+    </div>
+    <!-- <div class="card-text" [innerHTML]="workshop.description"></div> -->
+    <a
+      class="btn btn-primary btn-sm mt-4"
+      [routerLink]="[workshop.id]"
+      [attr.aria-label]="'Know more about ' + workshop.name"
+      >Know more</a
+    >
+  </div>
+</div>
+```
+
+## Step 45: Refactor `app-workshop-item` for content projection
+We'll convert the static card content into a flexible component that accepts custom header, body, and footer slots.
+- Modify `/src/app/workshops/workshops-list/item/item.component.html`. Replace the current `<div class="card">...</div>` with this template featuring three projection slots.
+
+```html
+<div class="card workshop-card w-100 p-3 d-flex flex-column">
+  <div class="card-header">
+    <ng-content select="[item-header]"></ng-content>
+  </div>
+  <div class="card-body flex-grow-1">
+    <ng-content select="[item-body]"></ng-content>
+  </div>
+  <div class="card-footer">
+    <ng-content select="[item-footer]"></ng-content>
+  </div>
+</div>
+```
+
+This design aligns with Angular’s multi-slot projection pattern, inserting each section where appropriate.
+
+- Update parent `/src/app/workshops/workshops-list/workshops-list.component.html`. Wrap the relevant pieces of each workshop within the defined projection slots.
+
+```html
+<app-workshop-item [workshop]="workshop" (delete)="confirmAndDeleteWorkshop(workshop)">
+  <!-- HEADER -->
+  <div item-header class="d-flex justify-content-between align-items-center">
+    <h5 class="card-title mb-0">{{ workshop.name }}</h5>
+    <span>
+      <fa-icon [icon]="favoritesService.isFavorite(workshop.id)? icons.faStar : icons.faStarEmpty"
+               class="favorite text-success"
+               (click)="favoritesService.toggleFavorite(workshop)">
+      </fa-icon>
+    </span>
+  </div>
+
+  <!-- BODY -->
+  <div item-body>
+    <img [src]="workshop.imageUrl" [alt]="workshop.name" class="card-img-top mb-2" />
+    <div class="workshop-location">
+      {{ workshop.location.address }}, {{ workshop.location.city }}, {{ workshop.location.state }}
+    </div>
+    <strong class="workshop-duration">
+      {{ workshop.startDate | date:'mediumDate' }} -
+      {{ workshop.endDate | date:'mediumDate' }}
+    </strong>
+  </div>
+
+  <!-- FOOTER -->
+  <div item-footer class="d-flex justify-content-between align-items-center">
+    <a [routerLink]="['/workshops/edit', workshop.id]">
+      <fa-icon [icon]="icons.faPencil" class="text-success"></fa-icon>
+    </a>
+    <fa-icon [icon]="icons.faTrash" class="text-danger" (click)="deleteWorkshop(workshop)"></fa-icon>
+    <a class="btn btn-primary btn-sm"
+       [routerLink]="[workshop.id]"
+       [attr.aria-label]="'Know more about ' + workshop.name">
+      Know more
+    </a>
+  </div>
+</app-workshop-item>
+```
+- Make necessary changes in `/src/app/workshops/workshops-list/workshops-list.component.ts`
+```ts
+import { DatePipe } from '@angular/common';
+
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faPencil, faTrash, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faStar as faStarEmpty } from '@fortawesome/free-regular-svg-icons';
+```
+```ts
+imports: [ItemComponent, NgbAlert, LoadingComponent, PaginationComponent, RouterLink, FontAwesomeModule, DatePipe],
+```
+```ts
+icons = {
+    faPencil,
+    faTrash,
+    faStar,
+    faStarEmpty,
+};
+```
+```ts
+constructor(
+    private activatedRoute: ActivatedRoute,
+    private router: Router,
+    private workshopsService: WorskhopsService,
+    public favoritesService: FavoritesService, // should be public as the HTML file uses the service directly
+    private toastService: ToastService
+) {
+    // rest of code...
+}
+```
+- __TODO__: CSS changes
+This structure clearly separates header, body, and footer, making each section customizable and maintaining the clean layout you already have.
+
+- **Why use content projection?**  
+  It enables flexible, reusable components that adapt to different content—similar to Angular’s `ng-content`, which passes external content into defined slots at compile time.
+- **Multi-slot projection**    
+  Each `ng-content select="[item-*]"` maps to a corresponding `<div item-*>` block in the parent. This empowers them to design rich, customized UI per workshop without altering the component logic.
+
+- Add fallback content - Optionally, include fallback templates in `/src/app/workshops/workshops-list/item/item.component.html`. This ensures the body shows helper text if the parent supplies no content, enabling default projection behavior.
+```html
+<ng-content select="[item-body]">
+  <p class="text-muted">No description available</p>
+</ng-content>
+```
+
+## Step 46: Understanding HTTP Interceptor
+- An HTTP interceptor can intercept HTTP requests and responses and process
+- A request before it goes out to the backend
+- A response before it is consumed by the rest of the Angular app
+- Generate interceptor
+```sh
+ng g interceptor common/auth/jwt
+```
+- In `app/common/auth/jwt.interceptor.ts`
+```ts
+import { HttpInterceptorFn } from '@angular/common/http';
+
+localStorage.setItem('auth-token', 'dummy-jwt-token'); // This is added here just for testing purpose. This will be obtained from the backend on successful login.
+
+export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = localStorage.getItem('auth-token');
+    const cloned = req.clone({
+      setHeaders: { Authorization: token ? `Bearer ${token}` : '' }
+    });
+    return next(cloned);
+};
+```
+- Registering it in `app.config.ts`
+```ts
+import {
+  HTTP_INTERCEPTORS,
+  withInterceptors,
+  provideHttpClient
+//   withInterceptorsFromDi,
+} from '@angular/common/http';
+
+import { jwtInterceptor } from './common/auth/jwt-interceptor';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    // rest of code...
+
+    // Registration for HTTP interceptors created using class, say JwtInterceptor. In case modules are used, it can be registered in `app.module.ts` (sample code in note below).
+    // provideHttpClient(
+    //   // DI-based interceptors must be explicitly enabled.
+    //   withInterceptorsFromDi()
+    // ),
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: JwtInterceptor,
+    //   multi: true,
+    // }
+
+    provideHttpClient(
+      withInterceptors([jwtInterceptor])
+    ),
+  ],
+};
+```
+- This adds an `authorization` header to every outgoing HTTP request, demonstrating centralized request handling. Check the request details under Network Tab of the Developer Tools. You will find a request header like so - `authorization: Bearer dummy-jwt-token`
+- __NOTE__: In Angular <= 16, interceptors were implemented using classes like below. This is just for your reference. Do not use it as we choose the function alternative to it above.
+    - Defining the interceptor using a class
+    ```ts
+    @Injectable()
+    export class AuthInterceptor implements HttpInterceptor {
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+        const token = localStorage.getItem('auth-token');
+        const cloned = req.clone({
+        setHeaders: { Authorization: token ? `Bearer ${token}` : '' }
+        });
+        return next.handle(cloned);
+    }
+    }
+    ```
+    - Registering it in `app.module.ts`
+
+    ```ts
+    providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    ],
+    ```
+
+## Step 47: Adding a Guard
+- Guards are used to prevent navigation to or away from a particular route. Let us create a guard that prevents navigation to the workshop details route if the workshop id in the URL is not a nmber.
+- Generate a guard (`CanActivate` guard helps restrict navigation to a route) - Select `CanActivate`
+```sh
+ng g g workshops/validate-workshop
+```
+- In `app/workshops/validate-workshop-guard.ts`
+```ts
+import { inject } from '@angular/core';
+import { Router, CanActivateFn } from '@angular/router';
+
+export const validateWorkshopGuard: CanActivateFn = (route, state) => {
+  const _router = inject(Router)
+
+  const strId = route.paramMap.get('id') as string;
+    const proceed = /^\d+$/.test(strId);
+
+    if (!proceed) {
+      _router.navigateByUrl('/');
+      return false;
+    } else {
+      return true;
+    }
+};
+```
+- Apply the guard to the route for workshop details. In `app/workshops/workshops.route.ts`
+```ts
+import { validateWorkshopGuard } from './validate-workshop-guard';
+```
+```ts
+// rest of code...
+{
+    path: 'workshops/:id',
+    component: WorkshopDetailsComponent
+    title: 'Details of workshop',
+    canActivate: [validateWorkshopGuard /*, any other guards may be added here... */ ],
+    children: [
+      // rest of code...
+    ],
+},
+// rest of code...
+```
+- __Note__: In Angular <= 16 guards could only be defined using a class like below. This is just for your reference. Do not use it as we choose the function alternative to it above.
+```ts
+import { Injectable } from '@angular/core';
+import {
+  CanActivate,
+  ActivatedRouteSnapshot,
+  RouterStateSnapshot,
+  Router,
+} from '@angular/router';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class ValidateWorkshopGuard implements CanActivate {
+  constructor(private _router: Router) {}
+
+  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
+    const strId = route.paramMap.get('id') as string;
+    const proceed = /^\d+$/.test(strId);
+
+    if (!proceed) {
+      this._router.navigateByUrl('/');
+      return false;
+    } else {
+      return true;
+    }
+  }
+}
+```
+- In the route objects, guards written using classes are added in place of functions as shown above.
+
+## Step 48: Lazy loading
+- Create `app/workshops/workshop-details.routes.ts`. Move the child route configuration to this file.
+```ts
+import { Routes } from '@angular/router';
+
+import { SessionsListComponent } from './workshop-details/sessions-list/sessions-list.component';
+import { AddSessionComponent } from './workshop-details/add-session/add-session.component';
+
+// Define child routes for ParentComponent
+export const parentRoutes: Routes = [
+  {
+    path: '',
+    component: SessionsListComponent,
+  },
+  {
+    path: 'add',
+    component: AddSessionComponent,
+  },
+];
+```
+- In `app/workshops/workshops.routes.ts` first comment out the workshop details route imports (along with child components). This is important, as __components which are lazily loaded must never be statically imported from outside the lazily loaded part!__
+```ts
+// import { WorkshopDetailsComponent } from './workshop-details/workshop-details.component';
+// import { SessionsListComponent } from './workshop-details/sessions-list/sessions-list.component';
+// import { AddSessionComponent } from './workshop-details/add-session/add-session.component';
+```
+- In the same file, change the workshop details routing configuration to this
+```ts
+{
+    path: 'workshops/:id',
+    loadComponent: () =>
+      import('./workshop-details/workshop-details.component').then(
+        (m) => m.WorkshopDetailsComponent
+      ),
+    title: 'Details of workshop',
+    canActivate: [validateWorkshopGuard],
+    children: [
+      {
+        path: '',
+        loadChildren: () =>
+          import('./workshop-details.routes').then((m) => m.parentRoutes),
+      },
+    ],
+},
+```
+- Now the workshop details related components are not part of the main bundle. A separate bundle is created which is downloaded in the browser only when you first navigate to the workshop details page. Keep the Network tab open in the browser. Load the app from the home page, and navigate to the workshop details page. You will notice the new bundle being downloaded from the server. The main bundle size would be smaller (with small overhead for lazy loading), thus reducing the first page load time.
+
