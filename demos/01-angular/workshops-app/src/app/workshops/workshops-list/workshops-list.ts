@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LoadingSpinner } from '../../common/loading-spinner/loading-spinner';
 import { ErrorAlert } from '../../common/error-alert/error-alert';
+import { Pagination } from '../../common/pagination/pagination';
 import { Item } from './item/item';
 import { WorkshopsService } from '../workshops';
 import IWorkshop from '../models/IWorkshop';
@@ -12,7 +13,8 @@ import IWorkshop from '../models/IWorkshop';
     CommonModule,
     LoadingSpinner,
     ErrorAlert,
-    Item
+    Item,
+    Pagination
   ],
   templateUrl: './workshops-list.html',
   styleUrl: './workshops-list.scss'
@@ -55,12 +57,8 @@ export class WorkshopsList implements OnInit {
     this.getWorkshops();
   }
 
-  changePage(by: number) {
-    if (this.page == 1 && by < 0) {
-        return;
-    }
-
-    this.page = this.page + by;
+  changePage(newPage: number) {
+    this.page = newPage;
 
     this.getWorkshops();
   }

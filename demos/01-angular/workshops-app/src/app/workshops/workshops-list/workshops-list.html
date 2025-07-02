@@ -2,22 +2,12 @@
 @if(loading) {
     <app-loading-spinner variant="success"></app-loading-spinner>
 } @else if( !loading && error ) {
+    <!--
+        parent gets hold o the new page and calls its own changePage()
+    -->
     <app-error-alert [error]="error"></app-error-alert>
 } @else {
-    <div class="my-2">
-        <div class="mt-1">
-            <!-- You can aletrnatively call previousPage() and nextPage(). But notice how we have defined changePage() using a single argument - this helps us avoid code duplication. -->
-            <button
-                class="btn btn-primary btn-sm me-2"
-                (click)="changePage(-1)"
-                [disabled]="page === 1"
-            >
-                Previous
-            </button>
-            <button class="btn btn-primary btn-sm" (click)="changePage(1)">Next</button>
-        </div>
-        <div>You are viewing page {{ page }}</div>
-    </div>
+    <app-pagination [page]="page" (pageChange)="changePage($event)"></app-pagination>
     <div class="row">
         @for ( workshopItem of workshops; track workshopItem.id ) {
             <div class="col-12 col-lg-4 my-3 d-flex">
