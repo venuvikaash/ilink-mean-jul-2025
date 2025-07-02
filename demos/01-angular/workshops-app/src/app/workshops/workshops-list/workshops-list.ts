@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { LoadingSpinner } from '../../common/loading-spinner/loading-spinner';
 import { ErrorAlert } from '../../common/error-alert/error-alert';
 import { Pagination } from '../../common/pagination/pagination';
@@ -15,16 +16,19 @@ import IWorkshop from '../models/IWorkshop';
     LoadingSpinner,
     ErrorAlert,
     Item,
-    Pagination
+    Pagination,
+    FormsModule
   ],
   templateUrl: './workshops-list.html',
   styleUrl: './workshops-list.scss'
 })
 export class WorkshopsList implements OnInit {
-  workshops!: IWorkshop[];
+  workshops!: IWorkshop[]; // all the 10 workshops for the page
+  filteredWorkshops!: IWorkshop[]; // only filtered workshops
   error: Error | null = null;
   loading = true;
   page = 1;
+  filterKey = '';
 
   // short syntax for data member creation and initialization
   constructor(
@@ -43,6 +47,8 @@ export class WorkshopsList implements OnInit {
           console.log( w );
           this.workshops = w;
           this.loading = false;
+
+          this.filterWorkshops();
         },
 
         // called when operation is unsuccessful - it is passed the error
@@ -90,6 +96,12 @@ export class WorkshopsList implements OnInit {
               page: this.page,
           },
         }
+    );
+  }
+
+  filterWorkshops() {
+    this.filteredWorkshops = this.workshops.filter(
+      (w) => w.name.toLowerCase().includes(this.filterKey.toLowerCase())
     );
   }
 }
