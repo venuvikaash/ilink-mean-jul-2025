@@ -1,0 +1,21 @@
+@if( workshop ) {
+<div class="card p-3">
+  <div class="card-img-top-wrapper">
+    <img [src]="workshop.imageUrl" class="card-img-top" [alt]="workshop.name" />
+  </div>
+  <div class="card-body">
+    <h5 class="card-title my-0">{{ workshop.name }}</h5>
+    <div class="card-text">
+      <div>{{ workshop.time }}</div>
+      <div>{{ workshop.startDate }} - {{ workshop.endDate }}</div>
+      <div>{{ workshop.location.address }}, {{ workshop.location.city }}, {{ workshop.location.state }} </div>
+    </div>
+    <a
+      class="btn btn-primary btn-sm mt-4"
+      routerLink=""
+      [attr.aria-label]="'Know more about ' + workshop.name"
+      >Know more</a
+    >
+  </div>
+</div>
+}

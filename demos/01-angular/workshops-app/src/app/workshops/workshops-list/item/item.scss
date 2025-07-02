@@ -1,0 +1,24 @@
+// :host targets the <app-item></app-item> element that "hosts" the HTML for this component
+:host {
+    display: flex;
+}
+
+.card-img-top-wrapper {
+    height: 192px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    // nesting selectors in SCSS
+    // in css this selector becomes -> .card-img-top-wrapper .card-img-top
+    .card-img-top {
+        width: 50%;
+    }
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 240px;
+}

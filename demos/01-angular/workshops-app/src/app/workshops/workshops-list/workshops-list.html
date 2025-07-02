@@ -4,10 +4,12 @@
 } @else if( !loading && error ) {
     <app-error-alert [error]="error"></app-error-alert>
 } @else {
-    @for ( workshop of workshops; track workshop.id ) {
-        <div>
-            {{ workshop.name }}
-        </div>
-    }
+    <div class="row">
+        @for ( workshopItem of workshops; track workshopItem.id ) {
+            <div class="col-12 col-lg-4 my-3 d-flex">
+                <app-item [workshop]="workshopItem"></app-item>
+            </div>
+        }
+    </div>
     <!-- <div *ngFor="let workshop of workshops">{{ workshop.name }}</div> -->
 }

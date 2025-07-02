@@ -1,7 +1,7 @@
 # Daywise Summary
 
 ## Day 1: Getting Started with Angular
-- Created the Angular app, and understood the project structure, its dependencies, scripts, build and serve process, and laucnhing the app
+- Created the Angular app, and understood the project structure, its dependencies, scripts, build and serve process, and launching the app
 - Basic concepts like components, data binding, event binding, conditional rendering using *ngIf
 - Installing Angular Bootstrap and using its components
 - Creating components like Home, Menu
