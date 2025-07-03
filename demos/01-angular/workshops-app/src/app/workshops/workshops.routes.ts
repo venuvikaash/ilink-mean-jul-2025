@@ -21,6 +21,7 @@ export const routes: Routes = [
         title: 'Favorite workshops'
     },
     {
+        
         path: 'workshops/:id',
         component: WorkshopDetails,
         title: 'Workshop Details',
