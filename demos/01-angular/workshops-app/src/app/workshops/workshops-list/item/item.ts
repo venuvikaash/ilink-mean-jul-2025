@@ -4,12 +4,16 @@ import { LocationPipe } from '../../../common/location/location-pipe';
 import { RouterLink } from '@angular/router';
 import IWorkshop from '../../models/IWorkshop';
 
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+
 @Component({
   selector: 'app-item',
   imports: [
     RouterLink,
     DatePipe,
-    LocationPipe
+    LocationPipe,
+    FontAwesomeModule
   ],
   templateUrl: './item.html',
   styleUrl: './item.scss',
@@ -18,6 +22,11 @@ import IWorkshop from '../../models/IWorkshop';
 export class Item {
   @Input()
   workshop!: IWorkshop;
+
+  icons = {
+    faPencil,
+    faTrash,
+  };
 
   constructor(private datePipe: DatePipe) {
     console.log( this.datePipe.transform( "2025-07-02", "medium" ) );
