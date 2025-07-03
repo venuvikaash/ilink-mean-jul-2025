@@ -18,7 +18,33 @@
                     {{ workshop.startDate | date : "EEEE, MMMM d, y" }} -
                     {{ workshop.endDate | date : "EEEE, MMMM d, y" }}
                 </div>
+
                 <div>{{ workshop.location | location }}</div>
+
+                <!-- Add this -->
+                <div class="my-2">
+                    <span class="me-4">
+                        <fa-icon
+                            [icon]="
+                                workshop.modes.inPerson
+                                    ? icons.faCheckCircle
+                                    : icons.faTimesCircle
+                            "
+                        ></fa-icon>
+                        In person
+                    </span>
+                    <span>
+                        <fa-icon
+                            [icon]="
+                                workshop.modes.online
+                                    ? icons.faCheckCircle
+                                    : icons.faTimesCircle
+                            "
+                        ></fa-icon>
+                        Online
+                    </span>
+                </div>
+
             </div>
             <div [innerHTML]="workshop.description"></div>
         </div>
