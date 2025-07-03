@@ -1,1 +1,24 @@
-<p>sessions-list works!</p>
+<h2>List of sessions</h2>
+
+<hr />
+
+<ul class="list-group">
+    @for( s of sessions; track s.id ) {
+        <li class="list-group-item">
+            <div class="row">
+                <div
+                    class="col-1 d-flex flex-column justify-content-center align-items-center"
+                >
+                    <!-- @todo voting widget -->
+                </div>
+                <div class="col-11">
+                    <h3>{{ s.name }}</h3>
+                    <div>by {{ s.speaker }}</div>
+                    <div>{{ s.level }}</div>
+                    <div>{{ s.duration }}</div>
+                    <div>{{ s.abstract }}</div>
+                </div>
+            </div>
+        </li>
+    }
+</ul>
