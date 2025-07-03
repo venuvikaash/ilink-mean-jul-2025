@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { RouterOutlet, RouterLink, RouterLinkActive, } from '@angular/router';
 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
@@ -25,7 +26,10 @@ import IWorkshop from '../models/IWorkshop';
     ErrorAlert,
     DatePipe,
     LocationPipe,
-    FontAwesomeModule
+    FontAwesomeModule,
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
   ],
   templateUrl: './workshop-details.html',
   styleUrl: './workshop-details.scss'
