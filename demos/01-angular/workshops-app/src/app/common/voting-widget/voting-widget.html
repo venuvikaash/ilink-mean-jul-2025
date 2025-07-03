@@ -1,0 +1,13 @@
+<fa-icon
+    [icon]="icons.faCaretUp"
+    (click)="emitVote(1)"
+    size="2x"
+    style="color: green; cursor: pointer"
+></fa-icon>
+<span class="upvoteCount">{{ votes }}</span>
+<fa-icon
+    [icon]="icons.faCaretDown"
+    (click)="emitVote(-1)"
+    size="2x"
+    style="color: red; cursor: pointer"
+></fa-icon>
