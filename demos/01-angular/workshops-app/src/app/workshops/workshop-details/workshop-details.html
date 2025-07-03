@@ -4,6 +4,7 @@
     <app-error-alert [error]="error"></app-error-alert>
 } @else {
     <h1>{{ workshop.name }}</h1>
+    <button [routerLink]="['..', workshop.id + 1]">Next workshop</button>
 
     <hr />
 
