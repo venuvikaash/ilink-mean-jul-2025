@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { WorkshopsList } from './workshops-list/workshops-list';
 import { AddWorkshop } from './add-workshop/add-workshop';
 import { Favorites } from './favorites/favorites';
+import { WorkshopDetails } from './workshop-details/workshop-details';
 
 export const routes: Routes = [
     {
@@ -18,5 +19,10 @@ export const routes: Routes = [
         path: 'workshops/favorites',
         component: Favorites,
         title: 'Favorite workshops'
+    },
+    {
+        path: 'workshops/:id',
+        component: WorkshopDetails,
+        title: 'Workshop Details',
     },
 ];
