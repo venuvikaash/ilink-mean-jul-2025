@@ -16,3 +16,4 @@
 - Angular Universal
 - Taking care of browser inconsistencies
 - MFE in Angular
+- Data tables
