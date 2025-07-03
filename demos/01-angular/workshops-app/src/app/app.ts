@@ -4,10 +4,11 @@ import { RouterOutlet } from '@angular/router';
 import { NgbAlert } from '@ng-bootstrap/ng-bootstrap'
 import { Menu } from './menu/menu';
 import { Home } from './home/home';
+import { Toast } from './common/toast/toast';
 
 @Component({
   selector: 'app-root',
-  imports: [NgbAlert, CommonModule, Menu, Home, RouterOutlet],
+  imports: [NgbAlert, CommonModule, Menu, Home, RouterOutlet, Toast],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
