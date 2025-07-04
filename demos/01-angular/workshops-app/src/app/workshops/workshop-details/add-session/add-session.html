@@ -1,1 +1,41 @@
-<p>add-session works!</p>
+<div class="d-flex justify-content-between align-items-center">
+    <h2 class="my-3">Add a session</h2>
+    <button class="btn btn-primary" id="list-sessions" [routerLink]="['..']">List of sessions</button>
+</div>
+
+<hr />
+
+<form id="add-session-form">
+    <div class="mb-3">
+        <label for="sequenceId" class="form-label">Sequence ID</label>
+        <input type="text" class="form-control" id="sequenceId" />
+        <div class="error-message"></div>
+    </div>
+    <div class="mb-3">
+        <label for="name" class="form-label">Name</label>
+        <input type="text" class="form-control" id="name" />
+    </div>
+    <div class="mb-3">
+        <label for="speaker" class="form-label">Speaker</label>
+        <input type="text" class="form-control" id="speaker" />
+    </div>
+    <div class="mb-3">
+        <label for="duration" class="form-label">Duration</label>
+        <input type="number" class="form-control" id="duration" />
+    </div>
+    <div class="mb-3">
+        <label for="level" class="form-label">Level</label>
+        <select class="form-select" id="level">
+            <option value="Basic">Basic</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="abstract" class="form-label">Abstract</label>
+        <textarea class="form-control" id="abstract" rows="3"></textarea>
+    </div>
+    <div class="mb-3">
+        <button class="btn btn-primary">Add session</button>
+    </div>
+</form>
