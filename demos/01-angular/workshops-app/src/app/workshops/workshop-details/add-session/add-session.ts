@@ -1,53 +1,129 @@
 import { Component } from '@angular/core';
 import { JsonPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormsModule, NgForm } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  NgForm,
+  FormGroup,
+  FormControl,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Sessions } from '../../sessions';
 import ISession from '../../models/ISession';
+import { Toast as ToastService } from '../../../common/toast';
 
 @Component({
   selector: 'app-add-session',
-  imports: [
-    RouterLink,
-    FormsModule,
-    JsonPipe
-  ],
+  imports: [RouterLink, ReactiveFormsModule, JsonPipe],
   templateUrl: './add-session.html',
-  styleUrl: './add-session.scss'
+  styleUrl: './add-session.scss',
 })
 export class AddSession {
-  constructor(
-      private activatedRoute: ActivatedRoute,
-      private sessionsService: Sessions,
-      private router: Router
-  ) {}
+    addSessionForm = new FormGroup(
+        {
+            sequenceId: new FormControl(
+                // initial input value
+                '',
+                [
+                    // the list of validators
+                    Validators.required,
+                    Validators.pattern('\\d+'),
+                ],
+            ),
+            name: new FormControl(
+                '',
+                [Validators.required, Validators.pattern('[A-Z][A-Za-z ]+')],
+            ),
+            speaker: new FormControl(
+                '',
+                [
+                    Validators.required,
+                    Validators.pattern('[A-Z][A-Za-z ]+(,[A-Z ][A-Za-z ]+)*'),
+                ],
+            ),
+            duration: new FormControl(
+                '',
+                [Validators.required, Validators.min(0.5), Validators.max(10)],
+            ),
+            level: new FormControl('', [Validators.required]),
+            abstract: new FormControl(
+                '',
+                [Validators.required, Validators.minLength(20)],
+            ),
+        }
+    );
 
-  addSession(addSessionForm : NgForm) {
-    console.log( addSessionForm.value );
+    // helper accessor methods
+    get sequenceId() {
+        return this.addSessionForm.get('sequenceId') as FormControl
+    }
+
+    get name() {
+        return this.addSessionForm.get('name') as FormControl;
+    }
+
+    get speaker() {
+        return this.addSessionForm.get('speaker') as FormControl;
+    }
+
+    get duration() {
+        return this.addSessionForm.get('duration') as FormControl;
+    }
+
+    get level() {
+        return this.addSessionForm.get('level') as FormControl;
+    }
+
+    get abstract() {
+        return this.addSessionForm.get('abstract') as FormControl;
+    }
+
+    constructor(
+        private activatedRoute: ActivatedRoute,
+        private sessionsService: Sessions,
+        private router: Router,
+        private toastService: ToastService
+    ) {}
+
+  addSession() {
+    const addSessionForm = this.addSessionForm;
+
+    console.log(addSessionForm.value);
 
     const id = +(this.activatedRoute.snapshot.parent?.paramMap.get(
-        'id'
+      'id'
     ) as string);
 
-    const newSession = {
-      ...addSessionForm.value,
-      workshopId: id,
-      upvoteCount: 0,
-      sequenceId: +addSessionForm.value.sequenceId,
-      duration: +addSessionForm.value.duration,
-    } as Omit<ISession, 'id'>;
+    // const newSession = {
+    //   ...addSessionForm.value,
+    //   workshopId: id,
+    //   upvoteCount: 0,
+    //   sequenceId: +addSessionForm.value.sequenceId,
+    //   duration: +addSessionForm.value.duration,
+    // } as Omit<ISession, 'id'>;
 
-    console.log(newSession);
+    // console.log(newSession);
 
-    this.sessionsService.addSession(newSession).subscribe({
-        next: (addedSession) => {
-            alert(`Added session with id = ${addedSession.id}`);
+    // this.sessionsService.addSession(newSession).subscribe({
+    //   next: (addedSession) => {
+    //     this.toastService.add({
+    //       message: `Added session with id = ${addedSession.id}`,
+    //       className: 'bg-success text-light',
+    //       duration: 5000,
+    //     });
 
-            // You can also use navigateByUrl()
-            this.router.navigate(['/workshops', id]);
-        },
-    });
+    //     // You can also use navigateByUrl()
+    //     this.router.navigate(['/workshops', id]);
+    //   },
+    //   error: (error) => {
+    //     this.toastService.add({
+    //       message: `Unable to add the session - ${error.message}`,
+    //       className: 'bg-danger text-light',
+    //       duration: 5000,
+    //     });
+    //   },
+    // });
   }
 }

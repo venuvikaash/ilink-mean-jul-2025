@@ -11,11 +11,13 @@
 
 <hr />
 
-<form
-    id="add-session-form"
-    (ngSubmit)="addSession()"
-    [formGroup]="addSessionForm"
->
+<form id="add-session-form" (ngSubmit)="addSession(addSessionForm)" #addSessionForm="ngForm">
+
+    <!-- <div>value = {{ addSessionForm.value | json }}</div>
+    <div>dirty = {{ addSessionForm.dirty }}</div>
+    <div>touched = {{ addSessionForm.touched }}</div>
+    <div>valid = {{ addSessionForm.valid }}</div> -->
+
     <div class="mb-3">
         <label for="sequenceId" class="form-label">Sequence ID</label>
         <input
@@ -23,8 +25,17 @@
             class="form-control"
             id="sequenceId"
             name="sequenceId"
-            formControlName="sequenceId"
+            required
+            pattern="\d+"
+            ngModel
+            #sequenceId="ngModel"
         />
+        <!-- {{ sequenceId }} -->
+        <!-- <div>Value = {{ sequenceId.value }}</div>
+        <div>Valid = {{ sequenceId.valid }}</div>
+        <div>Errors = {{ sequenceId.errors | json }}</div> -->
+        <!-- <div>Dirty = {{ sequenceId.dirty }}</div>
+        <div>Touched = {{ sequenceId.touched }}</div> -->
         @if( sequenceId.invalid && sequenceId.errors && (sequenceId.dirty || sequenceId.touched) ) {
             <div class="error-message">
                 @if(sequenceId.errors['required']) {
@@ -42,7 +53,10 @@
             class="form-control"
             id="name"
             name="name"
-            formControlName="name"
+            required
+            pattern="[A-Z][A-Za-z ]+"
+            ngModel
+            #name="ngModel"
         />
         @if( name.invalid && ( name.touched || name.dirty ) && name.errors ) {
             <div class="error-message">
@@ -61,7 +75,10 @@
             class="form-control"
             id="speaker"
             name="speaker"
-            formControlName="speaker"
+            required
+            pattern="[A-Z][A-Za-z ]+(,[A-Z ][A-Za-z ]+)*"
+            ngModel
+            #speaker="ngModel"
         />
         @if( speaker.invalid && ( speaker.touched || speaker.dirty ) && speaker.errors ) {
             <div class="error-message">
@@ -82,7 +99,11 @@
             class="form-control"
             id="duration"
             name="duration"
-            formControlName="duration"
+            required
+            min="0.5"
+            max="10"
+            ngModel
+            #duration="ngModel"
         />
         @if( duration.invalid && ( duration.touched || duration.dirty ) && duration.errors ) {
             <div class="error-message">
@@ -102,7 +123,9 @@
             class="form-select"
             id="level"
             name="level"
-            formControlName="level"
+            required
+            ngModel
+            #level="ngModel"
         >
             <option value="Basic">Basic</option>
             <option value="Intermediate">Intermediate</option>
@@ -123,7 +146,10 @@
             id="abstract"
             name="abstract"
             rows="3"
-            formControlName="abstract"
+            required
+            minlength="20"
+            ngModel
+            #abstract="ngModel"
         ></textarea>
         @if( abstract.invalid && ( abstract.touched || abstract.dirty ) && abstract.errors ) {
             <div class="error-message">
