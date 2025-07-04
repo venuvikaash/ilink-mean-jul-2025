@@ -2445,7 +2445,11 @@ imports: [FormsModule, JsonPipe],
 <input type="number" class="form-control" id="duration" required />
 ```
 ```html
-<select class="form-select" id="level" required>...<select>
+<select class="form-select" id="level" required>
+    <option value="Basic">Basic</option>
+    <option value="Intermediate">Intermediate</option>
+    <option value="Advanced">Advanced</option>
+</select>
 ```
 ```html
 <textarea
@@ -2545,8 +2549,10 @@ imports: [FormsModule, JsonPipe],
     ngModel
     #level="ngModel"
 >
-    ...
-<select>
+    <option value="Basic">Basic</option>
+    <option value="Intermediate">Intermediate</option>
+    <option value="Advanced">Advanced</option>
+</select>
 @if( level.invalid && ( level.touched || level.dirty ) && level.errors ) {
     <div class="error-message">
         @if(level.errors['required']) {
