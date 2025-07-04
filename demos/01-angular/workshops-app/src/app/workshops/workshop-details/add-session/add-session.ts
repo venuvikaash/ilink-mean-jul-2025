@@ -7,13 +7,54 @@ import {
   FormGroup,
   FormControl,
   Validators,
-  FormBuilder
+  FormBuilder,
+  AbstractControl
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Sessions } from '../../sessions';
 import ISession from '../../models/ISession';
 import { Toast as ToastService } from '../../../common/toast';
+
+function durationAndLevel(form: AbstractControl) {
+    const durationStr = (form.get('duration') as AbstractControl).value;
+    const duration = +durationStr;
+    const level = (form.get('level') as AbstractControl).value;
+
+    // if valid -> return null
+    // if invalid -> return an object with the details of the error. Further this object should have the property called `durationAndLevel`
+    if (durationStr === '' || level === '') {
+        return null;
+    }
+
+    if (level === 'Basic') {
+        return null;
+    }
+
+    if (level === 'Intermediate') {
+        if (duration >= 2) {
+            return null;
+        }
+
+        // error
+        return {
+            durationAndLevel: 'Intermediate level session should be at least 2 hours in duration',
+        };
+    }
+
+    if (level === 'Advanced') {
+        if (duration >= 3) {
+            return null;
+        }
+
+        // error
+        return {
+            durationAndLevel: 'Advanced level session should be at least 3 hours in duration',
+        };
+    }
+
+    return null;
+}
 
 @Component({
   selector: 'app-add-session',
@@ -64,7 +105,7 @@ export class AddSession {
                     [
                         // the list of validators
                         Validators.required,
-                        Validators.pattern('\\d+'),
+                        Validators.pattern('\\d+')
                     ],
                 ],
                 name: [
@@ -90,6 +131,9 @@ export class AddSession {
                     '',
                     [Validators.required, Validators.minLength(20)],
                 ],
+            },
+            {
+                validators: durationAndLevel,
             }
         );
     }

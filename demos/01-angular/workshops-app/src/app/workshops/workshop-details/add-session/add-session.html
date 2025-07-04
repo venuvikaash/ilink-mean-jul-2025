@@ -16,6 +16,12 @@
     (ngSubmit)="addSession()"
     [formGroup]="addSessionForm"
 >
+    <div class="mb-3 error-message">
+        @if( addSessionForm.errors && addSessionForm.errors['durationAndLevel']
+        ) {
+            <div>{{ addSessionForm.errors["durationAndLevel"] }}</div>
+        }
+    </div>
     <div class="mb-3">
         <label for="sequenceId" class="form-label">Sequence ID</label>
         <input
