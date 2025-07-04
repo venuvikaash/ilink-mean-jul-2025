@@ -2708,34 +2708,37 @@ imports: [
 ```ts
 export class AddSessionComponent {
     addSessionForm = new FormGroup({
-        sequenceId: new FormControl([
+        sequenceId: new FormControl(
             '', // initial value of the input
             [
                 // the list of validators
                 Validators.required,
                 Validators.pattern('\\d+'),
             ],
-        ]),
-        name: new FormControl([
+        ),
+        name: new FormControl(
             '',
             [Validators.required, Validators.pattern('[A-Z][A-Za-z ]+')],
-        ]),
-        speaker: new FormControl([
+        ),
+        speaker: new FormControl(
             '',
             [
                 Validators.required,
                 Validators.pattern('[A-Z][A-Za-z ]+(,[A-Z ][A-Za-z ]+)*'),
             ],
-        ]),
-        duration: new FormControl([
+        ),
+        duration: new FormControl(
             '',
             [Validators.required, Validators.min(0.5), Validators.max(10)],
-        ]),
-        level: new FormControl(['', [Validators.required]]),
-        abstract: new FormControl([
+        ),
+        level: new FormControl(
+            '',
+            [Validators.required]
+        ),
+        abstract: new FormControl(
             '',
             [Validators.required, Validators.minLength(2)],
-        ]),
+        ),
     });
     
     // helper accessor methods
