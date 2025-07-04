@@ -23,11 +23,12 @@
             ngModel
             #sequenceId="ngModel"
         />
-        <!-- <div>{{ sequenceId.value }}</div>
-        <div>{{ sequenceId.valid }}</div>
-        <div>{{ sequenceId.errors | json }}</div> -->
-        <!-- <div>{{ sequenceId.dirty }}</div> -->
-        <!-- <div>{{ sequenceId.touched }}</div> -->
+        <!-- {{ sequenceId }} -->
+        <!-- <div>Value = {{ sequenceId.value }}</div>
+        <div>Valid = {{ sequenceId.valid }}</div>
+        <div>Errors = {{ sequenceId.errors | json }}</div> -->
+        <!-- <div>Dirty = {{ sequenceId.dirty }}</div>
+        <div>Touched = {{ sequenceId.touched }}</div> -->
         @if( sequenceId.invalid && sequenceId.errors && (sequenceId.dirty || sequenceId.touched) ) {
             <div class="error-message">
                 @if(sequenceId.errors['required']) {
@@ -40,27 +41,118 @@
     </div>
     <div class="mb-3">
         <label for="name" class="form-label">Name</label>
-        <input type="text" class="form-control" id="name" />
+        <input
+            type="text"
+            class="form-control"
+            id="name"
+            name="name"
+            required
+            pattern="[A-Z][A-Za-z ]+"
+            ngModel
+            #name="ngModel"
+        />
+        @if( name.invalid && ( name.touched || name.dirty ) && name.errors ) {
+            <div class="error-message">
+                @if(name.errors['required']) {
+                    <div>This is required</div>
+                } @if(name.errors['pattern']) {
+                    <div>Provide a valid name (only letters and spaces)</div>
+                }
+            </div>
+        }
     </div>
     <div class="mb-3">
         <label for="speaker" class="form-label">Speaker</label>
-        <input type="text" class="form-control" id="speaker" />
+        <input
+            type="text"
+            class="form-control"
+            id="speaker"
+            name="speaker"
+            required
+            pattern="[A-Z][A-Za-z ]+(,[A-Z ][A-Za-z ]+)*"
+            ngModel
+            #speaker="ngModel"
+        />
+        @if( speaker.invalid && ( speaker.touched || speaker.dirty ) && speaker.errors ) {
+            <div class="error-message">
+                @if(speaker.errors['required']) {
+                    <div>This is required</div>
+                } @if(speaker.errors['pattern']) {
+                    <div>
+                        Provide valid names (only letters and spaces for names, and separate names by commas)
+                    </div>
+                }
+            </div>
+        }
     </div>
     <div class="mb-3">
         <label for="duration" class="form-label">Duration</label>
-        <input type="number" class="form-control" id="duration" />
+        <input
+            type="number"
+            class="form-control"
+            id="duration"
+            name="duration"
+            required
+            min="0.5"
+            max="10"
+            ngModel
+            #duration="ngModel"
+        />
+        @if( duration.invalid && ( duration.touched || duration.dirty ) && duration.errors ) {
+            <div class="error-message">
+                @if(duration.errors['required']) {
+                    <div>This is required</div>
+                } @if(duration.errors['min']) {
+                    <div>Duration is minimum 0.5</div>
+                } @if(duration.errors['max']) {
+                    <div>Duration is maximum 10</div>
+                }
+            </div>
+        }
     </div>
     <div class="mb-3">
         <label for="level" class="form-label">Level</label>
-        <select class="form-select" id="level">
+        <select
+            class="form-select"
+            id="level"
+            name="level"
+            required
+            ngModel
+            #level="ngModel"
+        >
             <option value="Basic">Basic</option>
             <option value="Intermediate">Intermediate</option>
             <option value="Advanced">Advanced</option>
         </select>
+        @if( level.invalid && ( level.touched || level.dirty ) && level.errors ) {
+            <div class="error-message">
+                @if(level.errors['required']) {
+                    <div>This is required</div>
+                }
+            </div>
+        }
     </div>
     <div class="mb-3">
         <label for="abstract" class="form-label">Abstract</label>
-        <textarea class="form-control" id="abstract" rows="3"></textarea>
+        <textarea
+            class="form-control"
+            id="abstract"
+            name="abstract"
+            rows="3"
+            required
+            minlength="20"
+            ngModel
+            #abstract="ngModel"
+        ></textarea>
+        @if( abstract.invalid && ( abstract.touched || abstract.dirty ) && abstract.errors ) {
+            <div class="error-message">
+                @if(abstract.errors['required']) {
+                    <div>This is required</div>
+                } @if(abstract.errors['minlength']) {
+                    <div>Minimum 20 characters needed</div>
+                }
+            </div>
+        }
     </div>
     <div class="mb-3">
         <button class="btn btn-primary">Add session</button>
