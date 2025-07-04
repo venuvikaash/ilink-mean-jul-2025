@@ -25,4 +25,16 @@ export class Sessions {
         null // we generally pass data in put request. In this case we don't have any data
     );
   }
+
+  addSession(session: Omit<ISession, 'id'>) {
+    return this.http.post<ISession>(
+      `${this.apiUrl}/sessions`,
+      session,
+      {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+      }
+    );
+  }
 }

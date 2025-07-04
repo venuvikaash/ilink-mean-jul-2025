@@ -11,13 +11,18 @@
 
 <hr />
 
-<form id="add-session-form">
+<form id="add-session-form" (ngSubmit)="addSession(addSessionForm)" #addSessionForm="ngForm">
+    <div>value = {{ addSessionForm.value | json }}</div>
+    <div>dirty = {{ addSessionForm.dirty }}</div>
+    <div>touched = {{ addSessionForm.touched }}</div>
+    <div>valid = {{ addSessionForm.valid }}</div>
     <div class="mb-3">
         <label for="sequenceId" class="form-label">Sequence ID</label>
         <input
             type="text"
             class="form-control"
             id="sequenceId"
+            name="sequenceId"
             required
             pattern="\d+"
             ngModel
@@ -155,6 +160,6 @@
         }
     </div>
     <div class="mb-3">
-        <button class="btn btn-primary">Add session</button>
+        <button class="btn btn-primary" [disabled]="addSessionForm.invalid">Add session</button>
     </div>
 </form>
