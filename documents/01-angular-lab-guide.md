@@ -3944,3 +3944,220 @@ export const parentRoutes: Routes = [
 ```
 - Now the workshop details related components are not part of the main bundle. A separate bundle is created which is downloaded in the browser only when you first navigate to the workshop details page. Keep the Network tab open in the browser. Load the app from the home page, and navigate to the workshop details page. You will notice the new bundle being downloaded from the server. The main bundle size would be smaller (with small overhead for lazy loading), thus reducing the first page load time.
 
+## Step 49: Loading components at runtime
+- We may sometimes want to load components at run time. For example, the advertisements to be shown in an application may be determined by data available at runtime - for example, there may be different types of ad components, and the the type of the ads to be shown may be known only at runtime (may be the backend gives the data).
+- First we create 3 types of advertisement components. For simplcity, we have use `temmplate` to define the HTML template for the component inline (rather than a separate HTML file). Note that `AdBannerComponent` and `AdVideoComponent` also take input parameters.
+```sh
+ng g c common/ads/ad-banner
+ng g c common/ads/ad-text
+ng g c common/ads/ad-video
+```
+- In `app/common/ads/ad-banner/ad-banner.component.ts`
+```ts
+import { Component, Input } from '@angular/core';
+
+@Component({
+  standalone: true,
+  selector: 'app-ad-banner',
+  template: `
+    <div style="border: 2px solid #007bff; padding: 10px; background: #e7f1ff; text-align: center;">
+      <img
+        [src]="imageSrc"
+        alt="Banner Ad"
+        style="max-width: 100%; height: auto;"
+      />
+      <p style="margin-top: 8px; font-weight: bold;">Sponsored by {{ company }}</p>
+    </div>
+  `
+})
+export class AdBannerComponent {
+  @Input() imageSrc!: string;
+  @Input() company!: string;
+}
+```
+- In `app/common/ads/ad-text/ad-text.component.ts`
+```ts
+import { Component } from '@angular/core';
+
+@Component({
+  standalone: true,
+  selector: 'app-ad-text',
+  template: `
+    <div style="border: 2px dashed #28a745; padding: 15px; background: #f4fff4;">
+      <h4 style="margin: 0 0 8px 0; color: #155724;">🔥 Limited Time Offer!</h4>
+      <p style="margin: 0 0 8px 0;">
+        Get <strong>50% OFF</strong> your first purchase at <em>GreenCart</em> — your go-to store for eco-friendly essentials.
+      </p>
+      <p style="margin: 0 0 8px 0;">
+        Use code <code>GREEN50</code> at checkout.
+      </p>
+      <button
+        style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;"
+        (click)="onClick()"
+      >
+        Shop Now
+      </button>
+    </div>
+  `
+})
+export class AdTextComponent {
+  onClick() {
+    window.open('https://example.com', '_blank');
+  }
+}
+```
+- In `app/common/ads/ad-video/ad-video.component.ts`
+```ts
+import { Component, Input } from '@angular/core';
+
+@Component({
+  standalone: true,
+  selector: 'app-ad-video',
+  template: `
+    <div style="border: 2px solid #dc3545; padding: 10px; background: #fff3f3;">
+      <video width="100%" height="240" controls autoplay muted loop style="display: block; margin: 0 auto;">
+        <source [src]="videoSrc" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <p style="text-align: center; font-weight: bold; margin-top: 8px;">
+        {{ captionText }}
+      </p>
+    </div>
+  `
+})
+export class AdVideoComponent {
+  @Input() videoSrc!: string;
+  @Input() captionText!: string;
+}
+```
+- We shall add advertisements dynamically on the home page. First add a container for advertisement components - we set a template reference variabe `adHost` so that we can get hold of a view container reference for this element. In `app/home/home.component.html`
+```html
+<!-- Add this at the end -->
+<ng-container #adHost></ng-container>
+```
+- In `app/home/home.component.ts` add the necessary imports
+```ts
+import {
+  Component,
+  inject,
+  ViewContainerRef,
+  ViewChild,
+  viewChild,
+  AfterViewInit,
+  Type,
+  OnDestroy
+} from '@angular/core';
+```
+- We shall implement 2 lifecycle methods `ngAfterViewInit` (called after child view DOM is ready) and `ngOnDestroy` (when component is about to be removed from the DOM, eg. on navigating to a different page).
+```ts
+export class Home implements AfterViewInit, OnDestroy {
+  // rest of code...
+}
+```
+- Add data members to set up cycling through advertisements. Also get a view container reference to the `ng-container` where ad conmponents will be dynamically rendered. The `@ViewChild()` query helps us get this reference. In Angular 17+ there is a signal-based approach as well to do this - using `viewChild()`. Both are demonstrated below.
+```ts
+export class Home implements AfterViewInit, OnDestroy {
+  // Every component has its own associated view container - To get a reference to the host view container ref we can do so...
+  // private viewContainerRef = inject(ViewContainerRef);
+
+  // We instead create a separate view container ref (Angular 16-)
+  // @ViewChild('adHost', { read: ViewContainerRef, static: true })
+  // viewContainerRef!: ViewContainerRef;
+
+  // We instead create a separate view container ref (Angular 17+)
+  private viewContainerRef = viewChild('adHost', { read: ViewContainerRef });
+
+  private adTypes = ['banner', 'video', 'text'];
+  private currentIndex = 0;
+  private intervalId: any;
+
+  private adConfigs = [
+    {
+      type: 'banner',
+      imageSrc: 'https://via.placeholder.com/468x60?text=Ad+1',
+      company: 'AdCorp'
+    },
+    {
+      type: 'video',
+      videoSrc: 'https://www.w3schools.com/html/mov_bbb.mp4',
+      captionText: 'Check out our new features!'
+    },
+    {
+      type: 'banner',
+      imageSrc: 'https://via.placeholder.com/468x60?text=Ad+2',
+      company: 'CoolSoft'
+    }
+  ];
+
+  // rest of code...
+}
+```
+- We use `ngAfterViewInit` lifecycle method to start loading the ad once the view is ready, and set up the ad cycling logic. Cleanup is ensured using `ngOnDestroy` lifecycle method.
+```ts
+export class Home implements AfterViewInit, OnDestroy {
+  // rest of code...
+
+  ngAfterViewInit(): void {
+    this.loadNextAd(); // Load first ad
+    this.intervalId = setInterval(() => this.loadNextAd(), 5000);
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.intervalId);
+  }
+
+  // rest of code...
+}
+```
+- We finally add the logic to loading components dynamically based on the type of the ad. The `ViewContainerRef` `createComponent` method is used to load components dynamically (returns a `ComponentRef`). It also has a `clear` method to remove any component already loaded (used to clear the previously loaded ad). `setInput` of a `ComponentRef` is used to pass input parameters to the dynamically loaded component. Note that the signal-based approach on Angular 17+ required optional chaining (`?.`) when accessing properties and methods on `ViewContainerRef` / `ComponentRef` as the reference may be `undefined`.
+```ts
+export class Home implements AfterViewInit, OnDestroy {
+  // rest of code...
+
+  private async loadNextAd() {
+    const type = this.adTypes[this.currentIndex];
+    const component = await this.resolveComponent(type);
+
+    // For Angular 16-
+    // this.viewContainerRef.clear();
+    // const componentRef = this.viewContainerRef.createComponent(component);
+
+    // For Angular 17+
+    this.viewContainerRef()?.clear();
+    const componentRef = this.viewContainerRef()?.createComponent(component);
+
+    // get ad config
+    const ad = this.adConfigs[this.currentIndex];
+
+    // Set @Input()s
+    if (type === 'banner') {
+      componentRef?.setInput('imageSrc', ad.imageSrc);
+      componentRef?.setInput('company', ad.company);
+    } else if (ad.type === 'video') {
+      componentRef?.setInput('videoSrc', ad.videoSrc);
+      componentRef?.setInput('captionText', ad.captionText);
+    }
+
+    this.currentIndex = (this.currentIndex + 1) % this.adTypes.length;
+  }
+
+  private async resolveComponent(type: string): Promise<Type<any>> {
+    switch (type) {
+      case 'banner':
+        const banner = await import('../common/ads/ad-banner/ad-banner');
+        return banner.AdBannerComponent;
+
+      case 'video':
+        const video = await import('../common/ads/ad-video/ad-video');
+        return video.AdVideoComponent;
+
+      case 'text':
+        const text = await import('../common/ads/ad-text/ad-text');
+        return text.AdTextComponent;
+
+      default:
+        throw new Error(`Unknown ad type: ${type}`);
+    }
+  }
+}
+```
