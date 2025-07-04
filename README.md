@@ -3,7 +3,7 @@
 
 ## Exercises
 - Step 20: Implementing filtering of workshops list (by category) in the backend
-- Step 25: Complete loading, error handling, and optionally, refactor and create a sessions list ite component
+- Step 25: Complete loading, error handling, and optionally, refactor and create a sessions list item component
 - Step 27: Using environment files for enabling environment-based settings
 - Step 28: Set up a toast message service and container to display toast messages
 

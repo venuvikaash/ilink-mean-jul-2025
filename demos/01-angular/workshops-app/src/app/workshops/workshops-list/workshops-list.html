@@ -30,7 +30,10 @@
     <div class="row">
         @for ( workshopItem of filteredWorkshops; track workshopItem.id ) {
             <div class="col-12 col-lg-4 my-3 d-flex">
-                <app-item [workshop]="workshopItem"></app-item>
+                <app-item
+                    [workshop]="workshopItem"
+                    (delete)="deleteWorkshop(workshopItem)"
+                ></app-item>
             </div>
         }
     </div>

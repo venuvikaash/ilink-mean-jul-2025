@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { LocationPipe } from '../../../common/location/location-pipe';
 import { RouterLink } from '@angular/router';
@@ -23,6 +23,9 @@ export class Item {
   @Input()
   workshop!: IWorkshop;
 
+  @Output()
+  delete = new EventEmitter();
+
   icons = {
     faPencil,
     faTrash,
@@ -36,4 +39,8 @@ export class Item {
   //   const date = new Date( dateStr );
   //   return date.getDate() + '-' + ( date.getMonth() + 1 ) + '-' + date.getFullYear();
   // }
+
+  onDeleteWorkshop() {
+    this.delete.emit();
+  }
 }

@@ -8,6 +8,7 @@ import { Pagination } from '../../common/pagination/pagination';
 import { Item } from './item/item';
 import { WorkshopsService } from '../workshops';
 import IWorkshop from '../models/IWorkshop';
+import { Toast as ToastService } from '../../common/toast';
 
 @Component({
   selector: 'app-workshops-list',
@@ -35,6 +36,7 @@ export class WorkshopsList implements OnInit {
     private workshopsService : WorkshopsService,
     private router : Router,
     private activatedRoute : ActivatedRoute,
+    private toastService : ToastService
   ) {
     this.workshopsService.doSomething();
   }
@@ -103,5 +105,35 @@ export class WorkshopsList implements OnInit {
     this.filteredWorkshops = this.workshops.filter(
       (w) => w.name.toLowerCase().includes(this.filterKey.toLowerCase())
     );
+  }
+
+  deleteWorkshop(workshop: IWorkshop) {
+    console.log(workshop);
+
+    this.workshopsService.deleteWorkshopById(workshop.id).subscribe({
+        next: () => {
+            // alert(`Deleted workshop with id = ${workshop.id}`);
+
+            this.toastService.add({
+                message: `Deleted workshop with id = ${workshop.id}`,
+                className: 'bg-success text-light',
+                duration: 5000,
+            });
+            // update this.workshops
+            this.workshops = this.workshops.filter(
+                (w) => w.id !== workshop.id
+            );
+            this.filterWorkshops();
+        },
+        error: () => {
+            // alert(`Could not delete workshop with id = ${workshop.id}`);
+
+            this.toastService.add({
+                message: `Could not delete workshop with id = ${workshop.id}`,
+                className: 'bg-danger text-light',
+                duration: 5000,
+            });
+        },
+    });
   }
 }

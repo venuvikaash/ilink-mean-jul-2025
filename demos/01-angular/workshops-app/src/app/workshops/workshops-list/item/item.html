@@ -5,7 +5,10 @@
           <fa-icon [icon]="icons.faPencil"></fa-icon>
       </button>
       <button class="btn btn-danger btn-sm btn-action-button" title="Delete this workshop">
-          <fa-icon [icon]="icons.faTrash"></fa-icon>
+          <fa-icon
+            [icon]="icons.faTrash"
+            (click)="onDeleteWorkshop()"
+          ></fa-icon>
       </button>
   </div>
 
