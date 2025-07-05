@@ -3650,6 +3650,232 @@ constructor(public favoritesService: FavoritesService) {}
 </div>
 ```
 
+## Step 45: Manage favorites using NgRx
+The next series of steps outlines how to manage favorite workshops using **NgRx**. This replaces the service-based approach with a state management solution using NgRx v16+. Install NgRx.
+```sh
+npm install @ngrx/store@18 @ngrx/effects@18 @ngrx/store-devtools@18
+```
+- Setup manually (for Standalone Angular 19). In `app/app.config.ts`
+```ts
+import { provideStore } from '@ngrx/store';
+import { provideEffects } from '@ngrx/effects';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideStore(),       // Root store
+    provideEffects(),     // Root effects
+    // Feature stores/effects via provideState/provideEffects
+  ]
+});
+```
+- Create a file `app/workshops/favorites/favorites.actions.ts` to define the actions
+
+```ts
+import { createActionGroup, props } from '@ngrx/store';
+import IWorkshop from '../models/IWorkshop';
+
+export const FavoritesActions = createActionGroup({
+  source: 'Favorites',
+  events: {
+    'Add Workshop': props<{ workshop: IWorkshop }>(),
+    'Remove Workshop': props<{ workshopId: number }>(),
+    'Load Favorites': props<{ favorites: IWorkshop[] }>()
+  }
+});
+```
+- Create a file `app/workshops/favorites/favorites.reducer.ts`:
+
+```ts
+import { createReducer, on } from '@ngrx/store';
+import { FavoritesActions } from './favorites.actions';
+import { Workshop } from '../models/workshop.model';
+
+export const initialState: ReadonlyArray<Workshop> = [];
+
+export const favoritesReducer = createReducer(
+  initialState,
+  on(FavoritesActions.addWorkshop, (state, { workshop }) => 
+    state.some(w => w.id === workshop.id) ? state : [...state, workshop]),
+  on(FavoritesActions.removeWorkshop, (state, { workshopId }) => 
+    state.filter(w => w.id !== workshopId)),
+  on(FavoritesActions.loadFavorites, (_, { favorites }) => favorites)
+);
+```
+- Register Feature in Store. Create a file `app/workshops/favorites/favorites.store.ts`
+
+```ts
+import { provideState } from '@ngrx/store';
+import { favoritesReducer } from './favorites.reducer';
+
+export const provideFavoritesStore = provideState({
+  name: 'favorites',
+  reducer: favoritesReducer
+});
+```
+- Then add to `app/app.config.ts`:
+
+```ts
+import { provideFavoritesStore } from 'app/workshops/favorites/favorites.store';
+```
+```ts
+export const appConfig: ApplicationConfig = {
+  providers: [
+    // rest of providers...
+    // ...
+
+    // add this...
+    provideFavoritesStore
+  ],
+};
+
+```
+- Create Selectors. Create a file `app/workshops/favorites/favorites.selectors.ts`.
+```ts
+import { createFeatureSelector, createSelector } from '@ngrx/store';
+import { Workshop } from '../models/workshop.model';
+
+export const selectFavorites = createFeatureSelector<ReadonlyArray<Workshop>>('favorites');
+
+export const isFavorite = (workshopId: number) => 
+  createSelector(selectFavorites, favorites => favorites.some(w => w.id === workshopId));
+```
+- Update Workshops Component. In `app/workshops/workshops-list/workshops-list.ts`.
+```ts
+import { inject } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { FavoritesActions } from '../store/favorites.actions';
+import { isFavorite } from '../store/favorites.selectors';
+
+@Component({ /* ... */ })
+export class WorkshopsComponent {
+  private store = inject(Store);
+
+  toggleFavorite(workshop: IWorkshop) {
+    const isFav = this.store.selectSignal(isFavorite(workshop.id))();
+
+    if (isFav) {
+      this.store.dispatch(FavoritesActions.removeWorkshop({ workshopId: workshop.id }));
+    } else {
+      this.store.dispatch(FavoritesActions.addWorkshop({ workshop }));
+    }
+  }
+}
+```
+- Show Favorites in Favorites Component. In `app/workshops/favorites/favorites.component.ts`.
+```ts
+import { inject } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { selectFavorites } from '../favorites/favorites.selectors';
+import { toSignal } from '@angular/core/rxjs-interop';
+
+@Component({ /* ... */ })
+export class FavoritesComponent {
+  private store = inject(Store);
+  favoriteWorkshops = toSignal(this.store.select(selectFavorites));
+}
+```
+- In `favorites.component.html`
+```html
+<ul>
+  <li *ngFor="let workshop of favoriteWorkshops()">
+    {{ workshop.name }}
+  </li>
+</ul>
+```
+- Add LocalStorage Persistence Using Effects
+
+### 7.1. Create `favorites.effects.ts`
+
+```ts
+import { inject } from '@angular/core';
+import { Actions, createEffect, ofType, provideEffects } from '@ngrx/effects';
+import { FavoritesActions } from './favorites.actions';
+import { withLatestFrom, tap } from 'rxjs/operators';
+import { Store } from '@ngrx/store';
+import { selectFavorites } from './favorites.selectors';
+
+export class FavoritesEffects {
+  private actions$ = inject(Actions);
+  private store = inject(Store);
+
+  persistFavorites$ = createEffect(
+    () => this.actions$.pipe(
+      ofType(FavoritesActions.addWorkshop, FavoritesActions.removeWorkshop),
+      withLatestFrom(this.store.select(selectFavorites)),
+      tap(([_, favorites]) => {
+        localStorage.setItem('favorite-workshops', JSON.stringify(favorites));
+      })
+    ),
+    { dispatch: false }
+  );
+}
+
+export const provideFavoritesEffects = provideEffects(FavoritesEffects);
+```
+
+### 7.2. Register Effect in App
+
+Update `main.ts` or `app.config.ts`:
+
+```ts
+import { provideEffects } from '@ngrx/effects';
+import { provideFavoritesEffects } from './store/favorites.effects';
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideStore(),
+    provideFavoritesStore,
+    provideFavoritesEffects
+  ]
+});
+```
+
+### 7.3. Load From LocalStorage on App Start
+
+In your `AppComponent.ts`:
+
+```ts
+import { inject, OnInit } from '@angular/core';
+import { Store } from '@ngrx/store';
+import { FavoritesActions } from './store/favorites.actions';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html'
+})
+export class AppComponent implements OnInit {
+  private store = inject(Store);
+
+  ngOnInit(): void {
+    const favorites = JSON.parse(localStorage.getItem('favorite-workshops') || '[]');
+    this.store.dispatch(FavoritesActions.loadFavorites({ favorites }));
+  }
+}
+```
+
+---
+
+## Summary Table
+
+| Feature           | Service Approach                  | NgRx Approach                              |
+| ----------------- | --------------------------------- | ------------------------------------------ |
+| Add to favorites  | `favoritesService.add()`          | `dispatch(addWorkshop({ workshop }))`      |
+| Remove favorite   | `favoritesService.remove()`       | `dispatch(removeWorkshop({ workshopId }))` |
+| Get all favorites | `favoritesService.getAll()`       | `store.select(selectFavorites)`            |
+| Share data        | BehaviorSubject or manual sharing | Global reactive store via NgRx             |
+| Persistence       | Manual localStorage sync          | NgRx Effect + Store hydration on load      |
+
+---
+
+
+
+
+
+
+
+
+
+
 ## Step 45: Refactor `app-workshop-item` for content projection
 We'll convert the static card content into a flexible component that accepts custom header, body, and footer slots.
 - Modify `/src/app/workshops/workshops-list/item/item.component.html`. Replace the current `<div class="card">...</div>` with this template featuring three projection slots.
