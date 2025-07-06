@@ -3739,16 +3739,32 @@ export const selectFavorites = createFeatureSelector<ReadonlyArray<Workshop>>('f
 export const isFavorite = (workshopId: number) => 
   createSelector(selectFavorites, favorites => favorites.some(w => w.id === workshopId));
 ```
-- Update Workshops Component. In `app/workshops/workshops-list/workshops-list.ts`.
+- Update Workshops List Component. In `app/workshops/workshops-list/workshops-list.ts`.
 ```ts
-import { inject } from '@angular/core';
+import { inject, computed } from '@angular/core'; // in addition to what is already imported from the module
 import { Store } from '@ngrx/store';
-import { FavoritesActions } from '../store/favorites.actions';
-import { isFavorite } from '../store/favorites.selectors';
+import { FavoritesActions } from '../favorites/favorites.actions';
+import { selectFavorites, isFavorite } from '../favorites/favorites.selectors';
+
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({ /* ... */ })
 export class WorkshopsComponent {
   private store = inject(Store);
+
+  // favorites: IWorkshop[] = [];
+  favorites = toSignal(this.store.select(selectFavorites), { initialValue: [] });
+
+  favoriteMap = computed(() => {
+    const map = new Map<number, boolean>();
+    for (const w of this.favorites()) {
+      map.set(w.id, true);
+    }
+    return map;
+  });
+
+  // rest of code...
+  // ...
 
   toggleFavorite(workshop: IWorkshop) {
     const isFav = this.store.selectSignal(isFavorite(workshop.id))();
@@ -3759,7 +3775,19 @@ export class WorkshopsComponent {
       this.store.dispatch(FavoritesActions.addWorkshop({ workshop }));
     }
   }
+
+  isFavorite(id: number) {
+    return this.favoriteMap().get(id) ?? false;
+  }
 }
+```
+- In `app/workshops/workshops-list/workshops-list.html`
+```html
+<fa-icon
+    [icon]="isFavorite(workshop.id) ? icons.faStar : icons.faStarEmpty"
+    class="favorite text-success"
+    (click)="toggleFavorite(workshop)">
+</fa-icon>
 ```
 - Show Favorites in Favorites Component. In `app/workshops/favorites/favorites.component.ts`.
 ```ts
@@ -3782,9 +3810,9 @@ export class FavoritesComponent {
   </li>
 </ul>
 ```
-- Add LocalStorage Persistence Using Effects
 
-### 7.1. Create `favorites.effects.ts`
+### Optional Steps - Persisting favorites in local storage using an effect
+- Add LocalStorage Persistence Using Effects. In `app/workshops/favorites/favorites.effects.ts`
 
 ```ts
 import { inject } from '@angular/core';
@@ -3812,32 +3840,27 @@ export class FavoritesEffects {
 
 export const provideFavoritesEffects = provideEffects(FavoritesEffects);
 ```
-
-### 7.2. Register Effect in App
-
-Update `main.ts` or `app.config.ts`:
-
+- Register Effect in App. Update `app.config.ts`
 ```ts
 import { provideEffects } from '@ngrx/effects';
 import { provideFavoritesEffects } from './store/favorites.effects';
-
-bootstrapApplication(AppComponent, {
+```
+```ts
+export const appConfig: ApplicationConfig = {
   providers: [
     provideStore(),
+    provideEffects(),
     provideFavoritesStore,
     provideFavoritesEffects
   ]
-});
+};
 ```
-
-### 7.3. Load From LocalStorage on App Start
-
-In your `AppComponent.ts`:
+- Load From local storage on application startup. In `app/app.ts`
 
 ```ts
 import { inject, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { FavoritesActions } from './store/favorites.actions';
+import { FavoritesActions } from 'app/workshops/favorites/favorites.actions';
 
 @Component({
   selector: 'app-root',
@@ -3852,6 +3875,7 @@ export class AppComponent implements OnInit {
   }
 }
 ```
+- You will now be able to refresh the browser window while preserving the currently added favorites.
 
 ---
 
@@ -3867,16 +3891,7 @@ export class AppComponent implements OnInit {
 
 ---
 
-
-
-
-
-
-
-
-
-
-## Step 45: Refactor `app-workshop-item` for content projection
+## Step 46: Refactor `app-workshop-item` for content projection
 We'll convert the static card content into a flexible component that accepts custom header, body, and footer slots.
 - Modify `/src/app/workshops/workshops-list/item/item.component.html`. Replace the current `<div class="card">...</div>` with this template featuring three projection slots.
 
@@ -3982,7 +3997,7 @@ This structure clearly separates header, body, and footer, making each section c
 </ng-content>
 ```
 
-## Step 46: Understanding HTTP Interceptor
+## Step 47: Understanding HTTP Interceptor
 - An HTTP interceptor can intercept HTTP requests and responses and process
 - A request before it goes out to the backend
 - A response before it is consumed by the rest of the Angular app
@@ -4059,7 +4074,7 @@ export const appConfig: ApplicationConfig = {
     ],
     ```
 
-## Step 47: Adding a Guard
+## Step 48: Adding a Guard
 - Guards are used to prevent navigation to or away from a particular route. Let us create a guard that prevents navigation to the workshop details route if the workshop id in the URL is not a nmber.
 - Generate a guard (`CanActivate` guard helps restrict navigation to a route) - Select `CanActivate`
 ```sh
@@ -4132,7 +4147,7 @@ export class ValidateWorkshopGuard implements CanActivate {
 ```
 - In the route objects, guards written using classes are added in place of functions as shown above.
 
-## Step 48: Lazy loading
+## Step 49: Lazy loading
 - Create `app/workshops/workshop-details.routes.ts`. Move the child route configuration to this file.
 ```ts
 import { Routes } from '@angular/router';
@@ -4179,7 +4194,7 @@ export const parentRoutes: Routes = [
 ```
 - Now the workshop details related components are not part of the main bundle. A separate bundle is created which is downloaded in the browser only when you first navigate to the workshop details page. Keep the Network tab open in the browser. Load the app from the home page, and navigate to the workshop details page. You will notice the new bundle being downloaded from the server. The main bundle size would be smaller (with small overhead for lazy loading), thus reducing the first page load time.
 
-## Step 49: Loading components at runtime
+## Step 50: Loading components at runtime
 - We may sometimes want to load components at run time. For example, the advertisements to be shown in an application may be determined by data available at runtime - for example, there may be different types of ad components, and the the type of the ads to be shown may be known only at runtime (may be the backend gives the data).
 - First we create 3 types of advertisement components. For simplcity, we have use `temmplate` to define the HTML template for the component inline (rather than a separate HTML file). Note that `AdBannerComponent` and `AdVideoComponent` also take input parameters.
 ```sh
