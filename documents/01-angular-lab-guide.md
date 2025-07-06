@@ -3651,9 +3651,9 @@ constructor(public favoritesService: FavoritesService) {}
 ```
 
 ## Step 45: Manage favorites using NgRx
-The next series of steps outlines how to manage favorite workshops using **NgRx**. This replaces the service-based approach with a state management solution using NgRx v16+. Install NgRx.
+This step outlines how to manage favorite workshops using **NgRx**. This replaces the service-based approach with a state management solution using NgRx v16+. Install NgRx. As of the time of writing this lab guide, support for Angular 20 is not available. Check [https://ngrx.io/guide/store] for the latest version. Use the appropriate version matching the Angular version of your application.
 ```sh
-npm install @ngrx/store@18 @ngrx/effects@18 @ngrx/store-devtools@18
+npm install @ngrx/store@19 @ngrx/effects@19 @ngrx/store-devtools@19
 ```
 - Setup manually (for Standalone Angular 19). In `app/app.config.ts`
 ```ts
