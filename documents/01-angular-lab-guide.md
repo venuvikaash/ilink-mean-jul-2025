@@ -1837,7 +1837,7 @@ export class SessionsListComponent implements OnInit {
     }
 </ul>
 ```
-- __EXERCISE__: Handle the loading and error states. Also move the display of sessions list items to a separate component (just the way we handled workshops list items).
+- __EXERCISE__: Handle the loading and error states. Also move the display of sessions list items to a separate component (just the way we handled workshops list items). The solution is mentioned at the end of Step 26.
 
 ## Step 26: Create a voting widget component and use it for voting on a session
 - Create the service method to vote on a session in `src/app/workshops/sessions.service.ts`
@@ -1944,6 +1944,154 @@ updateVote(session: ISession, by: number) {
         });
 }
 ```
+
+### Exercise solution (from Step 25)
+- In `src/app/workshops/workshop-details/sessions-list/sessions-list.component.ts`
+```ts
+import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Sessions } from '../../sessions';
+import ISession from '../../models/ISession';
+import { Toast as ToastService } from '../../../common/toast';
+
+import { LoadingSpinner } from '../../../common/loading-spinner/loading-spinner';
+import { ErrorAlert } from '../../../common/error-alert/error-alert';
+import { Item } from './item/item';
+
+@Component({
+    selector: 'app-sessions-list',
+    standalone: true,
+    imports: [
+        LoadingSpinner,
+        ErrorAlert,
+        Item
+    ],
+    templateUrl: './sessions-list.html',
+    styleUrl: './sessions-list.scss',
+})
+export class SessionsList implements OnInit {
+    loading = true;
+    error : Error | null = null;
+    workshopId!: number;
+    sessions!: ISession[];
+
+    private toastService = inject(ToastService);
+
+    constructor(
+        private sessionsService: Sessions,
+        private activatedRoute: ActivatedRoute
+    ) {}
+
+    ngOnInit() {
+        // this.activatedRoute.snapshot.paramMap is NOT an observable unlike this.activatedRoute.paramMap which is an observable
+        const idStr = this.activatedRoute.snapshot.paramMap.get('id');
+        this.workshopId = +(idStr as string);
+
+        this.loading = true;
+        this.sessionsService.getSessionsForWorkshop(this.workshopId).subscribe({
+            next: (sessions) => {
+                this.sessions = sessions;
+                this.loading = false;
+            },
+            error: (err) => {
+                this.error = err;
+                this.loading = false;
+            }
+        });
+    }
+
+    updateVote(session: ISession, by: number) {
+    this.sessionsService
+        .voteForSession(session.id, by === 1 ? 'upvote' : 'downvote')
+        .subscribe({
+            next: (updatedSession) => {
+                session.upvoteCount = updatedSession.upvoteCount;
+                alert(`Your vote for ${session.name} has been captured`);
+            },
+            error: (err) => {
+                alert(`Your vote for ${session.name} could not be captured (${err.message}). Try again.`);
+            }
+        });
+    }
+}
+```
+- In `src/app/workshops/workshop-details/sessions-list/sessions-list.component.html`
+```html
+<h2>List of sessions</h2>
+
+<hr />
+
+@if(loading) {
+    <app-loading-spinner variant="success"></app-loading-spinner>
+} @else if( !loading && error ) {
+    <!--
+        parent gets hold o the new page and calls its own changePage()
+    -->
+    <app-error-alert [error]="error"></app-error-alert>
+} @else {
+    <ul class="list-group">
+        @for( s of sessions; track s.id ) {
+            <li class="list-group-item">
+                <app-item
+                    [session]="s"
+                    (updateVote)="updateVote(s, $event)"
+                />
+            </li>
+        }
+    </ul>
+}
+```
+- In `src/app/workshops/workshop-details/sessions-list/item/item.component.ts`
+```ts
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import ISession from '../../../models/ISession';
+import { VotingWidget } from '../../../../common/voting-widget/voting-widget';
+
+@Component({
+  selector: 'app-item',
+  imports: [
+    VotingWidget
+  ],
+  templateUrl: './item.html',
+  styleUrl: './item.scss'
+})
+export class Item {
+  @Input()
+  session!: ISession;
+
+  @Output('updateVote')
+  updateVote = new EventEmitter<number>();
+
+  updateSessionVote($event: number) {
+    this.updateVote.emit($event);
+  }
+}
+```
+- In `src/app/workshops/workshop-details/sessions-list/item/item.component.html`
+```html
+<div class="row">
+    <div
+        class="col-1 d-flex flex-column justify-content-center align-items-center"
+    >
+        <div
+            class="col-1 d-flex flex-column justify-content-center align-items-center"
+        >
+            <app-voting-widget
+                [votes]="session.upvoteCount"
+                (vote)="updateSessionVote($event)"
+            ></app-voting-widget>
+        </div>
+    </div>
+    <div class="col-11">
+        <h3>{{ session.name }}</h3>
+        <div>by {{ session.speaker }}</div>
+        <div>{{ session.level }}</div>
+        <div>{{ session.duration }}</div>
+        <div>{{ session.abstract }}</div>
+    </div>
+</div>
+```
+
 
 ## Step 27: Using environment files for enabling environment-based settings
 - Environment files help us to use settings for the application based on the environment. We can, for example, have our code work without changes, and comunicate with a local development server in development, and a production server, in a production environment. Angular will take care to use the appropriate settings based on the application build (development/staging/production etc.)
@@ -4411,3 +4559,209 @@ export class Home implements AfterViewInit, OnDestroy {
   }
 }
 ```
+
+## Step 51: Understanding signals and using them
+- A signal is a reactive state primitive introduced in Angular v16.
+- To create a signal
+```ts
+const counter = signal(0);
+```
+- To set a signal to a new value
+```ts
+counter.set(5)
+```
+- Or, to update it based on the current value
+```ts
+counter.update(v => v + 1)
+```
+- Signals are used for
+  - Declaring reactive local state in Angular components
+  - Tracking derived values using `computed()` - for example,
+  ```ts
+  count = signal(2);
+  double = computed(() => this.count() * 2);
+  ```
+  - Replacing the need for RxJS in simple state flows
+  - __Signals make change detection more efficient__ - Signals enable automatic change detection in templates and `computed()`. Once Zoneless change detection become production-ready (maybe Angular 21+), signals would likely be the standard way to work with component data.
+  - Additionally, you can encapsulate signal-based logic in reusable functions or services - such functions are termed as __custom hooks__
+- We shall create a custom hook `useFilterableData`, that will help understand how signals are used, and how custom hooks are created to share reusable logic.
+- Define the custom hook in `app/signal/filter.signal.ts`. Here `array` and `filterKey` are signals, and `filteredArray` can be determined based on the former 2 variables - hence we define it as a __computed value__. We return these values to the component that needs to define use these.
+```ts
+import { computed, signal } from '@angular/core';
+
+// type FilterFunction = <ItemType>(item: ItemType) => boolean;
+
+export const useFilterableData = <
+  // FilterKeyProperty extends string,
+  ItemType extends { name: string }
+>() =>
+  // filterFunction: FilterFunction
+  {
+    const array = signal([] as Array<ItemType>);
+    const filterKey = signal('');
+    const filteredArray = computed(() => {
+      const key = filterKey().toUpperCase();
+
+      return array().filter((item) => {
+        return item.name.toUpperCase().includes(key);
+      });
+    });
+
+    const hasFilteredOutItems = array().length !== filteredArray().length;
+
+    return {
+      array,
+      filterKey,
+      filteredArray,
+      hasFilteredOutItems,
+    };
+  };
+
+```
+- In our case, we would like to use this to filter the workshops list based on user input. We make to following changes in order to use the custom hooks defined above. In `app/workshops/workshops-list/workshops-list.component.ts`
+```ts
+import { useFilterableData } from '../../signals/filter.signal';
+```
+```ts
+// We don't need these data member now since we use the signals from the custom hook (`useFilterableData`)
+// workshops!: IWorkshop[]; // all the 10 workshops for the page
+// filteredWorkshops!: IWorkshop[]; // only filtered workshops
+// filterKey = '';
+
+filterable: ReturnType<typeof useFilterableData<IWorkshop>> = useFilterableData<IWorkshop>();;
+```
+- In the `next` method of the observer passed to get workshops
+```ts
+next: (fetchedWorkshops) => {
+  this.filterable.array.set(fetchedWorkshops);
+  this.loading = false;
+}
+```
+- Change the filtering logic
+```ts
+// filterWorkshops() {
+//   this.filteredWorkshops = this.workshops.filter(
+//     (w) => w.name.toLowerCase().includes(this.filterKey.toLowerCase())
+//   );
+// }
+
+filterWorkshops(event: Event) {
+  this.filterable.filterKey.set((event?.target as HTMLInputElement).value);
+}
+```
+- In the `deleteWorkshop` method, update the logic that sets the `workshops`
+```ts
+// update this.workshops
+// this.workshops = this.workshops.filter(
+//     (w) => w.id !== workshop.id
+// );
+// this.filterWorkshops();
+
+this.filterable.array.set(this.filterable.array().filter(
+    (w) => w.id !== workshop.id
+));
+```
+- In `app/workshops/workshops-list/workshops-list.component.html` you can remove the `ngModel` binding in the filter input, and pass on the event data, i.e. `$event`
+```html
+<input
+    type="search"
+    class="form-control"
+    placeholder="Type to search by name"
+    (input)="filterWorkshops($event)"
+/>
+
+@if ( filterable.filterKey() !== '' ) {
+    <div>
+        Workshops whose name has
+        <span class="text-primary">{{ filterable.filterKey() }}</span> are shown.
+    </div>
+}
+```
+- Update the `@for` loop like so.
+```html
+@for ( workshopItem of filterable.filteredArray(); track workshopItem.id ) {
+  <!-- rest of code... -->
+}
+```
+
+## Step 52: OnPush change detection strategy for optimizing rendering performance
+We can benefit from `ChangeDetectionStrategy.OnPush` for improving rendering performance in the sessions list `app-item` component, which receives `session` as an `@Input()`. By default, Angular uses the **Default** change detection strategy, which checks **everything** on every change detection cycle. With `OnPush`, Angular only checks a component when:
+
+* An `@Input()` reference **changes**
+* An **event** is triggered in the component
+* An **Observable emits** (if used via `async`)
+* You **manually mark it for check**
+
+- In the session list item component
+```ts
+@Input() session!: ISession;
+```
+* This `session` is passed from session lost component using a `@for` loop over `sessions[]`.
+* If the `session` object changes by reference (as it does after an upvote), Angular can efficiently re-render only that `app-item`.
+
+This gives **performance benefits**, especially when rendering many `app-item`s. Let's enable `OnPush` strategy.
+
+- Add `OnPush` to `app/workshops/workshop-details/sessions-list/item/item.component.ts`
+
+```ts
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+
+@Component({
+  selector: 'app-item',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [VotingWidget],
+  templateUrl: './item.html',
+  styleUrl: './item.scss',
+})
+export class Item {
+  @Input() session!: ISession;
+  @Output('updateVote') updateVote = new EventEmitter<number>();
+
+  // to know if the template is re-evaluated during change detection for a component instance
+  logRender() {
+    console.log( 'rendering session list item :', this.session );
+  }
+
+  // Best for verifying input change-based re-renders - This is just to check which session is re-rendered on change - ngOnChanges() is called only when an @Input() changes (here, session) — which is exactly what OnPush checks for.
+  // ngOnChanges(changes: SimpleChanges): void {
+  //   console.log(`Item component re-rendered for session: ${this.session.name}`);
+  //   console.log('Changes:', changes);
+  // }
+
+  // ngDoCheck() runs on every CD cycle (even for OnPush components), but only if Angular believes there might be changes. For OnPush, it only triggers when @Input() references change or local events occur
+  // ngDoCheck(): void {
+  //   console.log( '*** Executing **ngDoCheck ***' );
+  //   console.log(`Checked: ${this.session.name}`);
+  // }
+
+  updateSessionVote($event: number) {
+    this.updateVote.emit($event);
+  }
+}
+```
+- Call `logRender()` in the template to determine when change detection runs for a component instance. In `app/workshops/workshop-details/sessions-list/item/item.component.html`
+```html
+<div class="row">
+    <!-- rest of the UI -->
+    <!-- ... -->
+
+    {{ logRender() }}
+</div>
+```
+- Ensure you **replace** the session object on update in the `SessionsList` component. Instead of mutating the object directly in `app/workshops/workshop-details/sessions-list/sessions-list.component.ts`, do so __immutably__ (__Note__ - this is __crucial__!)
+```ts
+// session.upvoteCount = updatedSession.upvoteCount;
+this.sessions = this.sessions.map(s =>
+  s.id === updatedSession.id ? updatedSession : s
+);
+```
+- This creates a **new array** and **new session object**, which makes Angular's OnPush strategy detect that the `@Input()` reference changed.
+- Check the console for the log from `logRender`. Try with both existing code and with the changes we made for enabling `OnPush`-based change detection. You will find that the template for only the session list item instance of the session you voted for has been re-evaluated.
+
+### Benefits Recap
+
+| With Default Strategy               | With OnPush                        |
+| ----------------------------------- | ---------------------------------- |
+| Every component rechecked on change | Only checked if `@Input()` changes |
+| Unnecessary renders                 | Only updated `session` re-renders  |
+| Slower for large lists              | Faster, more optimized             |
