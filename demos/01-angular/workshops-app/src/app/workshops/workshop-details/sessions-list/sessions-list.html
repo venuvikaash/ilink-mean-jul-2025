@@ -2,30 +2,22 @@
 
 <hr />
 
-<ul class="list-group">
-    @for( s of sessions; track s.id ) {
-        <li class="list-group-item">
-            <div class="row">
-                <div
-                    class="col-1 d-flex flex-column justify-content-center align-items-center"
-                >
-                    <div
-                        class="col-1 d-flex flex-column justify-content-center align-items-center"
-                    >
-                        <app-voting-widget
-                            [votes]="s.upvoteCount"
-                            (vote)="updateVote(s, $event)"
-                        ></app-voting-widget>
-                    </div>
-                </div>
-                <div class="col-11">
-                    <h3>{{ s.name }}</h3>
-                    <div>by {{ s.speaker }}</div>
-                    <div>{{ s.level }}</div>
-                    <div>{{ s.duration }}</div>
-                    <div>{{ s.abstract }}</div>
-                </div>
-            </div>
-        </li>
-    }
-</ul>
+@if(loading) {
+    <app-loading-spinner variant="success"></app-loading-spinner>
+} @else if( !loading && error ) {
+    <!--
+        parent gets hold o the new page and calls its own changePage()
+    -->
+    <app-error-alert [error]="error"></app-error-alert>
+} @else {
+    <ul class="list-group">
+        @for( s of sessions; track s.id ) {
+            <li class="list-group-item">
+                <app-item
+                    [session]="s"
+                    (updateVote)="updateVote(s, $event)"
+                />
+            </li>
+        }
+    </ul>
+}

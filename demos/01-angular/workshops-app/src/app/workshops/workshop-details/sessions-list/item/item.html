@@ -1,0 +1,23 @@
+<div class="row">
+    <div
+        class="col-1 d-flex flex-column justify-content-center align-items-center"
+    >
+        <div
+            class="col-1 d-flex flex-column justify-content-center align-items-center"
+        >
+            <app-voting-widget
+                [votes]="session.upvoteCount"
+                (vote)="updateSessionVote($event)"
+            ></app-voting-widget>
+        </div>
+    </div>
+    <div class="col-11">
+        <h3>{{ session.name }}</h3>
+        <div>by {{ session.speaker }}</div>
+        <div>{{ session.level }}</div>
+        <div>{{ session.duration }}</div>
+        <div>{{ session.abstract }}</div>
+    </div>
+
+    {{ logRender() }}
+</div>

@@ -4,18 +4,24 @@ import { Sessions } from '../../sessions';
 import ISession from '../../models/ISession';
 import { Toast as ToastService } from '../../../common/toast';
 
-import { VotingWidget } from '../../../common/voting-widget/voting-widget';
+import { LoadingSpinner } from '../../../common/loading-spinner/loading-spinner';
+import { ErrorAlert } from '../../../common/error-alert/error-alert';
+import { Item } from './item/item';
 
 @Component({
     selector: 'app-sessions-list',
     standalone: true,
     imports: [
-        VotingWidget
+        LoadingSpinner,
+        ErrorAlert,
+        Item
     ],
     templateUrl: './sessions-list.html',
     styleUrl: './sessions-list.scss',
 })
 export class SessionsList implements OnInit {
+    loading = true;
+    error : Error | null = null;
     workshopId!: number;
     sessions!: ISession[];
 
@@ -31,10 +37,16 @@ export class SessionsList implements OnInit {
         const idStr = this.activatedRoute.snapshot.paramMap.get('id');
         this.workshopId = +(idStr as string);
 
+        this.loading = true;
         this.sessionsService.getSessionsForWorkshop(this.workshopId).subscribe({
             next: (sessions) => {
                 this.sessions = sessions;
+                this.loading = false;
             },
+            error: (err) => {
+                this.error = err;
+                this.loading = false;
+            }
         });
     }
 
@@ -43,7 +55,14 @@ export class SessionsList implements OnInit {
         .voteForSession(session.id, by === 1 ? 'upvote' : 'downvote')
         .subscribe({
             next: (updatedSession) => {
-                session.upvoteCount = updatedSession.upvoteCount;
+                // Instead of mutating the object directly, do so immutably (Note - this is crucial!)
+
+                // session.upvoteCount = updatedSession.upvoteCount;
+
+                this.sessions = this.sessions.map(s =>
+                    s.id === updatedSession.id ? updatedSession : s
+                );
+
                 this.toastService.add({
                     message: `Your vote for ${session.name} has been captured`,
                     duration: 3000,
