@@ -12,6 +12,7 @@
 - Step 36: Using Form Builder
 - Step 37: Setting up custom and cross-field validations
 - Step 41: Updating (Editing) workshop
+- All remaining steps in Angular which were demonstrated
 
 
 ## Hosted backends
