@@ -1,0 +1,13 @@
+@for (toast of toastService.toasts; track toast) {
+<div class="mb-3">
+  <ngb-toast
+    [class]="toast.classname"
+    [autohide]="true"
+    [delay]="toast.delay || 5000"
+    (hidden)="toastService.remove(toast)"
+  >
+    <!-- <ng-template [ngTemplateOutlet]="toast.template"></ng-template> -->
+    {{ toast.templateOrMessage }}
+  </ngb-toast>
+</div>
+}

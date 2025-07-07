@@ -1,0 +1,10 @@
+// approach 1: Customizing the Sass variables
+// $navbar-light-active-color: crimson;
+// $navbar-light-brand-color: black;
+
+// @import "bootstrap/scss/bootstrap";
+
+// approach 2: Overriding using plain CSS
+.navbar-nav .nav-link.active {
+  color: crimson;
+}

@@ -1,0 +1,16 @@
+@if (isOpen) {
+<ngb-alert (closed)="isOpen = false" class="my-0">
+  <div class="text-center">
+    Note that this app is built using Angular 18. The APIs in Angular <= 16 are
+    significantly different.
+  </div>
+</ngb-alert>
+}
+
+<app-menu></app-menu>
+
+<div class="container my-4" [@routeAnimations]="getRouteAnimationState(outlet)">
+  <router-outlet #outlet="outlet" />
+</div>
+
+<app-toast-container></app-toast-container>

@@ -1,0 +1,19 @@
+<li class="list-group-item">
+  <div class="row">
+    <div class="col-1">
+      <app-voting
+        [votes]="session.upvoteCount"
+        (vote)="onVote($event)"
+      ></app-voting>
+    </div>
+    <div class="col-11">
+      <div class="lead">{{ session.name }}</div>
+      <div class="h6">by {{ session.speaker }}</div>
+      <div>
+        <span class="badge" [class]="getBadgeClass()">{{ session.level }}</span>
+      </div>
+      <div class="my-2">{{ session.duration }} hours</div>
+      <p>{{ session.abstract }}</p>
+    </div>
+  </div>
+</li>

@@ -1,0 +1,138 @@
+<!-- https://stackblitz.com/run?file=src%2Fapp%2Fdropdown-navbar.ts -->
+<nav class="navbar navbar-expand-md navbar-light bg-body-tertiary">
+  <div class="container">
+    <a
+      class="navbar-brand"
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      role="button"
+      >Workshops App</a
+    >
+    <button
+      class="navbar-toggler"
+      type="button"
+      aria-controls="navbarContent"
+      [attr.aria-expanded]="!collapsed"
+      aria-label="Toggle navigation"
+      (click)="collapsed = !collapsed"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div
+      class="navbar-collapse"
+      [class.collapse]="collapsed"
+      id="navbarContent"
+    >
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item" role="button">
+          <a
+            class="nav-link"
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            tabindex="0"
+            >Home</a
+          >
+        </li>
+        @if ( isLoggedIn ) {
+        <li class="nav-item" role="button">
+          <a
+            class="nav-link"
+            routerLink="/workshops"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            tabindex="0"
+            >List of workshops</a
+          >
+        </li>
+        <li class="nav-item" role="button">
+          <a
+            class="nav-link"
+            routerLink="workshops/add"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            tabindex="0"
+            >Add a workshop</a
+          >
+        </li>
+        }
+
+        <!--
+        <li class="nav-item" ngbDropdown>
+          <a
+            class="nav-link"
+            tabindex="0"
+            ngbDropdownToggle
+            id="navbarDropdown2"
+            role="button"
+          >
+            Static right
+          </a>
+          <div
+            ngbDropdownMenu
+            aria-labelledby="navbarDropdown2"
+            class="dropdown-menu dropdown-menu-end"
+          >
+            <a ngbDropdownItem href="#" (click)="$event.preventDefault()"
+              >Action</a
+            >
+            <a ngbDropdownItem href="#" (click)="$event.preventDefault()"
+              >Another action</a
+            >
+            <a ngbDropdownItem href="#" (click)="$event.preventDefault()"
+              >Something else here</a
+            >
+          </div>
+        </li>
+        -->
+      </ul>
+
+      <ul class="navbar-nav">
+        @if ( isLoggedIn ) {
+        <li
+          class="nav-item"
+          ngbDropdown
+          display="dynamic"
+          placement="bottom-end"
+        >
+          <a
+            class="nav-link"
+            tabindex="0"
+            ngbDropdownToggle
+            id="navbarDropdown3"
+            role="button"
+          >
+            Account & Preferences
+          </a>
+          <div
+            ngbDropdownMenu
+            aria-labelledby="navbarDropdown3"
+            class="dropdown-menu"
+          >
+            <a
+              ngbDropdownItem
+              routerLink="/workshops/favorites"
+              (click)="$event.preventDefault()"
+              >Favorites</a
+            >
+            <a ngbDropdownItem href="#" (click)="logout($event)">Logout</a>
+          </div>
+        </li>
+        } @else {
+        <li class="nav-item" role="button">
+          <a
+            class="nav-link"
+            routerLink="login"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            tabindex="0"
+            >Login</a
+          >
+        </li>
+        }
+      </ul>
+    </div>
+  </div>
+</nav>

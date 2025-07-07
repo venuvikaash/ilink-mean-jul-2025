@@ -1,0 +1,11 @@
+<div class="card workshop-card w-100 p-3 d-flex flex-column">
+  <div class="card-header">
+    <ng-content select="[item-header]"></ng-content>
+  </div>
+  <div class="card-body flex-grow-1">
+    <ng-content select="[item-body]"></ng-content>
+  </div>
+  <div class="card-footer">
+    <ng-content select="[item-footer]"></ng-content>
+  </div>
+</div>

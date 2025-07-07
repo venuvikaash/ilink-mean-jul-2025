@@ -1,0 +1,14 @@
+.ng-fa-icon {
+  font-size: var(--icon-font-size, 1em);
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.ng-fa-icon:hover {
+  opacity: 0.8;
+}
+
+.ng-fa-icon:active {
+  color: var(--icon-active-color, green);
+  opacity: 1;
+}

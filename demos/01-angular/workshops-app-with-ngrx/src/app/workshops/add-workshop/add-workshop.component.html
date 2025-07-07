@@ -1,0 +1,184 @@
+<div class="my-3">
+  <h1>Add a workshop</h1>
+  <hr />
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="container mt-4">
+  <!-- Name -->
+  <div class="row mb-3">
+    <label for="name" class="col-lg-2 col-form-label">Name</label>
+    <div class="col-lg-10">
+      <input
+        type="text"
+        id="name"
+        formControlName="name"
+        class="form-control"
+      />
+      <div *ngIf="isInvalid(name)" class="text-danger">
+        <small *ngIf="name.errors['required']">Name is required.</small>
+        <small *ngIf="name.errors['pattern']"
+          >Only letters and spaces allowed.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Category -->
+  <div class="row mb-3">
+    <label for="category" class="col-lg-2 col-form-label">Category</label>
+    <div class="col-lg-10">
+      <select id="category" formControlName="category" class="form-select">
+        <option value="" disabled selected>Select a category</option>
+        <option value="frontend">Frontend</option>
+        <option value="backend">Backend</option>
+        <option value="database">Database</option>
+        <option value="mobile">Mobile</option>
+        <option value="language">Language</option>
+        <option value="devops">DevOps</option>
+      </select>
+      <div *ngIf="isInvalid(category)" class="text-danger">
+        <small *ngIf="category.errors['required']">Category is required.</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <div class="row mb-3">
+    <label for="description" class="col-lg-2 col-form-label">Description</label>
+    <div class="col-lg-10">
+      <textarea
+        id="description"
+        formControlName="description"
+        class="form-control"
+      ></textarea>
+      <div *ngIf="isInvalid(description)" class="text-danger">
+        <small *ngIf="description.errors['required']"
+          >Description is required.</small
+        >
+        <small *ngIf="description.errors['minlength']"
+          >Minimum 20 characters required.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Start Date -->
+  <div class="row mb-3">
+    <label for="startDate" class="col-lg-2 col-form-label">Start Date</label>
+    <div class="col-lg-10">
+      <input
+        type="date"
+        id="startDate"
+        formControlName="startDate"
+        class="form-control"
+      />
+      <div *ngIf="isInvalid(startDate)" class="text-danger">
+        <small *ngIf="startDate.errors['required']"
+          >Start date is required.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- End Date -->
+  <div class="row mb-3">
+    <label for="endDate" class="col-lg-2 col-form-label">End Date</label>
+    <div class="col-lg-10">
+      <input
+        type="date"
+        id="endDate"
+        formControlName="endDate"
+        class="form-control"
+      />
+      <div *ngIf="isInvalid(endDate)" class="text-danger">
+        <small *ngIf="endDate.errors['required']">End date is required.</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Time -->
+  <div class="row mb-3">
+    <label for="time" class="col-lg-2 col-form-label">Time</label>
+    <div class="col-lg-10">
+      <input
+        type="text"
+        id="time"
+        formControlName="time"
+        class="form-control"
+      />
+      <div *ngIf="isInvalid(time)" class="text-danger">
+        <small *ngIf="time.errors['required']">Time is required.</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Location FormGroup -->
+  <div class="row mb-3">
+    <label class="col-lg-2 col-form-label">Location</label>
+    <div class="col-lg-10">
+      <div formGroupName="location">
+        <input
+          type="text"
+          id="address"
+          formControlName="address"
+          placeholder="Address"
+          class="form-control mb-2"
+        />
+        <select id="country" formControlName="country" class="form-select mb-2">
+          <option *ngFor="let country of countries">{{ country.name }}</option>
+        </select>
+        <select id="state" formControlName="state" class="form-select mb-2">
+          <option *ngFor="let state of states">{{ state.name }}</option>
+        </select>
+        <select id="city" formControlName="city" class="form-select mb-2">
+          <option *ngFor="let city of cities">{{ city }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modes Checkbox Group -->
+  <div class="row mb-3">
+    <label class="col-lg-2 col-form-label">Modes</label>
+    <div class="col-lg-10" formGroupName="modes">
+      <div>
+        <input type="checkbox" id="inPerson" formControlName="inPerson" />
+        <label for="inPerson" class="ms-2">In Person</label>
+      </div>
+      <div>
+        <input type="checkbox" id="online" formControlName="online" />
+        <label for="online" class="ms-2">Online</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image URL -->
+  <div class="row mb-3">
+    <label for="imageUrl" class="col-lg-2 col-form-label">Image URL</label>
+    <div class="col-lg-10">
+      <input
+        type="url"
+        id="imageUrl"
+        formControlName="imageUrl"
+        class="form-control"
+      />
+      <div *ngIf="isInvalid(imageUrl)" class="text-danger">
+        <small *ngIf="imageUrl.errors['required']"
+          >Image URL is required.</small
+        >
+        <small *ngIf="imageUrl.errors['pattern']"
+          >Please enter a valid URL.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit Button -->
+  <div class="row mt-3">
+    <div class="col-lg-10 offset-lg-2">
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+        Submit
+      </button>
+    </div>
+  </div>
+</form>

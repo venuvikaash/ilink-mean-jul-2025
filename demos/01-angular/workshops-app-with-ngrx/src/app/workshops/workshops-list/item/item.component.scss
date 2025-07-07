@@ -1,0 +1,45 @@
+:host {
+  display: flex;
+  width: 100%;
+}
+
+.workshop-card {
+  position: relative;
+
+  .card-img-wrapper {
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card-img-top {
+    width: 50%;
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .workshop-location,
+  .workshop-duration {
+    font-size: 0.75em;
+  }
+
+  // .card-title {
+  //   min-height: 60px;
+  // }
+
+  fa-icon {
+    cursor: pointer;
+  }
+
+  .favorite {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    padding: 20px;
+  }
+}

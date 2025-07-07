@@ -1,0 +1,24 @@
+<button
+  class="btn btn-primary btn-sm me-2"
+  (click)="previous()"
+  [disabled]="page === 1"
+>
+  Previous
+</button>
+<button
+  class="btn btn-primary btn-sm"
+  (click)="next()"
+  [disabled]="page === lastPage"
+>
+  Next
+</button>
+
+<div class="my-2">
+  @if( loading ) {
+  <div>Loading page {{ page }}</div>
+  } @else if ( !loading && error ) {
+  <div>Could not load items on page {{ page }} ({{ error.message }})</div>
+  } @else {
+  <div>You are viewing page {{ page }}</div>
+  }
+</div>

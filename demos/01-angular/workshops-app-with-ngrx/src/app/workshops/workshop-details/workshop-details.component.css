@@ -1,0 +1,18 @@
+/* $primary: #ff5722; // Example of changing primary color
+
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/functions';
+@import "bootstrap/scss/variables"; */
+
+.btn-child-route {
+  opacity: 0.85;
+}
+
+.btn-child-route.active {
+  opacity: initial;
+}
+
+:host {
+  --icon-font-size: 2em;
+  --icon-active-color: #0a58ca;
+}

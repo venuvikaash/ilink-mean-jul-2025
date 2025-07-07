@@ -1,0 +1,22 @@
+<h1>Favorites</h1>
+<hr />
+
+<!-- <div *ngIf="favoritesService.favorites$ | async as favorites; else loading">
+  <ul>
+    <li *ngFor="let favorite of favorites">
+      <a [routerLink]="['/workshops', favorite.id]">
+        {{ favorite.name }}
+      </a>
+    </li>
+  </ul>
+  <div *ngIf="favorites.length === 0">
+    You have not marked any workshops as favorites. We hope you'll soon find
+    some that pique your interest!
+  </div>
+</div> -->
+
+<li *ngFor="let workshop of favoriteWorkshops()">
+  {{ workshop.name }}
+</li>
+
+<ng-template #loading> Loading favorites... </ng-template>

@@ -1,0 +1,142 @@
+<div class="my-3">
+  <h2>Request a session</h2>
+  <hr />
+</div>
+
+<form
+  [formGroup]="form"
+  (ngSubmit)="addSession($event)"
+  class="container mt-4"
+  novalidate
+>
+  <!-- Sequence ID -->
+  <div class="row mb-3">
+    <label for="sequenceId" class="col-lg-2 col-form-label">Sequence ID</label>
+    <div class="col-lg-10">
+      <input
+        type="text"
+        id="sequenceId"
+        formControlName="sequenceId"
+        class="form-control"
+      />
+      <div *ngIf="isInvalid(sequenceId)" class="text-danger">
+        <small *ngIf="sequenceId.errors['required']"
+          >Sequence ID is required.</small
+        >
+        <small *ngIf="sequenceId.errors['pattern']"
+          >Sequence ID must be a positive integer.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Name -->
+  <div class="row mb-3">
+    <label for="name" class="col-lg-2 col-form-label">Name</label>
+    <div class="col-lg-10">
+      <input
+        type="text"
+        id="name"
+        formControlName="name"
+        class="form-control"
+      />
+      <div *ngIf="isInvalid(name)" class="text-danger">
+        <small *ngIf="name.errors['required']">Name is required.</small>
+        <small *ngIf="name.errors['pattern']"
+          >Name can contain only letters and spaces.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Speaker -->
+  <div class="row mb-3">
+    <label for="speaker" class="col-lg-2 col-form-label">Speaker</label>
+    <div class="col-lg-10">
+      <input
+        type="text"
+        id="speaker"
+        formControlName="speaker"
+        class="form-control"
+      />
+      <div *ngIf="isInvalid(speaker)" class="text-danger">
+        <small *ngIf="speaker.errors['required']">Speaker is required.</small>
+        <small *ngIf="speaker.errors['pattern']"
+          >Speaker can contain letters, spaces, and commas.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Duration -->
+  <div class="row mb-3">
+    <label for="duration" class="col-lg-2 col-form-label">Duration</label>
+    <div class="col-lg-10">
+      <input
+        type="text"
+        id="duration"
+        formControlName="duration"
+        class="form-control"
+      />
+      <div class="text-danger">
+        <span *ngIf="isInvalid(duration)">
+          <small *ngIf="duration.errors['required']"
+            >Duration is required.</small
+          >
+        </span>
+        <small>{{
+          form &&
+          form.errors &&
+          form.errors["sessionDurationAndLevel"] &&
+          (duration.dirty || duration.touched) &&
+          (level.dirty || level.touched)
+            ? form.errors["sessionDurationAndLevelErrorMessage"]
+            : ""
+        }}</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level -->
+  <div class="row mb-3">
+    <label for="level" class="col-lg-2 col-form-label">Level</label>
+    <div class="col-lg-10">
+      <select id="level" formControlName="level" class="form-select">
+        <option value="" disabled selected>Select a level</option>
+        <option value="Basic">Basic</option>
+        <option value="Intermediate">Intermediate</option>
+        <option value="Advanced">Advanced</option>
+      </select>
+      <div *ngIf="isInvalid(level)" class="text-danger">
+        <small *ngIf="level.errors['required']">Level is required.</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Abstract -->
+  <div class="row mb-3">
+    <label for="abstract" class="col-lg-2 col-form-label">Abstract</label>
+    <div class="col-lg-10">
+      <textarea
+        id="abstract"
+        formControlName="abstract"
+        class="form-control"
+      ></textarea>
+      <div *ngIf="isInvalid(abstract)" class="text-danger">
+        <small *ngIf="abstract.errors['required']">Abstract is required.</small>
+        <small *ngIf="abstract.errors['minlength']"
+          >Level selection must be at least 20 characters long.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit Button -->
+  <div class="row mt-3">
+    <div class="col-lg-10 offset-lg-2">
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+        Submit
+      </button>
+    </div>
+  </div>
+</form>

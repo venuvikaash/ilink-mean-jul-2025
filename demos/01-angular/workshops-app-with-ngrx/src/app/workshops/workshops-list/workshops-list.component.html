@@ -1,0 +1,125 @@
+<h1>List of Workshops</h1>
+<hr />
+
+<app-pagination
+  [page]="page"
+  [lastPage]="2"
+  (pageChange)="onPageChange($event)"
+  [loading]="loading"
+  [error]="error"
+></app-pagination>
+
+<div class="my-3">
+  <input
+    type="search"
+    placeholder="Type to filter workshops by name"
+    (input)="onFilter($event)"
+    class="form-control"
+  />
+
+  <div [style.height.px]="20">
+    @if ( filterable.hasFilteredOutItems ) {
+    <div class="text-muted">Some elements are filtered out</div>
+    }
+  </div>
+</div>
+
+@if ( loading ) {
+<app-loading></app-loading>
+} @else if ( !loading && error ) {
+<ngb-alert type="danger" (closed)="isOpen = false">
+  {{ error.message }}
+</ngb-alert>
+} @else {
+<div class="row">
+  @for ( workshop of filterable.filteredArray(); track workshop.id ) {
+  <div class="col-12 col-md-4 col-xl-3 my-3 d-flex" @fadeSlideOut>
+    <app-workshop-item [workshop]="workshop" (delete)="confirmAndDeleteWorkshop(workshop)">
+      <!-- HEADER -->
+      <div item-header class="d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">{{ workshop.name }}</h5>
+        <span>
+          <!-- Using plain service -->
+          <!-- (click)="favoritesService.toggleFavorite(workshop)"> -->
+
+          <!-- Using NgRx store with signal data member -->
+          <fa-icon
+            [icon]="isFavorite(workshop.id) ? icons.faStar : icons.faStarEmpty"
+            class="favorite text-success"
+            (click)="toggleFavorite(workshop)">
+          </fa-icon>
+
+          <!-- Using NgRx store with Observable data member -->
+          <!-- <fa-icon
+            [icon]="(isFavorite(workshop.id) | async) ? icons.faStar : icons.faStarEmpty"
+            class="favorite text-success"
+            (click)="toggleFavorite(workshop)">
+          </fa-icon> -->
+        </span>
+      </div>
+
+      <!-- BODY -->
+      <div item-body>
+        <img [src]="workshop.imageUrl" [alt]="workshop.name" class="card-img-top mb-2" />
+        <div class="workshop-location">
+          {{ workshop.location.address }}, {{ workshop.location.city }}, {{ workshop.location.state }}
+        </div>
+        <strong class="workshop-duration">
+          {{ workshop.startDate | date:'mediumDate' }} -
+          {{ workshop.endDate | date:'mediumDate' }}
+        </strong>
+      </div>
+
+      <!-- FOOTER -->
+      <div item-footer class="d-flex justify-content-between align-items-center">
+        <a [routerLink]="['/workshops/edit', workshop.id]">
+          <fa-icon [icon]="icons.faPencil" class="text-success"></fa-icon>
+        </a>
+        <fa-icon [icon]="icons.faTrash" class="text-danger" (click)="deleteWorkshop( workshop )"></fa-icon>
+        <a class="btn btn-primary btn-sm"
+          [routerLink]="[workshop.id]"
+          [attr.aria-label]="'Know more about ' + workshop.name">
+          Know more
+        </a>
+      </div>
+    </app-workshop-item>
+  </div>
+  }
+</div>
+}
+
+<ng-template #deleteConfirmationModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="delete-confirmation-modal">Please Confirm</h4>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="modal.dismiss('close')"
+    ></button>
+  </div>
+  <div class="modal-body">
+    <p>
+      This action is destructive. You will not be able to recover details of the
+      workshop once it has been deleted. Are you sure you want to proceed?
+    </p>
+
+    <p>
+      Click
+      <strong>OK</strong> to confirm, or <strong>Cancel</strong> to abort the
+      action.
+    </p>
+
+    <p class="text-center">
+      <button
+        class="btn btn-outline-secondary me-2"
+        (click)="modal.close('cancel')"
+      >
+        Cancel
+      </button>
+      <button class="btn btn-outline-danger" (click)="modal.close('ok')">
+        OK
+      </button>
+    </p>
+  </div>
+</ng-template>

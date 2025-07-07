@@ -1,0 +1,5 @@
+<div class="voting-widget d-flex flex-column align-items-center">
+  <fa-icon [icon]="faCaretUp" (click)="onVote('upvote')" />
+  <span>{{ votes }}</span>
+  <fa-icon [icon]="faCaretDown" (click)="onVote('downvote')" />
+</div>

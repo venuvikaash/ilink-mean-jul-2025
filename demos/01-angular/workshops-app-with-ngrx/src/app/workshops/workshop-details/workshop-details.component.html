@@ -1,0 +1,88 @@
+@if ( loading ) {
+<app-loading></app-loading>
+} @else if ( !loading && error ) {
+<ngb-alert type="danger" (closed)="isOpen = false">
+  {{ error.message }}
+</ngb-alert>
+} @else {
+<div class="row">
+  <div class="col-12 col-md-4">
+    <img [src]="workshop.imageUrl" [alt]="workshop.name" class="img-fluid" />
+  </div>
+  <div class="col-12 col-md-8">
+    <h1>
+      {{ workshop.name }}
+
+      <span>
+        <fa-icon
+          [icon]="
+            favoritesService.isFavorite(workshop.id)
+              ? icons.faStar
+              : icons.faStarEmpty
+          "
+          class="favorite text-success"
+          (click)="favoritesService.toggleFavorite(workshop)"
+        ></fa-icon>
+      </span>
+    </h1>
+    <hr />
+
+    <div class="col-12">
+      <div>
+        {{ workshop.location.address }}, {{ workshop.location.city }},
+        {{ workshop.location.state }}
+      </div>
+
+      <div class="my-2">
+        <div>
+          {{ workshop.startDate | date : "mediumDate" }} -
+          {{ workshop.endDate | date : "mediumDate" }}
+        </div>
+
+        <div>{{ workshop.time }}</div>
+      </div>
+
+      <div class="my-3">
+        <div>
+          @if ( workshop.modes.inPerson) {
+          <fa-icon [icon]="icons.faCheckCircle"></fa-icon>
+          } @else {
+          <fa-icon [icon]="icons.faTimesCircle"></fa-icon>
+          } Classroom
+        </div>
+
+        <div>
+          @if ( workshop.modes.online) {
+          <fa-icon [icon]="icons.faCheckCircle"></fa-icon>
+          } @else {
+          <fa-icon [icon]="icons.faTimesCircle"></fa-icon>
+          } Online
+        </div>
+      </div>
+    </div>
+
+    <div [innerHTML]="workshop.description"></div>
+  </div>
+
+  <div class="mt-5 mb-3">
+    <a
+      class="me-2 btn btn-primary btn-sm btn-child-route"
+      [routerLink]="['.']"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      >List of sessions</a
+    >
+    <a
+      class="btn btn-primary btn-sm btn-child-route"
+      [routerLink]="['add']"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      >Add a session</a
+    >
+  </div>
+
+  <div>
+    <router-outlet></router-outlet>
+  </div>
+</div>
+}

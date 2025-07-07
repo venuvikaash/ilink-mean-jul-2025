@@ -1,0 +1,189 @@
+<div class="my-3">
+  <h2>Request a session</h2>
+  <hr />
+</div>
+
+<form
+  #form="ngForm"
+  (ngSubmit)="addSession($event, form.value)"
+  class="container mt-4"
+  novalidate
+>
+  <!-- Sequence ID -->
+  <div class="row mb-4">
+    <label for="sequenceId" class="col-lg-2 col-form-label">Sequence ID</label>
+    <div class="col-lg-10">
+      <input
+        type="text"
+        id="sequenceId"
+        name="sequenceId"
+        class="form-control"
+        ngModel
+        #sequenceId="ngModel"
+        required
+        pattern="^[1-9][0-9]*$"
+      />
+      <div
+        *ngIf="
+          sequenceId.invalid &&
+          (sequenceId.dirty || sequenceId.touched) &&
+          sequenceId.errors
+        "
+        class="text-danger"
+      >
+        <small *ngIf="sequenceId.errors['required']"
+          >Sequence ID is required.</small
+        >
+        <small *ngIf="sequenceId.errors['pattern']"
+          >Sequence ID must be a positive integer.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Name -->
+  <div class="row mb-4">
+    <label for="name" class="col-lg-2 col-form-label">Name</label>
+    <div class="col-lg-10">
+      <input
+        type="text"
+        id="name"
+        name="name"
+        class="form-control"
+        ngModel
+        #name="ngModel"
+        required
+        pattern="^[A-Za-z ]+$"
+      />
+      <div
+        *ngIf="name.invalid && (name.dirty || name.touched) && name.errors"
+        class="text-danger"
+      >
+        <small *ngIf="name.errors['required']">Name is required.</small>
+        <small *ngIf="name.errors['pattern']"
+          >Name can contain only letters and spaces.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Speaker -->
+  <div class="row mb-4">
+    <label for="speaker" class="col-lg-2 col-form-label">Speaker</label>
+    <div class="col-lg-10">
+      <input
+        type="text"
+        id="speaker"
+        name="speaker"
+        class="form-control"
+        ngModel
+        #speaker="ngModel"
+        required
+        pattern="^[A-Za-z ,]+$"
+      />
+      <div
+        *ngIf="
+          speaker.invalid &&
+          (speaker.dirty || speaker.touched) &&
+          speaker.errors
+        "
+        class="text-danger"
+      >
+        <small *ngIf="speaker.errors['required']">Speaker is required.</small>
+        <small *ngIf="speaker.errors['pattern']"
+          >Speaker can contain letters, spaces, and commas.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Duration -->
+  <div class="row mb-4">
+    <label for="duration" class="col-lg-2 col-form-label">Duration</label>
+    <div class="col-lg-10">
+      <input
+        type="number"
+        id="duration"
+        name="duration"
+        class="form-control"
+        ngModel
+        #duration="ngModel"
+        required
+      />
+      <div
+        *ngIf="
+          duration.invalid &&
+          (duration.dirty || duration.touched) &&
+          duration.errors
+        "
+        class="text-danger"
+      >
+        <small *ngIf="duration.errors['required']">Duration is required.</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level -->
+  <div class="row mb-4">
+    <label for="level" class="col-lg-2 col-form-label">Level</label>
+    <div class="col-lg-10">
+      <select
+        id="level"
+        name="level"
+        class="form-select"
+        ngModel
+        #level="ngModel"
+        required
+      >
+        <option value="" disabled selected>Select a level</option>
+        <option value="Basic">Basic</option>
+        <option value="Intermediate">Intermediate</option>
+        <option value="Advanced">Advanced</option>
+      </select>
+      <div
+        *ngIf="level.invalid && (level.dirty || level.touched) && level.errors"
+        class="text-danger"
+      >
+        <small *ngIf="level.errors['required']">Level is required.</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Abstract -->
+  <div class="row mb-4">
+    <label for="abstract" class="col-lg-2 col-form-label">Abstract</label>
+    <div class="col-lg-10">
+      <textarea
+        id="abstract"
+        name="abstract"
+        class="form-control"
+        ngModel
+        #abstract="ngModel"
+        required
+        minlength="20"
+      ></textarea>
+      <div
+        *ngIf="
+          abstract.invalid &&
+          (abstract.dirty || abstract.touched) &&
+          abstract.errors
+        "
+        class="text-danger"
+      >
+        <small *ngIf="abstract.errors['required']">Abstract is required.</small>
+        <small *ngIf="abstract.errors['minlength']"
+          >Abstract must be at least 20 characters long.</small
+        >
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit Button -->
+  <div class="row mt-4">
+    <div class="col-lg-10 offset-lg-2">
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
+        Submit
+      </button>
+    </div>
+  </div>
+</form>

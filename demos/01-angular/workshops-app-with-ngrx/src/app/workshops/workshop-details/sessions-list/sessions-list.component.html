@@ -1,0 +1,33 @@
+<div class="my-3">
+  <h2>List of Sessions</h2>
+  <hr />
+</div>
+
+<app-pagination
+  [page]="page"
+  [lastPage]="2"
+  (pageChange)="onPageChange($event)"
+  [loading]="loading"
+  [error]="error"
+></app-pagination>
+
+<div class="my-3">
+  <input
+    type="search"
+    placeholder="Type to filter sessions by name"
+    (input)="onFilter($event)"
+    class="form-control"
+  />
+
+  <div [style.height.px]="20">
+    @if ( filterable.hasFilteredOutItems ) {
+    <div class="text-muted">Some elements are filtered out</div>
+    }
+  </div>
+</div>
+
+<div class="list-group">
+  @for ( session of filterable.filteredArray(); track session.id ) {
+  <app-session-item [session]="session" (vote)="onVote(session, $event)" />
+  }
+</div>
