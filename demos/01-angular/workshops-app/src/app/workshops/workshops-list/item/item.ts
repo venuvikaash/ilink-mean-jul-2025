@@ -5,7 +5,10 @@ import { RouterLink } from '@angular/router';
 import IWorkshop from '../../models/IWorkshop';
 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPencil, faTrash, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faStar as faStarEmpty } from '@fortawesome/free-regular-svg-icons';
+
+import { Favorites as FavoritesService } from '../../favorites';
 
 @Component({
   selector: 'app-item',
@@ -29,9 +32,14 @@ export class Item {
   icons = {
     faPencil,
     faTrash,
+    faStar,
+    faStarEmpty
   };
 
-  constructor(private datePipe: DatePipe) {
+  constructor(
+    private datePipe: DatePipe,
+    public favoritesService: FavoritesService
+  ) {
     console.log( this.datePipe.transform( "2025-07-02", "medium" ) );
   }
 

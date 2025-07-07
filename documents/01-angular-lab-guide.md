@@ -3695,14 +3695,14 @@ export class FavoritesService {
 - In `/src/app/workshops/favorites/favorites.component.ts`
 ```ts
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, AsyncPipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FavoritesService } from '../favorites.service';
 
 @Component({
   selector: 'app-favorites',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AsyncPipe],
   templateUrl: './favorites.component.html',
   styleUrl: './favorites.component.css',
 })
@@ -3808,13 +3808,15 @@ npm install @ngrx/store@19 @ngrx/effects@19 @ngrx/store-devtools@19
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
 
-bootstrapApplication(AppComponent, {
+export const appConfig: ApplicationConfig = {
   providers: [
+    // other providers...
+    // ...
     provideStore(),       // Root store
     provideEffects(),     // Root effects
     // Feature stores/effects via provideState/provideEffects
   ]
-});
+};
 ```
 - Create a file `app/workshops/favorites/favorites.actions.ts` to define the actions
 

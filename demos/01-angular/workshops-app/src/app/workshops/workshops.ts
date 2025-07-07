@@ -37,4 +37,12 @@ export class WorkshopsService {
   deleteWorkshopById(workshopId: number) {
     return this.http.delete<void>(`${this.apiUrl}/workshops/${workshopId}`);
   }
+
+  postWorkshop(workshop: Omit<IWorkshop, 'id'>) {
+    return this.http.post<IWorkshop>(`${this.apiUrl}/workshops`, workshop, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+}
 }

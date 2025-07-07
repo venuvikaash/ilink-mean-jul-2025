@@ -187,6 +187,26 @@
         "online": true
       },
       "imageUrl": "https://camo.githubusercontent.com/055e8995558e293e52e92d7c93b9ec49a9ea6c78/68747470733a2f2f63646e2e7261776769742e636f6d2f7a656b652f6a6176617363726970742d79656c6c6f772f6d61737465722f6c6f676f2e737667"
+    },
+    {
+      "name": "Some workshop",
+      "category": "backend",
+      "description": "Some description",
+      "startDate": "2025-07-07",
+      "endDate": "2025-07-10",
+      "time": "12:00 - 2:00 PM",
+      "location": {
+        "address": "Some adress",
+        "city": "",
+        "state": ""
+      },
+      "modes": {
+        "inPerson": true,
+        "online": false
+      },
+      "imageUrl": "https://someyrl.com/somimage",
+      "createdDate": "Jul 07, 2025",
+      "id": 13
     }
   ],
   "sessions": [

@@ -11,6 +11,7 @@
 - Step 35: Complete it by enabling submission of the new session data to the backend
 - Step 36: Using Form Builder
 - Step 37: Setting up custom and cross-field validations
+- Step 41: Updating (Editing) workshop
 
 
 ## Hosted backends
