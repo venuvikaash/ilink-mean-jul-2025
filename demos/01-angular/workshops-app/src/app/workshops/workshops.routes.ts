@@ -5,6 +5,7 @@ import { Favorites } from './favorites/favorites';
 import { WorkshopDetails } from './workshop-details/workshop-details';
 import { SessionsList } from './workshop-details/sessions-list/sessions-list';
 import { AddSession } from './workshop-details/add-session/add-session';
+import { validateWorkshopGuard } from './validate-workshop-guard';
 
 export const routes: Routes = [
     {
@@ -26,6 +27,7 @@ export const routes: Routes = [
 
         path: 'workshops/:id',
         component: WorkshopDetails,
+        canActivate: [ validateWorkshopGuard ],
         title: 'Workshop Details',
         children: [
             {
