@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            // import { Observable } from 'rxjs';
+            const ajax = rxjs.ajax.ajax;
+
+            ajax(`https://workshops-server.onrender.com/workshop`).subscribe({
+                next( res ) {
+                    console.log( res.status );
+                    console.log( res.response );
+                },
+                error( err ) {
+                    console.log( err.status, err.message );
+
+                    if( err.status >= 400 && err.status < 500 ) {
+                        console.log( 'client side error' );
+                    } else {
+                        console.log( 'network issue' );
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
