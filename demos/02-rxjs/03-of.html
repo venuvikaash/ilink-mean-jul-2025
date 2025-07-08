@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            // import { Observable } from 'rxjs';
+            const of = rxjs.of;
+
+            const obs$ = of(10, 20, 30);
+
+            obs$.subscribe({
+                next: (num) => {
+                    console.log( num );
+                }
+            });
+        </script>
+    </body>
+</html>

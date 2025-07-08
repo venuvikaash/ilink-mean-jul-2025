@@ -22,7 +22,7 @@
                 () => {}, // error
                 () => {
                     console.log( 'completed' );
-                }, // complete
+                }, // complete -> does not fire on unsubscription, as callback is not called after unsubscription
             );
 
             // we can unsubscribe from the Observable when we are no more interested in the events
