@@ -1,0 +1,1109 @@
+# RxJS - Lab Guide
+
+## Step 1: Observable and Observer
+```html
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script> -->
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            // an "Observable" represents a sequence of events over time
+
+            // Subscriber function is used to define an Observable
+            // When we "subscribe" to an Observable it will initiate an action
+            // observer has 3 methods - next(), error() and complete()
+            function getDateObservable( interval, repeat = 10 ) {
+                return new rxjs.Observable(observer => {
+                    let count = 0, id;
+
+                    id = setInterval(() => {
+                        count++;
+                        observer.next( new Date() );
+
+                        if( count === repeat ) {
+                            console.log('completing');
+                            observer.complete(); // results in unsubscription
+                        }
+                    }, interval * 1000);
+
+                    return {
+                        unsubscribe() {
+                            console.log( 'unsubscribe');
+                            clearInterval( id );
+                        }
+                    };
+                });
+            }
+
+            class DateObserver {
+                next( date ) {
+                    console.log( date );
+                }
+
+                error( err ) {
+                    console.log( err.message );
+                }
+
+                complete() {
+                    console.log( 'no more events' );
+                }
+            }
+
+            // subscribe is passed an "observer" object - it should have 3 methods - next, error, complete
+            // const subscription = getDateObservable( 3, 7 ).subscribe( new DateObserver() );
+            const subscription = getDateObservable( 1, 15 ).subscribe(
+                ( date ) => { console.log( date )}, // next
+                () => {}, // error
+                () => { console.log( 'no more events' ); } // complete
+            );
+
+            // setTimeout(() => {
+            //     subscription.unsubscribe();
+            // }, 10000);
+        </script>
+    </body>
+</html>
+```
+### Concepts Covered
+* **Creating a custom Observable** using the `new Observable()` constructor
+* **Emitting values over time** using `setInterval`
+* **Observer methods**: `next()`, `error()`, and `complete()`
+* **Subscription management** with `unsubscribe()`
+* **Passing an observer object vs separate callbacks** to `subscribe()`
+
+### Description:
+
+In this example, we manually create an `Observable` using the constructor `new rxjs.Observable()`. The subscriber function inside defines the logic for emitting values. It uses `setInterval` to emit the current `Date` object every `interval` seconds.
+
+* The observable completes automatically after a given number of emissions (`repeat`), calling `observer.complete()`.
+* We see two ways to subscribe:
+  1. Passing an **observer object** with `next()`, `error()`, and `complete()` methods.
+  2. Passing **separate callbacks** for each handler function.
+
+Unsubscribing clears the interval to prevent memory leaks, and logs `"unsubscribe"` to confirm the teardown.
+
+### Key Takeaways:
+* An **Observable represents a stream of values over time**.
+* The **subscription initiates the execution**, and cleanup logic can be returned from the subscriber function.
+* Observables can emit multiple values, and complete or error out.
+* Proper **resource cleanup** is important and handled through `unsubscribe()`.
+
+## Step 2: Observable creation method - `interval()` for an infinite sequence of timed events
+```js
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const sequence$ = rxjs.interval( 1000 );
+
+            const subscription = sequence$.subscribe(evt  => {
+                console.log( evt );
+            });
+
+            setTimeout(() => {
+                subscription.unsubscribe();
+            }, 5000);
+        </script>
+    </body>
+</html>
+```
+
+### Concepts Covered:
+
+* Using **`rxjs.interval()`** to create an Observable that emits sequential integers
+* **Subscribing** to an Observable to consume values
+* **Unsubscribing** after a set time to stop the emissions
+
+### Description:
+
+In this example, the `interval()` function is used to create a cold Observable (`sequence$`) that emits increasing numbers (0, 1, 2, …) at a **fixed time interval of 1 second**.
+
+* `rxjs.interval(1000)` creates an Observable that emits values starting from `0`, incrementing by 1 every 1000 milliseconds.
+* When you **subscribe**, it starts emitting values immediately.
+* The subscription is **manually terminated after 5 seconds** using `setTimeout(() => subscription.unsubscribe(), 5000)`.
+
+### Key Takeaways:
+
+* **`interval()`** is a **creation operator** that emits an infinite stream of numbers at fixed intervals.
+* The emitted values are useful for polling, animations, timers, etc.
+* Always **unsubscribe from long-lived or infinite Observables** to prevent memory leaks or unnecessary processing.
+
+## Step 3: Observable creation method - `of()` for a sequence of immediately and synchronously emitted events
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const sequence$ = rxjs.of( 1, 2, 3 );
+
+            const subscription = sequence$.subscribe({
+                next( evt ) {
+                    console.log( evt );
+                },
+                complete() {
+                    console.log( 'completed' );
+                }
+            });
+        </script>
+    </body>
+</html>
+```
+### Description:
+This example uses `of(1, 2, 3)` to create a **cold Observable** that emits the values `1`, `2`, and `3` **synchronously**, then completes. The observer logs each value and the completion message.
+
+### Key Takeaway:
+`of()` emits values **in sequence** and completes immediately — useful for static or demo data.
+
+## Step 4: Observable creation method - `fromEvent()` for a sequence of events based off of events fired by DOM nodes
+`fromEvent()` is `** used to create an Observable from DOM events. `fromEvent()` listens for `mousemove` on the element. Each event logs cursor coordinates. When the cursor enters the red "forbidden" area (top-left 40×40px), the Observable is unsubscribed to stop further tracking.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <style>
+            body {
+                margin: 0;
+            }
+
+            #my-element {
+                position: relative;
+                box-sizing: border-box;
+                width: 100%;
+                height: 100vh;
+                border: 1px solid crimson;
+            }
+
+            #forbidden {
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                width: 40px;
+                height: 40px;
+                background-color: crimson;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="my-element">
+            <div id="forbidden"></div>
+        </div>
+
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const el = document.getElementById('my-element');
+            const mouseMoves$ = rxjs.fromEvent(el, 'mousemove');
+
+            const subscription = mouseMoves$.subscribe(evt => {
+                console.log(`Coords: ${evt.clientX} X ${evt.clientY}`);
+
+                if (evt.clientX < 40 && evt.clientY < 40) {
+                    subscription.unsubscribe();
+                }
+            });
+        </script>
+    </body>
+</html>
+```
+
+## Step 5: Making HTTP Requests with `ajax()`
+We perform an HTTP GET request to fetch user data using `ajax()`. It logs the response on success and uses a custom error handler to distinguish between client-side and network errors.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const apiData$ = rxjs.ajax.ajax(`https://jsonplaceholder.typicode.com/users?username=Bret`);
+
+            function handleError( error ) {
+                console.log( error.status, error.message );
+
+                if( error.status >= 400 ) {
+                    console.log( 'client side error' );
+                } else {
+                    console.log( 'network issue' );
+                }
+            }
+
+            apiData$.subscribe({
+                next( res ) {
+                    console.log( res.status, res.response );
+                },
+                error: handleError
+            });
+        </script>
+    </body>
+</html>
+```
+
+## Step 6: Sequential Execution with `concat()`
+`concat()` is used to run Observables __sequentially__. Emissions from the second Observable start only after the first completes. Two date-emitting Observables are created with different intervals. `concat()` combines them into a single Observable that runs `observable1$` first, then `observable2$` only after the first completes. Used for **order-preserving execution** of multiple streams.
+
+```html
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            function getDateObservable( interval, obsId, repeat = 10 ) {
+                return new rxjs.Observable(observer => {
+                    let count = 0, id;
+
+                    id = setInterval(() => {
+                        count++;
+                        observer.next( obsId + ' ' + new Date() );
+
+                        if( count === repeat ) {
+                            observer.complete();
+                        }
+                    }, interval * 1000);
+
+                    return {
+                        unsubscribe() {
+                            clearInterval( id );
+                        }
+                    };
+                });
+            }
+
+            class DateObserver {
+                next( date ) {
+                    console.log( date );
+                }
+
+                error() {
+
+                }
+
+                complete() {
+                    console.log( 'no more events' );
+                }
+            }
+
+            const observable1$ = getDateObservable( 2, 'observable1$', 7 );
+            const observable2$ = getDateObservable( 1, 'observable2$', 7 );
+
+            const concatenatedObservable$ = rxjs.concat( observable1$, observable2$ );
+
+            concatenatedObservable$.subscribe( new DateObserver() );
+        </script>
+    </body>
+</html>
+```
+
+## Step 7: Parallel Emissions with `merge()`
+Multiple Observables are combined using **`merge()`**. Emissions from all sources are **interleaved** based on their timing. Observables run **concurrently**, not sequentially (unlike `concat()`). This example merges two time-based Observables (`observable1$` and `observable2$`) into a single stream. Both start immediately and emit values in parallel. Useful for handling multiple real-time sources simultaneously.
+
+```html
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            function getDateObservable( interval, obsId, repeat = 10 ) {
+                return new rxjs.Observable(observer => {
+                    let count = 0, id;
+
+                    id = setInterval(() => {
+                        count++;
+                        observer.next( obsId + ' ' + new Date() );
+
+                        if( count === repeat ) {
+                            observer.complete(); // results in unsubscription
+                        }
+                    }, interval * 1000);
+
+                    return {
+                        unsubscribe() {
+                            console.log( 'unsubscribe' );
+                            clearInterval( id );
+                        }
+                    };
+                });
+            }
+
+            class DateObserver {
+                next( date ) {
+                    console.log( date );
+                }
+
+                error() {
+
+                }
+
+                complete() {
+                    console.log( 'no more events' );
+                }
+            }
+
+            const observable1$ = getDateObservable( 2, 'observable1$', 7 );
+            const observable2$ = getDateObservable( 1, 'observable2$', 7 );
+
+            const mergedObservable$ = rxjs.merge( observable1$, observable2$ );
+
+            mergedObservable$.subscribe( new DateObserver() );
+        </script>
+    </body>
+</html>
+```
+
+## Step 8: Limiting Emissions with `take()`
+_ We can use **`take(n)`** to limit the number of emissions from a source Observable. It auto-completes after `n` values are emitted. This example uses `take(3)` to emit only the **first 3 values** from the source Observable. After emitting `1, 2, 3`, it completes automatically. Ideal for sampling or truncating streams.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const of = rxjs.of;
+            const take = rxjs.operators.take;
+
+            const sequence$ = of( 1, 2, 3, 4, 5, 6, 7, 8 );
+            const evenSequence$ = take( 3 )( sequence$ );
+
+            const subscription = evenSequence$.subscribe({
+                next( evt ) {
+                    console.log( evt );
+                },
+                complete() {
+                    console.log( 'completed' );
+                }
+            });
+        </script>
+    </body>
+</html>
+```
+
+## Step 9: Filtering Stream Values with `filter()`
+We use **`filter()`** to allow only values matching a condition. It enables selective emission based on a predicate. This example filters the source stream to emit only **even numbers**. `filter(x => x % 2 === 0)` ensures values like `2, 4, 6, 8` are passed through. Commonly used to reduce noise in data streams.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const of = rxjs.of;
+            const filter = rxjs.operators.filter;
+
+            const sequence$ = of( 1, 2, 3, 4, 5, 6, 7, 8 );
+            const evenSequence$ = filter( x => x % 2 === 0 )( sequence$ );
+
+            const subscription = evenSequence$.subscribe({
+                next( evt ) {
+                    console.log( evt );
+                },
+                complete() {
+                    console.log( 'completed' );
+                }
+            });
+        </script>
+    </body>
+</html>
+```
+
+## Step 10: Transforming Values with `map()`
+We use **`map()`** to transform each emitted value by applying a function to modify stream data. This example multiplies each value in the stream by 2 using `map(x => 2 * x)`, converting `1, 2, 3, ...` into `2, 4, 6, ...`. `map()` is a key operator for transforming data in RxJS streams.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            // EXERCISE: Explore use of tap() to log values before and after an event is emitted
+            const of = rxjs.of;
+            const map = rxjs.operators.map;
+
+            const sequence$ = of( 1, 2, 3, 4, 5, 6, 7, 8 );
+            const evenSequence$ = map( x => 2 * x )( sequence$ );
+
+            const subscription = evenSequence$.subscribe({
+                next( evt ) {
+                    console.log( evt );
+                },
+                complete() {
+                    console.log( 'completed' );
+                }
+            });
+        </script>
+    </body>
+</html>
+```
+
+## Step 11: Handling Errors with `catchError()`
+
+### Concepts Covered:
+
+* Throwing errors inside a `map()` operator
+* Using **`catchError()`** for custom error handling or fallback streams
+* Recovering from or transforming stream errors
+
+- This example demonstrates how to handle errors in a pipeline:
+    * The first stream throws an error on encountering an **odd number**, and `catchError()` rethrows a custom error.
+    * The second stream throws on **even numbers**, but `catchError()` recovers by returning a fallback Observable.  
+
+Useful for **graceful degradation**, fallback data, or error logging.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const of = rxjs.of;
+            const map = rxjs.operators.map;
+            const catchError = rxjs.operators.catchError;
+
+            const sequenceEvens$ = of( 2, 4, 6, 7, 8 );
+
+            const noOddsSequence$ = map( x => {
+                if( x % 2 === 1 ) {
+                    throw new Error( 'Invalid number' );
+                }
+
+                return x;
+            })( sequenceEvens$ );
+
+            const noOddsSequenceWithErrorHandling$ = catchError( error => {
+                if( error.message === 'Invalid number' ) {
+                    throw new Error( 'Odd number encountered' );
+                }
+            })( noOddsSequence$ );
+
+            const subscription1 = noOddsSequenceWithErrorHandling$.subscribe({
+                next( evt ) {
+                    console.log( evt );
+                },
+                complete() {
+                    console.info( 'completed noOddsSequence' );
+                },
+                error( error ) {
+                    console.error( 'error : ' + error.message );
+                }
+            });
+
+            const sequenceOdds$ = of( 1, 3, 5, 6, 7 );
+
+            const noEvensSequence$ = map( x => {
+                if( x % 2 === 0 ) {
+                    throw new Error( 'Invalid number' );
+                }
+
+                return x;
+            })( sequenceOdds$ );
+
+            const noEvensSequenceWithErrorHandling$ = catchError( error => {
+                if( error.message === 'Invalid number' ) {
+                    return of( 7, 5, 3, 1 );
+                }
+            })( noEvensSequence$ );
+
+            const subscription2 = noEvensSequenceWithErrorHandling$.subscribe({
+                next( evt ) {
+                    console.log( evt );
+                },
+                complete() {
+                    console.info( 'completed noEvensSequence' );
+                },
+                error( error ) {
+                    console.error( error.message );
+                }
+            });
+        </script>
+    </body>
+</html>
+```
+
+## Step 12: Sequential Mapping with `concatMap()`
+
+### Concepts Covered:
+
+* Use of **`concatMap()`** — a **higher-order mapping operator**
+* Queues emissions from the outer Observable and processes them **one at a time**
+* Returns an **inner Observable** for each outer value
+
+### Description:
+
+This example uses `concatMap()` to map each value from `x$` to a new inner Observable `y$`. Each `x` waits until its corresponding inner `y$` completes before the next `x` is processed.
+
+* The function inside `concatMap()` returns a new **Observable**, not a value — this is key to how it operates.
+* `concatMap()` **queues** these inner Observables and subscribes to them **sequentially**.
+
+This ensures **order is preserved**, unlike `mergeMap()` which runs all inner Observables concurrently.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const interval = rxjs.interval;
+            const take = rxjs.operators.take;
+            const map = rxjs.operators.map;
+            const concatMap = rxjs.operators.concatMap;
+
+            const x$ = take( 3 )( interval( 1000 ) );
+            const y$ = take( 3 )( interval( 1000 ) );
+
+            const xy$ = concatMap( x => {
+                console.log('x = ' + x );
+                // return map( y => `(${x}, ${y})` )( y$ );
+                return y$;
+            })( x$ );
+            xy$.subscribe( xy => console.log( xy ) );
+        </script>
+    </body>
+</html>
+```
+
+## Step 13: Concurrent Mapping with `mergeMap()`
+
+### Concepts Covered:
+
+* Use of **`mergeMap()`**, a **higher-order mapping operator**
+* Maps each value from the outer Observable (`x$`) to an **inner Observable (`y$`)**
+* All inner Observables are **subscribed to concurrently** (no queuing)
+
+### Description:
+
+This example emits values from `x$`, and for each `x`, maps it to `y$` using `mergeMap()`. Each `y$` runs **immediately and in parallel**, without waiting for others to complete.
+
+* The function passed to `mergeMap()` **returns an Observable**, not a direct value.
+* Emitted results are combined as `{ x, y }` objects.
+
+Ideal when inner Observables can run **simultaneously**, such as parallel API calls or events.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const interval = rxjs.interval;
+            const take = rxjs.operators.take;
+            const map = rxjs.operators.map;
+            const mergeMap = rxjs.operators.mergeMap;
+
+            const x$ = take( 3 )( interval( 1000 ) );
+            const y$ = take( 3 )( interval( 1000 ) );
+
+            const xy$ = mergeMap( x => map( y => ( { x, y } ) )( y$ ) )( x$ );
+            xy$.subscribe( xy => console.log( xy ) );
+        </script>
+    </body>
+</html>
+```
+
+## Step 14: Motivation for Using `pipe()` to Compose Operators
+
+### Concepts Covered:
+
+* Function composition with and without `pipe()`
+* Reusability and readability through `pipe()`
+* `pipe()` as a clean way to sequence RxJS operators
+
+---
+
+### Description:
+
+The **first example** shows nested calls:
+
+```ts
+map(...)(filter(...)(obs$))
+```
+
+While functional, it quickly becomes unreadable with more operators.
+
+```html
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const of = rxjs.of;
+            const filter = rxjs.operators.filter;
+            const map = rxjs.operators.map;
+
+            const obs$ = of( 1, 2, 3, 4, 5, 6, 7 );
+
+            map( x => x * x )( filter( x => x % 2 !== 0 )( obs$ ) ).subscribe( x => console.log( x ) );
+        </script>
+    </body>
+</html>
+```
+
+The **second example** uses **`pipe()`** to compose both **regular functions** (like `double`, `square`) and **RxJS operators**, resulting in:
+
+```ts
+obs$.pipe(
+  filter(...),
+  map(...)
+)
+```
+
+This approach:
+
+* Improves **readability**
+* Enables defining **reusable operator chains** (like `squareOfOdds`)
+* Mirrors how RxJS handles operator composition internally
+
+```html
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const of = rxjs.of;
+            const filter = rxjs.operators.filter;
+            const map = rxjs.operators.map;
+
+            const pipe = rxjs.pipe;
+
+            const double = x => x + x;
+            const square = x => x * x;
+
+            const doubleAndSquare = pipe( double, square );
+            console.log( doubleAndSquare( 3 ) ); // 36
+
+            const obs$ = of( 1, 2, 3, 4, 5, 6, 7 );
+
+            // a recipe using rxjs operators
+            const squareOfOdds = pipe(
+                filter( x => x % 2 !== 0 ),
+                map( x => x * x )
+            );
+
+            squareOfOdds( obs$ ).subscribe( x => console.log( x ) );
+        </script>
+    </body>
+</html>
+```
+
+### Takeaway:
+
+Using `pipe()` makes complex stream transformations **clearer**, **more maintainable**, and **easier to reuse**.
+
+
+## Step 15: Handling HTTP Errors with `retry()` and `catchError()`
+
+### Concepts Covered:
+
+* Making HTTP requests using **`ajax()`**
+* Automatically retrying failed requests with **`retry()`**
+* Catching and transforming errors using **`catchError()`**
+* Composing logic cleanly with **`pipe()`**
+
+### Description:
+
+This example defines a function `getUsersWithName(name)` that:
+
+1. Sends a GET request using `ajax()`
+2. **Retries up to 3 times** if the request fails
+3. Maps the successful response to the `response` body
+4. **Catches errors** using `catchError()` and throws a wrapped error with a custom message
+
+On failure, it distinguishes **client-side errors** (status ≥ 400) from **network issues**, and reports a generic error while preserving the original error.
+
+### Takeaway:
+
+`retry()` and `catchError()` are essential tools for making HTTP requests resilient and user-friendly. Composing them in a `pipe()` ensures clean and declarative error-handling logic.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const ajax = rxjs.ajax.ajax;
+
+            const retry = rxjs.operators.retry;
+            const catchError = rxjs.operators.catchError;
+            const map = rxjs.operators.map;
+
+            function getUsersWithName( name ) {
+                return ajax( `https://jsonplaceholder.typicode.com/users?username=${name}` ).pipe(
+                    retry( 3 ),
+                    map( res => res.response ),
+                    catchError( handleError )
+                );
+            }
+
+            function handleError( error ) {
+                console.log( error );
+
+                if( error.status >= 400 ) {
+                    console.log( 'client side error' );
+                } else {
+                    console.log( 'network issue' );
+                }
+
+                const wrapperError = new Error( 'Something went wrong when fetching data from the server' );
+                wrapperError.originalError = error;
+                throw wrapperError;
+            }
+
+            getUsersWithName( 'Bret' ).subscribe(
+                users => console.log( users ),
+                err => console.log( err.message )
+            );
+        </script>
+    </body>
+</html>
+```
+
+## Step 16: Chaining Dependent HTTP Calls with `switchMap()`
+
+### Concepts Covered:
+
+* Making **chained HTTP requests** using `ajax()`
+* Using **`switchMap()`** to flatten and switch to new inner Observables
+* **Retrying** failed requests and **catching errors**
+* Mapping final results with `map()`
+
+### Description:
+
+This example defines `getCommentsForFirstUserWithName(name)`, which performs three dependent HTTP requests:
+
+1. Fetches the user by username.
+2. Uses `switchMap()` to get that user's posts.
+3. Uses another `switchMap()` to get comments for the first post.
+4. Maps the response to extract the comments.
+5. Retries the initial request up to 3 times if needed.
+6. Handles all errors via `catchError()`.
+
+Each `switchMap()` ensures that if a new emission comes in, the previous inner request (if still pending) is **cancelled**, making this ideal for **cancelable, sequential fetches**.
+
+### Takeaway:
+
+Use `switchMap()` for **nested, dependent HTTP requests** where only the latest result matters. This pattern avoids deeply nested subscriptions and keeps error handling centralized and clean.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const ajax = rxjs.ajax.ajax;
+
+            const retry = rxjs.operators.retry;
+            const catchError = rxjs.operators.catchError;
+            const map = rxjs.operators.map;
+
+            const mergeMap = rxjs.operators.mergeMap;
+            const concatMap = rxjs.operators.concatMap;
+            const switchMap = rxjs.operators.switchMap;
+
+            function getCommentsForFirstUserWithName( name ) {
+                return ajax( `https://jsonplaceholder.typicode.com/users?username=${name}` ).pipe(
+                    retry( 3 ),
+                    switchMap( res => ajax( `https://jsonplaceholder.typicode.com/users/${res.response[0].id}/posts` ) ),
+                    switchMap( res => ajax( `https://jsonplaceholder.typicode.com/comments?postId=${res.response[0].id}` ) ),
+                    map( res => res.response ),
+                    catchError( handleError )
+                );
+            }
+
+            function handleError( error ) {
+                console.log( error );
+
+                if( error.status >= 400 ) {
+                    console.log( 'client side error' );
+                } else {
+                    console.log( 'network issue' );
+                }
+
+                const wrapperError = new Error( 'Something went wrong when fetching data from the server' );
+                wrapperError.originalError = error;
+                throw wrapperError;
+            }
+
+            getCommentsForFirstUserWithName( 'Samantha' ).subscribe(
+                comments => console.log( comments ),
+                err => console.log( err.message )
+            );
+        </script>
+    </body>
+</html>
+```
+
+## Step 17: Parallel API Calls with `forkJoin()`
+
+### Concepts Covered:
+
+* Executing **parallel HTTP requests** using **`forkJoin()`**
+* Reusing a function that returns an Observable (`getCommentsForFirstUserWithName`)
+* Handling **multiple inner streams** and combining their final results
+* Preserving retry and error handling for each stream individually
+
+### Description:
+
+This example defines two functions:
+
+* `getCommentsForFirstUserWithName(name)` performs a **chain of dependent API calls** (user → posts → comments).
+* `getCommentsForFirstUsersWithNames(...names)` maps each name to its respective Observable and uses **`forkJoin()`** to execute all in **parallel**.
+
+Once all requests complete, `forkJoin()` emits an array of results (`commentsLists`). If any Observable errors, the entire result errors out (handled by `catchError` within each Observable).
+
+### Takeaway:
+
+Use `forkJoin()` to run **multiple observables concurrently** and collect **all results once every stream completes**. Ideal for **batch requests** or **independent parallel fetches** that should resolve together.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const ajax = rxjs.ajax.ajax;
+
+            const retry = rxjs.operators.retry;
+            const catchError = rxjs.operators.catchError;
+            const map = rxjs.operators.map;
+
+            const switchMap = rxjs.operators.switchMap;
+            const forkJoin = rxjs.forkJoin;
+
+            function getCommentsForFirstUserWithName( name ) {
+                return ajax( `https://jsonplaceholder.typicode.com/users?username=${name}` ).pipe(
+                    retry( 3 ),
+                    switchMap( res => ajax( `https://jsonplaceholder.typicode.com/users/${res.response[0].id}/posts` ) ),
+                    switchMap( res => ajax( `https://jsonplaceholder.typicode.com/comments?postId=${res.response[0].id}` ) ),
+                    map( res => res.response ),
+                    catchError( handleError )
+                );
+            }
+
+            function getCommentsForFirstUsersWithNames( ...names ) {
+                const comments$Array = names.map( getCommentsForFirstUserWithName );
+                return forkJoin( comments$Array );
+            }
+
+            function handleError( error ) {
+                console.log( error );
+
+                if( error.status >= 400 ) {
+                    console.log( 'client side error' );
+                } else {
+                    console.log( 'network issue' );
+                }
+
+                const wrapperError = new Error( 'Something went wrong when fetching data from the server' );
+                wrapperError.originalError = error;
+                throw wrapperError;
+            }
+
+            getCommentsForFirstUsersWithNames( 'Bret', 'Samantha' ).subscribe(
+                commentsLists => console.log( commentsLists ),
+                err => console.log( err.message )
+            );
+        </script>
+    </body>
+</html>
+```
+
+## Step 18: Debounced Search with `fromEvent()`, `debounceTime()` and `switchMap()`
+
+### Concepts Covered:
+
+* Capturing user input as a stream using **`fromEvent()`**
+* Reducing noisy emissions using **`debounceTime()`**
+* Cancelling stale HTTP requests with **`switchMap()`**
+* Tapping into the stream with **`tap()`** for side-effects (e.g., logging)
+
+### Description:
+
+This example demonstrates how to build a **type-ahead search box**:
+
+1. `fromEvent()` listens for input events.
+2. `map()` extracts the search term.
+3. `debounceTime(500)` waits until 500ms of inactivity before proceeding.
+4. `switchMap()` makes the AJAX request — **cancelling any prior request** if a new one starts.
+5. `tap()` logs each keystroke without affecting the stream.
+
+The final subscription simulates an action like showing suggestions.
+
+### Takeaway:
+
+This pattern is ideal for search boxes — **efficient**, **responsive**, and **avoids race conditions** by ensuring only the latest query triggers a request.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <input type="search" id="search" />
+        Making an ajax call with <span id="input"></span>
+
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            // import { fromEvent } from 'rxjs';
+            const fromEvent = rxjs.fromEvent;
+            const debounceTime = rxjs.operators.debounceTime;
+            const switchMap = rxjs.operators.switchMap;
+            const map = rxjs.operators.map;
+            const tap = rxjs.operators.tap;
+            const ajax = rxjs.ajax.ajax;
+
+            const searchBox = document.getElementById('search');
+
+            // NOTE: switchMap() cancels the previous HTTP request if a new one starts before the previous finishes
+            const searchInputAfterWait$ = fromEvent(searchBox, 'input').pipe(
+                map(event => event.target.value),
+                tap(event => console.log(event)),
+                debounceTime(500),
+                switchMap((event) => {
+                    return ajax.getJSON(`http://dummysearch.com/api/search?q=${event}`);
+                })
+            );
+
+            searchInputAfterWait$.subscribe(
+                ( event ) => {
+                    const value = event.target.value;
+                    console.log( `we made an ajax call now to fetch the suggestions for ${value}` );
+                }
+            );
+        </script>
+    </body>
+</html>
+```
+
+## Step 19: 
+
+```html
+```
+
+## Step 20: 
+
+```html
+```
+
+## Step 21: 
+
+```html
+```
+
+## Step 22: 
+
+```html
+```
+
