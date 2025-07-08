@@ -15,4 +15,16 @@
     view the list of sessions in a workshop, and also add a new session for a
     workshop.
   </p>
+
+  <!-- Add this -->
+  <app-call-to-action>
+    <ng-template #cta>
+      <button class="btn btn-primary">📅 Book Your Workshop Slot</button>
+    </ng-template>
+  </app-call-to-action>
+
+  <app-call-to-action></app-call-to-action>
+
+  <!-- Add this at the end -->
+  <ng-container #adHost></ng-container>
 </section>

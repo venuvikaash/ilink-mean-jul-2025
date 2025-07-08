@@ -57,8 +57,14 @@ export class SessionsList implements OnInit {
             next: (updatedSession) => {
                 // Instead of mutating the object directly, do so immutably (Note - this is crucial!)
 
+                // we have updated a property on this session object
+                // the session object is the same object in memory
+                // the this.sessions array is the same in memory
+                // But we have MUTATED the existing object, array
                 // session.upvoteCount = updatedSession.upvoteCount;
 
+                // a new object is present in the array for the session which has been updated. rest all session objects are the same as before (therefore they will not be checked for change)
+                // With OnPush strategy this will trigger a Change Detection (CD), as `session` is an input for app-item component. Therefore the UI for app-item will be updated
                 this.sessions = this.sessions.map(s =>
                     s.id === updatedSession.id ? updatedSession : s
                 );

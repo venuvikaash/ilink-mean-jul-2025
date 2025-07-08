@@ -4399,7 +4399,7 @@ export const parentRoutes: Routes = [
     component: SessionsListComponent,
   },
   {
-    path: 'add',
+    path: 'add-session',
     component: AddSessionComponent,
   },
 ];
