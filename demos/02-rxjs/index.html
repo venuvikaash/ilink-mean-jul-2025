@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            console.log( rxjs );
+
+            // import { Observable } from 'rxjs';
+            const Observable = rxjs.Observable;
+
+
+            // Observable -> ___ 0 ___ 1 ___ 2 ____ 3 ____ ...
+            // An Observable starts of an operation
+            // For example this.http.get() returns an Observable which starts off a backend call
+
+            // One part of the app..
+            // IMPORTANT: When you create the Observable the operation does not start off
+            const MAX_REPEAT = 20;
+
+            function getDateObservable( interval, repeat = 10 ) {
+                return new Observable(observer => {
+                    let count = 0, id;
+
+                    setInterval(
+                        () => {
+                            ++count;
+                            observer.next(new Date());
+
+                            if( count > MAX_REPEAT ) {
+                                observer.error( new Error( 'Exceeded maximum repeat' ) );
+                            }
+
+                            if ( count === repeat ) {
+                                observer.complete();
+                            }
+                        },
+                        interval
+                    );
+
+                    return {
+                        unsubscribe() {
+                            console.log( 'unsubscribe');
+                            clearInterval( id );
+                        }
+                    };
+                });
+            };
+
+            const date$ = getDateObservable( 1000, 25 );
+
+            const dateObserver = {
+                // mandatory - called when Observable emits an event
+                next: (data) => {
+                    console.log( data );
+                },
+                error: (err) => {
+                    console.log( err.message );
+                },
+                complete: () => {
+                    console.log( 'The Observable has completed the operation it started' );
+                }
+            };
+
+            // In another part of the app...
+            // IMPORTANT: The operations starts off wehn you subscribe to the Observable
+            date$.subscribe(
+                dateObserver
+            );
+        </script>
+    </body>
+</html>
