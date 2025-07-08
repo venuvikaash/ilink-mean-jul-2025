@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            // import { Observable } from 'rxjs';
+            const interval = rxjs.interval;
+
+            const obs$ = interval( 1000 );
+
+            // Passing Observer object is recommended, but you can pass (next, error, complete separately)
+            const obsSubscription = obs$.subscribe(
+                (num) => {
+                    console.log( num );
+                }, // next
+                () => {}, // error
+                () => {
+                    console.log( 'completed' );
+                }, // complete
+            );
+
+            // we can unsubscribe from the Observable when we are no more interested in the events
+            setTimeout(
+                () => obsSubscription.unsubscribe(),
+                5000
+            );
+        </script>
+    </body>
+</html>

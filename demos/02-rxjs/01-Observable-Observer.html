@@ -29,12 +29,12 @@
 
                     setInterval(
                         () => {
-                            ++count;
-                            observer.next(new Date());
-
-                            if( count > MAX_REPEAT ) {
+                            if( count + 1 >= MAX_REPEAT ) {
                                 observer.error( new Error( 'Exceeded maximum repeat' ) );
                             }
+
+                            ++count;
+                            observer.next(new Date());
 
                             if ( count === repeat ) {
                                 observer.complete();
@@ -43,6 +43,7 @@
                         interval
                     );
 
+                    // Subscription object is returned (it will have unsubscribe method)
                     return {
                         unsubscribe() {
                             console.log( 'unsubscribe');
@@ -68,7 +69,7 @@
             };
 
             // In another part of the app...
-            // IMPORTANT: The operations starts off wehn you subscribe to the Observable
+            // IMPORTANT: The operation starts off wehn you subscribe to the Observable
             date$.subscribe(
                 dateObserver
             );
