@@ -59,3 +59,19 @@
 - VotingWidget component that reinforces @Input(), @Output. PUT request handling.
 - Using environment files for development / production configuration
 - Toast messages through a shared service
+
+### Day 5: Form handling
+- Deleting a workshop - DELETE HTTP request
+- Template-driven forms - FormsModule, validation, template reference variables, NgModel instance properties (value, errors, valid, dirty, touched), NgForm, ngSubmit event
+- Reactive forms - ReactiveFormsModule, validation, FormGroup, FormControl, formGroup, formControlName, Validators, Cross-field / custom validators, FormBuilder
+- Handling POST HTTP request to add a session to the backend
+
+### Day 6: Miscellaneous topics in Angular
+- Form to add a workshop
+- Favorites service to share list of favorites in the app
+- NgRx overview (Store, slice, actions, reducer, selector) and a store to share list of favorites in the app
+- Content projection
+- HTTP interceptor
+- Adding navigation guards
+
+

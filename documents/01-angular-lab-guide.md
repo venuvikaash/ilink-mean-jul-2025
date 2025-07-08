@@ -4147,10 +4147,6 @@ This structure clearly separates header, body, and footer, making each section c
 </ng-content>
 ```
 
-Yes! Based on **Step 46** in your document, which explains content projection using `<ng-content>`, here’s a new step that demonstrates how to use `<ng-template>` with `@ContentChild` and `ngTemplateOutlet` for **manual or conditional content projection**.
-
----
-
 ## Step 47: Project content from the parent using `<ng-template>` and render it in the child using `ngTemplateOutlet`
 - In this step we shall see an alternative to passing content to the projected from parent to child, that allows conditional rendering of the passed content, if required at a later point in time in the child as well.
 - We define a call to action component that allows the parent to pass a custom template for a **call-to-action section**, and render it in the child component manually. Passing `ng-template` from the parent allows content to be projected conditionally and at a later point in time in the child component.
