@@ -4147,7 +4147,98 @@ This structure clearly separates header, body, and footer, making each section c
 </ng-content>
 ```
 
-## Step 47: Understanding HTTP Interceptor
+Yes! Based on **Step 46** in your document, which explains content projection using `<ng-content>`, here’s a new step that demonstrates how to use `<ng-template>` with `@ContentChild` and `ngTemplateOutlet` for **manual or conditional content projection**.
+
+---
+
+## Step 47: Project content from the parent using `<ng-template>` and render it in the child using `ngTemplateOutlet`
+- In this step we shall see an alternative to passing content to the projected from parent to child, that allows conditional rendering of the passed content, if required at a later point in time in the child as well.
+- We define a call to action component that allows the parent to pass a custom template for a **call-to-action section**, and render it in the child component manually. Passing `ng-template` from the parent allows content to be projected conditionally and at a later point in time in the child component.
+- Define a child component that supports `@ContentChild`
+```bash
+ng g c common/call-to-action
+```
+- In `app/common/call-to-action.component.ts`
+```ts
+import { Component, ContentChild, TemplateRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-call-to-action',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './call-to-action.component.html',
+  styleUrl: './call-to-action.component.scss'
+})
+export class CallToActionComponent {
+  @ContentChild('cta') ctaTemplate!: TemplateRef<any>;
+}
+```
+- In `app/common/call-to-action.component.html`
+```html
+<div class="alert alert-warning text-center">
+  <h4>Don't miss out!</h4>
+  <ng-container *ngIf="ctaTemplate; else defaultCTA" [ngTemplateOutlet]="ctaTemplate"></ng-container>
+
+  <ng-template #defaultCTA>
+    <button class="btn btn-danger">Sign up now</button>
+  </ng-template>
+</div>
+```
+- Use it from the parent with a custom `<ng-template>`. In `app/home/home.component.ts`,
+```ts
+import { CallToActionComponent } from '../common/call-to-action/call-to-action.component';
+```
+```ts
+@Component({
+  selector: 'app-home',
+  imports: [
+    CallToAction
+  ],
+  templateUrl: './home.component.html',
+  styleUrl: './home.component.scss'
+})
+```
+- In `app/home/home.component.html`, include this at the end.
+```html
+<section>
+  <!-- rest of existing content -->
+  <!-- ... -->
+
+  <!-- Add this -->
+  <app-call-to-action>
+    <ng-template #cta>
+      <button class="btn btn-primary">📅 Book Your Workshop Slot</button>
+    </ng-template>
+  </app-call-to-action>
+</section>
+```
+### What This Demonstrates
+
+* Unlike `<ng-content>`, `<ng-template>` content is:
+
+  * **Not rendered automatically**
+  * Passed as a **`TemplateRef`**
+  * Rendered manually using `ngTemplateOutlet`
+
+### Output Summary
+
+If the parent passes a `#cta` template:
+
+```
+Don't miss out!
+📅 Book Your Workshop Slot
+```
+
+If no `#cta` is passed:
+
+```
+Don't miss out!
+Sign up now
+```
+- The important point is the call to action child component renders the passed template conditionally (using __ngIf__). You can change the condition as per the requirements.
+
+## Step 48: Understanding HTTP Interceptor
 - An HTTP interceptor can intercept HTTP requests and responses and process
 - A request before it goes out to the backend
 - A response before it is consumed by the rest of the Angular app
@@ -4224,7 +4315,7 @@ export const appConfig: ApplicationConfig = {
     ],
     ```
 
-## Step 48: Adding a Guard
+## Step 49: Adding a Guard
 - Guards are used to prevent navigation to or away from a particular route. Let us create a guard that prevents navigation to the workshop details route if the workshop id in the URL is not a nmber.
 - Generate a guard (`CanActivate` guard helps restrict navigation to a route) - Select `CanActivate`
 ```sh
@@ -4297,7 +4388,7 @@ export class ValidateWorkshopGuard implements CanActivate {
 ```
 - In the route objects, guards written using classes are added in place of functions as shown above.
 
-## Step 49: Lazy loading
+## Step 50: Lazy loading
 - Create `app/workshops/workshop-details.routes.ts`. Move the child route configuration to this file.
 ```ts
 import { Routes } from '@angular/router';
@@ -4344,7 +4435,7 @@ export const parentRoutes: Routes = [
 ```
 - Now the workshop details related components are not part of the main bundle. A separate bundle is created which is downloaded in the browser only when you first navigate to the workshop details page. Keep the Network tab open in the browser. Load the app from the home page, and navigate to the workshop details page. You will notice the new bundle being downloaded from the server. The main bundle size would be smaller (with small overhead for lazy loading), thus reducing the first page load time.
 
-## Step 50: Loading components at runtime
+## Step 51: Loading components at runtime
 - We may sometimes want to load components at run time. For example, the advertisements to be shown in an application may be determined by data available at runtime - for example, there may be different types of ad components, and the the type of the ads to be shown may be known only at runtime (may be the backend gives the data).
 - First we create 3 types of advertisement components. For simplcity, we have use `temmplate` to define the HTML template for the component inline (rather than a separate HTML file). Note that `AdBannerComponent` and `AdVideoComponent` also take input parameters.
 ```sh
@@ -4562,7 +4653,7 @@ export class Home implements AfterViewInit, OnDestroy {
 }
 ```
 
-## Step 51: Understanding signals and using them
+## Step 52: Understanding signals and using them
 - A signal is a reactive state primitive introduced in Angular v16.
 - To create a signal
 ```ts
@@ -4686,7 +4777,7 @@ this.filterable.array.set(this.filterable.array().filter(
 }
 ```
 
-## Step 52: OnPush change detection strategy for optimizing rendering performance
+## Step 53: OnPush change detection strategy for optimizing rendering performance
 We can benefit from `ChangeDetectionStrategy.OnPush` for improving rendering performance in the sessions list `app-item` component, which receives `session` as an `@Input()`. By default, Angular uses the **Default** change detection strategy, which checks **everything** on every change detection cycle. With `OnPush`, Angular only checks a component when:
 
 * An `@Input()` reference **changes**
