@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            const interval = rxjs.interval;
+            const take = rxjs.operators.take;
+            const map = rxjs.operators.map;
+
+            const concatMap = rxjs.operators.concatMap;
+
+            const x$ = take( 2 )( interval( 1000 ) ); // --- 0 --- 1 |
+            const y$ = take( 3 )( interval( 1000 ) ); // --- 0 --- 1 --- 2 |
+
+            // x$ is the source observable
+            // x$ --- 0 (after some time time 1, 2 will be queued up. And they will be queued till the y$ observable started earlier completes)
+
+            // xy$ subscribes to the returned y$ observable and continues emitting y$ values till y$ completes.
+            // xy$ --- 0 --- 1 --- 2
+            const xy$ = concatMap( x => {
+                console.log('x = ' + x );
+                return y$; // "inner observable"
+            })( x$ );
+
+            xy$.subscribe( data => console.log( data ) );
+        </script>
+    </body>
+</html>
