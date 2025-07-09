@@ -14,9 +14,13 @@
             const take = rxjs.operators.take;
             const map = rxjs.operators.map;
 
-            const obs1$ = interval( 1000 ).pipe( map( x => x * 2 ), take( 5 ) ); // 0 --- 2 --- 4 --- 6 --- 8 |
-            const obs2$ = interval( 1000 ).pipe(  map( x => x * 2 + 1 ),take( 5 ) ); // 1 --- 3 --- 5 --- 7 --- 9 |
+            const obs1$ = interval( 1000 ).pipe( map( x => x * 2 ), take( 5 ) ); // --- 0 --- 2 --- 4 --- 6 --- 8 |
+            const obs2$ = interval( 1000 ).pipe( map( x => x * 2 + 1 ), take( 5 ) ); // --- 1 --- 3 --- 5 --- 7 --- 9 |
 
+            /**
+             * If obs1$ errors before obs2$ completes, then obs3$ will error immediately, and no further values—including those from obs2$—will be emitted.
+             * If you want to continue receiving values from other observables even when one errors, consider catchError inside each observable before merging.
+            */
             const obs3$ = merge( obs1$, obs2$ ); // --- 0 1 --- 2 3 --- 4 5 --- 6 7 --- 8 9 |
 
             obs3$.subscribe({

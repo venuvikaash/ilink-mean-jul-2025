@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            // import { interval } from 'rxjs';
+            const interval = rxjs.interval;
+
+            // import { take } from 'rxjs/operators';
+            const take = rxjs.operators.take;
+
+            // earlier we did like this
+            // const source$ = interval( 1000 ).pipe( take(5) );
+
+            // now we do like this...
+            const source$ = interval( 1000 ).pipe( take(5) );
+
+            // interval( 1000 ).pipe( take( 5 ) );
+
+            // take operator takes an argument (how many events to consume from the source observable) - take( 5 ) returns a function
+            console.log( typeof take( 5 ) ); // "function"
+
+            // operators take 1 or more observables as input, and generate an output observable
+            const dest$ = take( 5 )( source$ );
+
+            // this dest$ observable emits the same events as source$, but stops after 5 events
+            dest$.subscribe({
+                next(data) {
+                    console.log( data );
+                }
+            })
+
+        </script>
+    </body>
+</html>
