@@ -74,4 +74,9 @@
 - HTTP interceptor
 - Adding navigation guards
 
-
+### Day 7: Miscellaneous topics in Angular and Introduction to RxJS
+- Advanced Content Projection - ng-template, ngTemplateOutlet, ngContainer, @ContentChild
+- Lazy loading, dynamic import, loadComponent, loadChildren
+- Dynamic components - ViewContainerRef, createComponent, setInput, @ViewChild, ngAfterViewInit, ngOnDestroy
+- OnPush change detection - passing changes in immutable way
+- Introduction to RxJS - Observable, Observer, Subscription, Observable creation operators - interval, of and fromEvent, making HTTP requests using RxJS ajax

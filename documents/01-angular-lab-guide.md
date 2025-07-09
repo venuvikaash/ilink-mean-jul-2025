@@ -4854,3 +4854,184 @@ this.sessions = this.sessions.map(s =>
 | Every component rechecked on change | Only checked if `@Input()` changes |
 | Unnecessary renders                 | Only updated `session` re-renders  |
 | Slower for large lists              | Faster, more optimized             |
+
+## Step 54: HTTP retry and error handling using RxJS operators
+To add **retry and reusable error handling logic** across methods and services in Angular, you can do the following.
+
+- Create a reusable `HttpErrorHandler` service. In `app/common/http-error-handler.service.ts`
+```bash
+ng g s common/http-error-handler
+```
+
+```ts
+// src/app/common/http-error-handler.service.ts
+import { Injectable } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { throwError } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class HttpErrorHandlerService {
+  handleError(error: HttpErrorResponse) {
+    if (error.error instanceof ErrorEvent) {
+      // Client-side/network error
+      console.error('Client-side error:', error.error.message);
+    } else {
+      // Backend/server error
+      console.error(`Server returned code ${error.status}, body was:`, error.error);
+    }
+
+    return throwError(() => new Error(this.getFriendlyMessage(error)));
+  }
+
+  private getFriendlyMessage(error: HttpErrorResponse): string {
+    if (error.status === 0) return 'Unable to connect to the server.';
+    if (error.status >= 400 && error.status < 500)
+      return 'A request error occurred. Please check your input.';
+    if (error.status >= 500)
+      return 'A server error occurred. Please try again later.';
+    return 'An unknown error occurred.';
+  }
+}
+```
+- Update the `WorkshopsService` with `retry` and `catchError`. In `app/workshops/workshops.service.ts`
+```ts
+import { Injectable } from '@angular/core';
+import IWorkshop from './models/IWorkshop';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
+
+import { catchError, retry } from 'rxjs/operators';
+import { HttpErrorHandlerService } from '../common/http-error-handler.service';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class WorkshopsService {
+  private apiUrl = environment.apiUrl;
+
+  constructor(
+    private http: HttpClient,
+    private errorHandler: HttpErrorHandlerService
+  ) {}
+
+  getWorkshops(page: number = 1) {
+    return this.http.get<IWorkshop[]>(
+      `${this.apiUrl}/workshops`,
+      { params: { _page: page } }
+    ).pipe(
+      retry(2),
+      catchError(this.errorHandler.handleError)
+    );
+  }
+
+  getWorkshopById(workshopId: number) {
+    return this.http.get<IWorkshop>(
+      `${this.apiUrl}/workshops/${workshopId}`
+    ).pipe(
+      retry(2),
+      catchError(this.errorHandler.handleError)
+    );
+  }
+
+  deleteWorkshopById(workshopId: number) {
+    return this.http.delete<void>(
+      `${this.apiUrl}/workshops/${workshopId}`
+    ).pipe(
+      retry(1),
+      catchError(this.errorHandler.handleError)
+    );
+  }
+
+  postWorkshop(workshop: Omit<IWorkshop, 'id'>) {
+    return this.http.post<IWorkshop>(
+      `${this.apiUrl}/workshops`,
+      workshop,
+      { headers: { 'Content-Type': 'application/json' } }
+    ).pipe(
+      catchError(this.errorHandler.handleError)
+    );
+  }
+}
+```
+- __EXERCISE__: Update the session service in `app/workshops/sessions.service.ts` similarly.
+
+## Step 55: HTTP retry and error handling using RxJS operators
+— Angular **Forms API** provides a `valueChanges` __observable__ on form controls like `FormControl`. This is a clean and reactive way to apply **debouncing**. Let us refactor the WorkshopsList component with `FormControl` and `valueChanges`
+- In `app/workshops/workshops-list/workshops-list.component.html`, update to use `formControl`
+```html
+<input
+  type="search"
+  class="form-control"
+  placeholder="Type to search by name"
+  [formControl]="searchControl"
+/>
+```
+- In `app/workshops/workshops-list/workshops-list.component.ts`
+```ts
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import IWorkshop from '../models/IWorkshop';
+
+import { Subject } from 'rxjs';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime, takeUntil } from 'rxjs/operators';
+```
+```ts
+imports: [
+  ReactiveFormsModule
+  // rest of imports...
+  // ...
+]
+```
+```ts
+export class WorkshopsList implements OnInit, OnDestroy {
+  workshops: IWorkshop[] = [];
+  filteredWorkshops: IWorkshop[] = [];
+
+  searchControl = new FormControl('');
+  private destroy$ = new Subject<void>();
+
+  ngOnInit(): void {
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(300),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((term: string | null) => {
+        const keyword = term?.toLowerCase() ?? '';
+        this.filteredWorkshops = this.workshops.filter(w =>
+          w.name.toLowerCase().includes(keyword)
+        );
+      });
+
+      // rest of code...
+      // ...
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+}
+```
+- __NOTE__: This pattern in Angular is **crucial for preventing memory leaks** when using **RxJS `takeUntil()`** for subscription cleanup.
+```ts
+ngOnDestroy(): void {
+  this.destroy$.next();
+  this.destroy$.complete();
+}
+```
+- When you subscribe to observables (like `valueChanges`), those subscriptions stay **active** unless you unsubscribe. If you navigate away or destroy the component, the observable keeps emitting — which:
+  * Causes **memory leaks**
+  * Might try to update a destroyed component, leading to runtime errors
+
+### What this code does
+
+| Code                       | Purpose                                                                      |
+| -------------------------- | ---------------------------------------------------------------------------- |
+| `this.destroy$`            | A `Subject<void>` that acts as a **notifier** to terminate observables       |
+| `takeUntil(this.destroy$)` | Tells each observable to **unsubscribe automatically** when `destroy$` emits |
+| `this.destroy$.next()`     | Emits a value to **trigger unsubscription**                                  |
+| `this.destroy$.complete()` | Closes the notifier itself to **free resources**                             |
+
