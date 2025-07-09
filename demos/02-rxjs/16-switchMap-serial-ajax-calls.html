@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            // serial ajax calls where data from first ajax call is used in the second ajax call
+            const ajax = rxjs.ajax.ajax; // like Angular this.http.get()
+
+            const retry = rxjs.operators.retry;
+            const catchError = rxjs.operators.catchError;
+            const map = rxjs.operators.map;
+
+            const switchMap = rxjs.operators.switchMap;
+
+            function getCommentsForFirstUserWithName( name ) {
+                // There is ONLY 1 response event for ajax() observable and then it completes
+                // For understanding sake, lets say, there are more events
+                // first ajax() call, i.e. source --- res1 --- res2 --- res3 --- ....
+                return ajax( `https://jsonplaceholder.typicode.com/users?username=${name}` ).pipe(
+                    switchMap( res1 => ajax( `https://jsonplaceholder.typicode.com/users/${res1.response[0].id}/posts` ) ),
+                    switchMap( res2 => ajax( `https://jsonplaceholder.typicode.com/comments?postId=${res2.response[0].id}` ) ),
+                )
+            }
+
+            getCommentsForFirstUserWithName( 'Bret' ).subscribe({
+                next(res) {
+                    console.log( res.response );
+                }
+            })
+        </script>
+    </body>
+</html>

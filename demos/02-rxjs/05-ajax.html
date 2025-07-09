@@ -12,6 +12,8 @@
             // import { Observable } from 'rxjs';
             const ajax = rxjs.ajax.ajax;
 
+            // this.http.get()
+            // ajax() -> Observable starts off a backend HTTP call. The first and ONLY event it emits is when the backends sends the response and ajax() receives the response. The event has the response details.
             ajax(`https://workshops-server.onrender.com/workshops`).subscribe({
                 next( res ) {
                     console.log( res.status );
