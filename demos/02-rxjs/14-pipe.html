@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            const of = rxjs.of;
+            const pipe = rxjs.pipe;
+
+            const filter = rxjs.operators.filter;
+            const map = rxjs.operators.map;
+
+            const obs$ = of( 1, 2, 3, 4, 5, 6, 7 );
+
+            // map( x => x * x )( filter( x => x % 2 === 1 )( obs$ ) ).subscribe({
+            //     next( data ) {
+            //         console.log( data );
+            //     }
+            // });
+
+            // Take obs$ -> first step we filter -> second step we map
+            obs$.pipe(
+                filter( x => x % 2 === 1 ), // only odd number events remain
+                map( x => x * x ) // for every number emit the square
+            ).subscribe({
+                next( data ) {
+                    console.log( data );
+                }
+            });
+        </script>
+    </body>
+</html>
