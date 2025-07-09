@@ -1107,3 +1107,150 @@ This pattern is ideal for search boxes — **efficient**, **responsive**, and **
 ```html
 ```
 
+## Step 23: Multicasting
+- __Multicasting__ in RxJS refers to the ability to **share a single execution of an Observable among multiple subscribers**, so that all subscribers receive the same emitted values **without re-triggering** the source observable.
+
+### Without Multicasting (Unicast – Default Behavior)
+- By default, RxJS Observables are **unicast**. This means:
+    * Each subscriber gets a **new, independent execution** of the source.
+    * Think of this like everyone getting their own copy of a recorded video.
+
+#### Example (Unicast)
+
+```ts
+const obs$ = new Observable(observer => {
+  console.log('Source executed');
+  observer.next(Math.random());
+});
+
+obs$.subscribe(value => console.log('Subscriber 1:', value));
+obs$.subscribe(value => console.log('Subscriber 2:', value));
+```
+
+**Output:**
+```
+Source executed
+Subscriber 1: 0.123
+Source executed
+Subscriber 2: 0.456
+```
+
+Both subscribers trigger the observable separately — two executions, different results.
+
+### With Multicasting
+
+- Multicasting shares a single source among all subscribers:
+    * All subscribers receive the **same** value.
+    * Think of this like watching a **live broadcast** — one stream shared with many viewers.
+
+#### Example (Multicasting with `share()`)
+
+```ts
+import { Observable, share } from 'rxjs';
+
+const obs$ = new Observable(observer => {
+  console.log('Source executed');
+  observer.next(Math.random());
+}).pipe(
+  share()
+);
+
+obs$.subscribe(value => console.log('Subscriber 1:', value));
+obs$.subscribe(value => console.log('Subscriber 2:', value));
+```
+
+**Output:**
+
+```
+Source executed
+Subscriber 1: 0.789
+Subscriber 2: 0.789
+```
+
+Only one execution — both subscribers get the same value.
+
+### Operators That Enable Multicasting
+
+* `share()` — commonly used for simple multicasting
+* `shareReplay(n)` — multicast and replay last `n` values to late subscribers
+* `publish()` / `multicast()` — advanced and lower-level (require a subject)
+
+
+### Real-World Use Case
+
+Multicasting is critical when:
+
+* Making **HTTP requests** (which should only be made once)
+* Subscribing to **WebSocket streams**
+* Preventing redundant side-effects
+
+```ts
+this.http.get('/api/data').pipe(share());
+```
+
+Without `share()`, multiple subscriptions will cause multiple HTTP requests.
+
+## Step 24: Scheduler
+In **RxJS**, a **scheduler** is a powerful mechanism that controls **when** and **where** (on what execution context or "thread") tasks like subscriptions, emissions, and notifications happen.
+- A **scheduler** in RxJS is an abstraction for:
+    * **Controlling execution timing** (now, later, periodically)
+    * **Controlling execution context** (e.g., sync, async, animation frame, microtask, etc.)
+In short: **Schedulers let you control time and concurrency in RxJS**.
+
+### Common RxJS Schedulers
+
+| Scheduler                 | Purpose                                               |
+| ------------------------- | ----------------------------------------------------- |
+| `queueScheduler`          | Synchronous execution using a queue                   |
+| `asapScheduler`           | Executes tasks in microtask queue (after current job) |
+| `asyncScheduler`          | Executes tasks asynchronously using `setTimeout()`    |
+| `animationFrameScheduler` | Sync with browser's animation frame                   |
+
+### Example: `asyncScheduler`
+
+```ts
+import { of, asyncScheduler } from 'rxjs';
+import { observeOn } from 'rxjs/operators';
+
+console.log('Before');
+
+of(1, 2, 3)
+  .pipe(observeOn(asyncScheduler))  // Delay emission to next macrotask
+  .subscribe(value => console.log('Emitted:', value));
+
+console.log('After');
+```
+
+**Output:**
+
+```
+Before
+After
+Emitted: 1
+Emitted: 2
+Emitted: 3
+```
+
+- __NOTE__: Without `.pipe(observeOn(asyncScheduler))`, it would emit before `After` - remove the line and check.
+
+### Practical Use Case in Angular: Preventing UI Freezing with `asyncScheduler`
+
+Imagine a component loading **thousands of records** from a backend and mapping them before rendering:
+
+```ts
+from(hugeDataArray)
+  .pipe(
+    observeOn(asyncScheduler),
+    map(processHeavy)
+  )
+  .subscribe(result => renderToDOM(result));
+```
+
+This offloads processing to **asynchronous chunks**, keeping the UI **responsive** by letting Angular’s change detection and rendering happen between chunks.
+
+### Where You Might Use a Scheduler
+
+* **Debounced input + async updates** (e.g., in forms)
+* **Breaking up long-running computations** into tasks (e.g., rendering lots of DOM nodes)
+* **Avoiding blocking UI** by scheduling work to the event loop
+* **Custom animations** with `animationFrameScheduler`

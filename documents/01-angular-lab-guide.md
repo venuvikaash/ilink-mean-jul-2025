@@ -4957,7 +4957,7 @@ export class WorkshopsService {
 ```
 - __EXERCISE__: Update the session service in `app/workshops/sessions.service.ts` similarly.
 
-## Step 55: HTTP retry and error handling using RxJS operators
+## Step 55: Debouncing and using async scheduler
 — Angular **Forms API** provides a `valueChanges` __observable__ on form controls like `FormControl`. This is a clean and reactive way to apply **debouncing**. Let us refactor the WorkshopsList component with `FormControl` and `valueChanges`
 - In `app/workshops/workshops-list/workshops-list.component.html`, update to use `formControl`
 ```html
@@ -4973,9 +4973,9 @@ export class WorkshopsService {
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import IWorkshop from '../models/IWorkshop';
 
-import { Subject } from 'rxjs';
+import { Subject, asyncScheduler } from 'rxjs';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { debounceTime, takeUntil, observeOn, map } from 'rxjs/operators';
 ```
 ```ts
 imports: [
@@ -4996,14 +4996,11 @@ export class WorkshopsList implements OnInit, OnDestroy {
     this.searchControl.valueChanges
       .pipe(
         debounceTime(300),
+        observeOn(asyncScheduler), // Push filtering to macrotask queue
+        map(term => this.filterWorkshops()),
         takeUntil(this.destroy$)
       )
-      .subscribe((term: string | null) => {
-        const keyword = term?.toLowerCase() ?? '';
-        this.filteredWorkshops = this.workshops.filter(w =>
-          w.name.toLowerCase().includes(keyword)
-        );
-      });
+      .subscribe(filteredWorkshops => this.filteredWorkshops = filteredWorkshops);
 
       // rest of code...
       // ...
@@ -5035,3 +5032,13 @@ ngOnDestroy(): void {
 | `this.destroy$.next()`     | Emits a value to **trigger unsubscription**                                  |
 | `this.destroy$.complete()` | Closes the notifier itself to **free resources**                             |
 
+- Note the use of `asyncScheduler` with `observeOn()` to keep the UI responsive when filtering a large dataset (like a list of workshops). If we have `WorkshopsListComponent` display hundreds or thousands of workshops (say), filtering should **not freeze the UI** when the user types a search term.
+- Without it, filtering happens immediately inside the main thread. With it
+    * The filtering gets **scheduled** in the **next macrotask** (via `setTimeout()`).
+    * Angular gets a chance to **render** the UI (e.g., spinner, keystrokes).
+    * Prevents **jank/freeze** for large computations (e.g., thousands of items).
+
+### Try This:
+* Add a spinner (`<div *ngIf="loading">Loading...</div>`) before filtering starts.
+* Without `observeOn(asyncScheduler)`, the spinner may not render.
+* With it, the spinner renders first, then filtering happens.
