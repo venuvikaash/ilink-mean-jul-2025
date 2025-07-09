@@ -1087,27 +1087,245 @@ This pattern is ideal for search boxes — **efficient**, **responsive**, and **
 </html>
 ```
 
-## Step 19: 
+## Step 19: Multicasting with Subject
+
+### Concepts Covered:
+
+* Creating a `Subject`, which is both an **Observable** and an **Observer**
+* Using a `Subject` to **multicast** values to multiple subscribers
+* Forwarding emissions from a source Observable using `subject.subscribe()` pattern
+
+#### Description:
+
+This example shows how a `Subject` bridges a unicast `Observable` (`nums$`) to **multiple subscribers**:
+
+1. `nums$` emits `1, 2, 3` to the subject.
+2. `numsSubject` acts as an Observer — it receives these values.
+3. At the same time, it's an Observable — both `subscription1` and `subscription2` receive **all values**.
+
+Without the `Subject`, each subscription to `nums$` would run **independently**. But the `Subject` shares the values to all subscribers **simultaneously**.
+
+#### Takeaway:
+
+Use `Subject` to convert **cold Observables into hot**, enabling **multicasting** — where multiple subscribers share a single execution path.
 
 ```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            // A Subject is both an Observable and an Observer
+            const nums$ = new rxjs.Observable(observer => {
+                observer.next( 1 );
+                observer.next( 2 );
+                observer.next( 3 );
+            });
+
+            const numsSubject = new rxjs.Subject();
+
+            const subscription1 = numsSubject.subscribe(evt => {
+                console.log(`[1] ${evt}`);
+            });
+
+            const subscription2 = numsSubject.subscribe(evt => {
+                console.log(`[2] ${evt}`);
+            });
+
+            const subscription = nums$.subscribe( numsSubject );
+        </script>
+    </body>
+</html>
 ```
 
-## Step 20: 
+## Step 20: Hot Observables and Multicasting with `fromEvent()`
+
+### Concepts Covered:
+
+* **`fromEvent()` creates a hot observable**
+* Hot observables **emit events regardless of subscriptions**
+* No need for `Subject` to multicast from hot sources like DOM events
+* Multiple subscribers can independently receive the same event stream
+
+### Description:
+
+This example uses `fromEvent()` to track mouse movements over an element:
+
+* It directly subscribes **twice** to the same `mouseMove$` stream.
+* Each subscription reacts independently to mouse events.
+* There's a suggestion to use a `Subject`, but it’s **not required here**.
+
+Why?
+
+* `fromEvent()` wraps an **external event source (like DOM events)**.
+* Such events **exist independently** of the Observable — making `mouseMove$` **hot**.
+* Since it's hot, it **naturally supports multicasting** — unlike cold Observables (`interval()`, `of()`), which need a `Subject` to share emissions.
+
+### Takeaway:
+
+Hot observables like `fromEvent()` don't need a `Subject` for multicasting. Multiple subscribers can safely consume the same event stream **simultaneously**.
 
 ```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <style>
+            body {
+                margin: 0;
+            }
+
+            #my-element {
+                position: relative;
+                box-sizing: border-box;
+                width: 100%;
+                height: 100vh;
+                border: 1px solid crimson;
+            }
+
+            #forbidden-1 {
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                width: 40px;
+                height: 40px;
+                background-color: rgba( 220, 20, 60, 0.75 );
+                z-index: 100;
+            }
+
+            #forbidden-2 {
+                position: absolute;
+                top: 0px;
+                left: 0px;
+                width: 100px;
+                height: 100px;
+                background-color: rgba( 0, 0, 128, 0.75 );
+                z-index: 10
+            }
+        </style>
+    </head>
+    <body>
+        <div id="my-element">
+            <div id="forbidden-1"></div>
+            <div id="forbidden-2"></div>
+        </div>
+
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            // fromEvent() creates a "Hot observable" -> hot observables suppport multi-casting, and hence Subject is not needed for multicasting the events of such Observables
+            // When the events of an Observable are generated outside of the Observable generation method (here, fromEvent), the Observable is a "Hot Observable"
+            // NOTE: interval() and of() produce "Cold observables" - these requires Subject for multi-casting
+            const el = document.getElementById('my-element');
+            const mouseMove$ = rxjs.fromEvent(el, 'mousemove');
+
+            const mouseMoveSubject = new rxjs.Subject();
+
+            // EXERCISE: Substitute mouseMoveSubject with mouseMove$ in the following 2 subscriptions and comment the last line - it will still work!
+            const subscription1 = mouseMove$.subscribe(evt => {
+                console.log(`[1] Coords: ${evt.clientX} X ${evt.clientY}`);
+
+                if (evt.clientX < 40 && evt.clientY < 40) {
+                    subscription1.unsubscribe();
+                }
+            });
+
+            const subscription2 = mouseMove$.subscribe(evt => {
+                console.log(`[2] Coords: ${evt.clientX} X ${evt.clientY}`);
+
+                if (evt.clientX < 100 && evt.clientY < 100) {
+                    subscription2.unsubscribe();
+                }
+            });
+
+            // EXERCISE: Comment this line - it will still work!
+            // const subscription = mouseMove$.subscribe( mouseMoveSubject );
+        </script>
+    </body>
+</html>
 ```
 
-## Step 21: 
+## Step 21: Difference Between `Subject` and `BehaviorSubject`
+
+### Concepts Covered:
+
+* Understanding the **key difference** between `Subject` and `BehaviorSubject`
+* Subscribing **after emissions start**
+* Use of `interval()` with Subjects to simulate a ticking counter
+* Multicasting and late subscriber behavior
+
+### Description:
+
+* `counterSubject` subscribes to an interval that emits every 10 seconds.
+* **Subscriber 1** subscribes immediately and receives emissions as they happen.
+* **Subscriber 2** subscribes **after 15 seconds** — it **misses earlier emissions** and only receives new ones going forward.
+
+This is because a `Subject` **does not store** the last emitted value — it only pushes future values to new subscribers.
+
+- Let us now understand `BehaviorSubject`.
+    * Same setup, but substitute `Subject` with `BehaviorSubject`.
+    * When **Subscriber 2** subscribes after 15 seconds, it **immediately receives the latest value** emitted before it joined.
+
+This is because a `BehaviorSubject` **remembers the most recent value** and sends it to **new subscribers immediately** upon subscription.
+
+### Summary: Subject vs BehaviorSubject
+
+| Feature                  | `Subject`            | `BehaviorSubject`              |
+| ------------------------ | -------------------- | ------------------------------ |
+| Remembers last value?    | ❌ No                 | ✅ Yes                          |
+| Emits value on late sub? | ❌ Only future values | ✅ Immediately emits last value |
+| Requires initial value?  | ❌ No                 | ✅ Yes (must provide one)       |
+
+> __EXERCISE__: In the BehaviorSubject example, we did not provide an **initial value**. But you can like so. Try it.
+
+```js
+const counterSubject = new rxjs.BehaviorSubject(0); // Should provide a default
+```
+
+### Takeaway:
+Use `BehaviorSubject` when you want **new subscribers to immediately receive the current/latest value** — commonly used in **state management scenarios**. Use `Subject` when you only want to multicast **new events**.
 
 ```html
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <script src="rxjs-7.8.2.umd.js"></script>
+
+        <script>
+            const counter$ = rxjs.interval( 10000 );
+
+            const counterSubject = new rxjs.Subject();
+
+            const subscription1 = counterSubject.subscribe(evt => {
+                console.log(`[1] ${evt}`);
+            });
+
+            const subscription = counter$.subscribe( counterSubject );
+
+            setTimeout(() => {
+                const subscription2 = counterSubject.subscribe(evt => {
+                    console.log(`[2] ${evt}`);
+                });
+            }, 15000);
+        </script>
+    </body>
+</html>
 ```
 
-## Step 22: 
-
-```html
-```
-
-## Step 23: Multicasting
+## Step 22: Multicasting
 - __Multicasting__ in RxJS refers to the ability to **share a single execution of an Observable among multiple subscribers**, so that all subscribers receive the same emitted values **without re-triggering** the source observable.
 
 ### Without Multicasting (Unicast – Default Behavior)
@@ -1190,7 +1408,7 @@ this.http.get('/api/data').pipe(share());
 
 Without `share()`, multiple subscriptions will cause multiple HTTP requests.
 
-## Step 24: Scheduler
+## Step 23: Scheduler
 In **RxJS**, a **scheduler** is a powerful mechanism that controls **when** and **where** (on what execution context or "thread") tasks like subscriptions, emissions, and notifications happen.
 - A **scheduler** in RxJS is an abstraction for:
     * **Controlling execution timing** (now, later, periodically)
@@ -1254,3 +1472,64 @@ This offloads processing to **asynchronous chunks**, keeping the UI **responsive
 * **Breaking up long-running computations** into tasks (e.g., rendering lots of DOM nodes)
 * **Avoiding blocking UI** by scheduling work to the event loop
 * **Custom animations** with `animationFrameScheduler`
+
+## Step 24: Creating custom operators
+- **RxJS** allows you to encapsulate and reuse logic applied to streams. You create custom operators using the `lift` method (advanced) or, more commonly and cleanly, using the **higher-order function pattern** (a function returning an `OperatorFunction`) like so
+```ts
+function customOperator<T, R>(...args): OperatorFunction<T, R> {
+    return (source: Observable<T>) => {
+        return source.pipe(
+                // built-in operators go here (map, filter, etc.)
+        );
+    };
+}
+```
+
+### **Example 1: Custom Filter for Minimum Value**
+
+```ts
+function filterMin(min: number): OperatorFunction<number, number> {
+    return (source: Observable<number>) => {
+        return source.pipe(
+            map(val => Number(val)), // ensure number
+            filter(val => val >= min)
+        );
+    };
+}
+```
+
+**Usage:**
+
+```ts
+of(10, 20, 30)
+    .pipe(filterMin(20))
+    .subscribe(x => console.log(x));
+```
+
+### **Example 2: Custom Debug Operator (like tap with a label)**
+
+```ts
+import { tap } from 'rxjs/operators';
+
+function debug<T>(label: string): OperatorFunction<T, T> {
+    return (source: Observable<T>) => {
+        return source.pipe(
+            tap(value => console.log(`${label}:`, value))
+        );
+    };
+}
+```
+
+**Usage:**
+
+```ts
+of(10, 20, 30)
+    .pipe(debug('Value'))
+    .subscribe(x => console.log(x));
+```
+
+### **Best Practices**
+
+* Use generics (`<T, R>`) to make it type-safe.
+* Compose using existing RxJS operators (`map`, `filter`, `tap`, etc.).
+* Avoid `lift` unless doing very advanced interop or internal library work.
