@@ -12,8 +12,9 @@
             const concat = rxjs.concat;
             const interval = rxjs.interval;
             const take = rxjs.operators.take;
+            // const map = rxjs.operators.map;
 
-            const obs1$ = interval( 1000 ).pipe( take( 5 ) );
+            const obs1$ = interval( 1000 ).pipe( /*map( x => x * 2 ),*/ take( 5 ) );
             // obs1$.subscribe({
             //     next( data ) {
             //         console.log( data );
