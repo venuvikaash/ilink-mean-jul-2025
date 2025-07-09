@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            const interval = rxjs.interval;
+            const take = rxjs.operators.take;
+            const map = rxjs.operators.map;
+
+            const mergeMap = rxjs.operators.mergeMap;
+
+            const x$ = take( 4 )( interval( 1000 ) ); // --- 0 --- 1 --- 2 --- 3 |
+            const y$ = take( 3 )( interval( 1000 ) ); // --- 0 --- 1 --- 2 |
+
+            const xy$ = mergeMap( x => {
+                console.log('x = ' + x );
+                return map( y => `${x}, ${y}` )( y$ ); // "inner observable" // --- "0, 0" --- "0, 1" --- "0, 2" |
+            })( x$ );
+
+            // ------ "0, 0" --- "0, 1" --- "0, 2" |
+            // ----------------- "1, 0" --- "1, 1" --- "1, 2" |
+            // ---------------------------- "2, 0" --- "2, 1" --- "2, 2" |
+            // --------------------------------------- "3, 0" --- "3, 1" --- "3, 2" |
+            xy$.subscribe( data => console.log( data ) );
+        </script>
+    </body>
+</html>
