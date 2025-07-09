@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <!-- resp -> { total: 30000, success: true: data : [ {}, {} ] }
+        map( resp => resp.data ) -->
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            const map = rxjs.operators.map;
+            const of = rxjs.of;
+
+            const source$ = of( 1, 2, 7, 8, 15, 6, 9 );
+            const dest$ = map( x => 2 * x )( source$ );
+
+            dest$.subscribe({
+                next( data ) {
+                    console.log( data );
+                }
+            });
+        </script>
+    </body>
+</html>
