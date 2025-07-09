@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            const concat = rxjs.concat;
+            const interval = rxjs.interval;
+            const take = rxjs.operators.take;
+
+            const obs1$ = interval( 1000 ).pipe( take( 5 ) );
+            // obs1$.subscribe({
+            //     next( data ) {
+            //         console.log( data );
+            //     }
+            // })
+            const obs2$ = interval( 5000 ).pipe( take( 3 ) );
+
+            const obs3$ = concat( obs1$, obs2$ );
+
+            obs3$.subscribe({
+                next( data ) {
+                    console.log( data );
+                },
+                complete() {
+                    console.log( `That's all folks!` );
+                }
+            });
+        </script>
+    </body>
+</html>
