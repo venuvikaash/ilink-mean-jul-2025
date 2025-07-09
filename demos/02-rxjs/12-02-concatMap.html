@@ -15,17 +15,23 @@
 
             const concatMap = rxjs.operators.concatMap;
 
-            const x$ = take( 2 )( interval( 1000 ) ); // --- 0 --- 1 |
+            const x$ = take( 4 )( interval( 1000 ) ); // --- 0 --- 1 --- 2 --- 3 |
             const y$ = take( 3 )( interval( 1000 ) ); // --- 0 --- 1 --- 2 |
 
             // x$ is the source observable
-            // x$ --- 0 (after some time time 1, 2 will be queued up. And they will be queued till the y$ observable started earlier completes)
+            // x$ --- 0 (after some time time 1, 2 will be queued up. And they will be queued till the y$ observable that started because x$ emitted 0, completes)
 
-            // xy$ subscribes to the returned y$ observable and continues emitting y$ values till y$ completes.
+            // xy$ subscribes to the returned y$ observable and continues emitting y$ values till y$ completes (meanwhile any values emitted by source onbservable x$ are queued)
             // xy$ --- 0 --- 1 --- 2
             const xy$ = concatMap( x => {
                 console.log('x = ' + x );
-                return y$; // "inner observable"
+                return map( y => `${x}, ${y}` )( y$ ); // "inner observable"
+                // return map( y => {
+                //     return {
+                //         x: x,
+                //         y: y
+                //     }
+                // } )( y$ ); // "inner observable"
             })( x$ );
 
             xy$.subscribe( data => console.log( data ) );
