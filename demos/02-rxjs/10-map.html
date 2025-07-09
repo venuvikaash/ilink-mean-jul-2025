@@ -6,8 +6,13 @@
         <title>Document</title>
     </head>
     <body>
-        <!-- resp -> { total: 30000, success: true: data : [ {}, {} ] }
-        map( resp => resp.data ) -->
+        <!--
+            Response data from backend
+            resp -> { total: 30000, success: true: data : [ {}, {} ] }
+
+            Say, we are interested only in response.data property - then we can use map() to select only that
+            ```map( resp => resp.data )```
+        -->
         <strong>Check the console logs</strong>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
         <script>

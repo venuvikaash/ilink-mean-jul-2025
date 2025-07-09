@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            const of = rxjs.of;
+            const map = rxjs.operators.map;
+
+            const catchError = rxjs.operators.catchError;
+
+            // source observable
+            const sequenceEvens$ = of( 2, 4, 6, 7, 8 );
+
+            // destination observable
+            const noOddsSequenceWithErrorHandling$ = catchError( err => {} )( sequenceEvens$ );
+
+            // no difference when compared to subscribing to the source observable sequenceEvens$ - same events (since there is no error emitted by source observable)
+            noOddsSequenceWithErrorHandling$.subscribe({
+                next( data ) {
+                    console.log( data );
+                }
+            });
+
+        </script>
+    </body>
+</html>

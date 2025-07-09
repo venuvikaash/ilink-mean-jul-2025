@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+    </head>
+    <body>
+        <strong>Check the console logs</strong>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/7.8.2/rxjs.umd.js"></script>
+        <script>
+            const of = rxjs.of;
+            const map = rxjs.operators.map;
+
+            const catchError = rxjs.operators.catchError;
+
+            function mapper(x) {
+                if ( x % 2 === 0 ) {
+                    return x;
+                } else {
+                    throw new Error( 'Encountered odd number' );
+                }
+            }
+
+            // source observable
+            const sequenceEvens$ = of( 2, 4, 6, 7, 8 );
+            const noOddsSequence$ = map( mapper )( sequenceEvens$ );
+
+            // destination observable
+            // source noOddsSequence$ throws an error when 7 is encountered
+
+            // Option 1: The function we pass to catchError() can return another error object
+            // const noOddsSequenceWithErrorHandling$ = catchError( err => {
+            //     throw new Error('Something went wrong');
+            // } )( noOddsSequence$ );
+
+            // Option 2: The function we pass to catchError() can return a "recovery" observable (that is subscribed to, and events continue to be emitted from the recovery observable)
+            const noOddsSequenceWithErrorHandling$ = catchError( err => {
+                return of(-1);
+            } )( noOddsSequence$ );
+
+            noOddsSequenceWithErrorHandling$.subscribe({
+                next( data ) {
+                    console.log( data );
+                },
+                error( err ) {
+                    console.log( err.message );
+                }
+            });
+
+        </script>
+    </body>
+</html>
