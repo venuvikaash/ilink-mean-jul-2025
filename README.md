@@ -14,6 +14,9 @@
 - Step 41: Updating (Editing) workshop
 - All remaining steps in Angular which were demonstrated
 
+## Questions
+- Best industry practices to not expose secrets from frontend
+- Does Angular provide any help for version upgrades?
 
 ## Hosted backends
 - Workshops server - https://workshops-server.onrender.com/

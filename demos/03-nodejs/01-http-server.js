@@ -6,8 +6,15 @@ const server = http.createServer(
     // res -> second argument -> response object
     (req, res) => {
         console.log( req.method );
-        res.end( 'hello, world' ); // end() is a method of response object
+        res.write( 'some data' )
+        res.write( 'some data' )
+        res.write( 'some data' )
+        res.write( 'some data' )
+        res.write( 'some data' )
+        res.end( 'hello, world!!!' ); // end() is a method of response object
     }
 );
 
 server.listen( 3000 );
+
+console.log( 'end of script' );
