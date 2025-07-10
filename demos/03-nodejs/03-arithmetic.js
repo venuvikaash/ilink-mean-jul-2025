@@ -16,19 +16,41 @@ function addArray( arr ) {
 
     return sum;
 }
+// IMPORTANT: ALWAYS use `module.exports`. NEVER use plain `exports`
 
-// module -> { exports : {} }
+// By default: module = { exports : {} }
+// By default: exports -> {} (same object as module.exports)
 // module -> { exports : { add: add, addArray: addArray, factorial: fn } }
-module.exports.add = add;
-module.exports.addArray = addArray;
-module.exports.factorial = function( num ) {
-    let fact = 0;
 
-    for ( let i = 1; i <= num; ++i ) {
-        fact *= i;
+// Option 1
+// module.exports.add = add;
+// module.exports.addArray = addArray;
+// module.exports.factorial = function( num ) {
+//     let fact = 0;
+
+//     for ( let i = 1; i <= num; ++i ) {
+//         fact *= i;
+//     }
+
+//     return fact;
+// };
+
+// Option 2 - Assign a new object
+// `exports` will still refer to the same default object (i.e. {})
+module.exports = {
+    // if the property name and the initializer variable have the same identifier - `add` here, then you can simplify this way
+    // add: add
+    add,
+    addArray,
+    factorial( num ) {
+        let fact = 0;
+
+        for ( let i = 1; i <= num; ++i ) {
+            fact *= i;
+        }
+
+        return fact;
     }
-
-    return fact;
 }
 
 // module.exports will be available for others to require()

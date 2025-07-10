@@ -28,6 +28,8 @@
 - Taking care of browser inconsistencies
 - MFE in Angular
 - Data tables
+- HTTPS (we will do)
+- Publishing npm packages
 
 ## Daywise Summary
 
