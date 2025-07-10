@@ -1,0 +1,16 @@
+{
+    "name": "json-utilities",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "node .",
+        "watch": "nodemon ."
+    },
+    "keywords": [],
+    "author": "Prashanth Puranik <puranik@digdeeper.in>",
+    "license": "GPL-3",
+    "dependencies": {
+        "nodemon": "^2.0.12"
+    }
+}

@@ -1,0 +1,1 @@
+- An Express + MongoDB-based implementation can be found at https://www.section.io/engineering-education/nodejs-url-shortener/

@@ -1,0 +1,2 @@
+- For another reference implementation you may check https://heynode.com/tutorial/readwrite-json-files-nodejs/
+- For pointers on handling concurrency issues you can check https://stackoverflow.com/questions/57667548/nodejs-synchronizing-multiple-simultaneous-file-changes

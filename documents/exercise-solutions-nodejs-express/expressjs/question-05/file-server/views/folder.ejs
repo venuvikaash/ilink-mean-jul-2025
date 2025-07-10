@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+    <head>
+        <title><%= pathname %></title>
+    </head>
+    <body>
+        <ul>
+            <li><a href=".." style="text-decoration: none;">..</a></li>
+            <% items.forEach( item => { %>
+                <li>
+                    <a href="<%= item.fullPath %>"><%= item.object %></a>
+                </li>
+            <% }); %>
+        </ul>
+    </body>
+</html>

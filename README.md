@@ -80,3 +80,12 @@
 - Dynamic components - ViewContainerRef, createComponent, setInput, @ViewChild, ngAfterViewInit, ngOnDestroy
 - OnPush change detection - passing changes in immutable way
 - Introduction to RxJS - Observable, Observer, Subscription, Observable creation operators - interval, of and fromEvent, making HTTP requests using RxJS ajax
+
+### Day 8: RxJS
+- Sequential Execution with `concat()`
+- Parallel Emissions with `merge()`
+- Operators - `take()`, `filter()`, `map()`
+- Error handling with `catchError()`
+- Higher-order mapping operators - `concatMap()`, `mergeMap()`
+- Operator composition using `pipe()`
+- Handling serial and parallel ajax calls with `switchMap()` and `forkJoin()`

@@ -1001,9 +1001,13 @@ Use `forkJoin()` to run **multiple observables concurrently** and collect **all 
                     console.log( 'network issue' );
                 }
 
-                const wrapperError = new Error( 'Something went wrong when fetching data from the server' );
-                wrapperError.originalError = error;
-                throw wrapperError;
+                // if you want to terminate the request throw a custom error
+                // const wrapperError = new Error( 'Something went wrong when fetching data from the server' );
+                // wrapperError.originalError = error;
+                // throw wrapperError;
+
+                // if you want to recover from an error pass a recovery Observable
+                return of([]);
             }
 
             getCommentsForFirstUsersWithNames( 'Bret', 'Samantha' ).subscribe(

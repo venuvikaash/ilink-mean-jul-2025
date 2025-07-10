@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Document</title>
+        <style>
+            #error-message {
+                color: crimson;
+                font-size: 11px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root">
+            <form method="POST" action="/login">
+                Username: <input type="text" name="username" id="username" />
+                Password: <input type="password" name="password" id="password" />
+                <button id="submit-button">Login</button>
+                <div id="error-message"></div>
+                <div id="giveaway">Psst... Username: john.doe@example.com / Password: password (Admin user)</div>
+                <div id="giveaway">Psst... Username: mark.smith@example.com / Password: password (Non-admin user)</div>
+            </form>
+        </div>
+
+        <script>
+            document.getElementById( 'submit-button' ).onclick = function( event ) {
+                event.preventDefault();
+
+                fetch( '/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: document.getElementById( 'username' ).value,
+                        password: document.getElementById( 'password' ).value
+                    })
+                }).then(function( response ) {
+                    if( response.ok ) {
+                        return response.json();
+                    } else {
+                        throw response.json();
+                    }
+                }).then(function( data ) {
+                    // passport is safely stored in localStorage
+                    localStorage.setItem( 'username', data.username );
+                    localStorage.setItem( 'token', data.token );
+                })
+                .then(function() {
+                    return fetch( '/private', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': 'Bearer ' + localStorage.getItem( 'token' )
+                        }
+                    });
+                })
+                .then(function( response ) {
+                    return response.text();
+                })
+                .then(function( html ) {
+                    document.getElementById( 'root' ).innerHTML = html;
+
+                    document.getElementById( 'logout-form' ).onsubmit = function( event ) {
+                        event.preventDefault();
+
+                        localStorage.removeItem( 'username' );
+                        localStorage.removeItem( 'token' );
+
+                        this.submit();
+                    }
+                })
+                .catch(function( errorPromise ) {
+                    errorPromise.then(function( error ) {
+                        document.getElementById( 'error-message' ).innerText = error.message;
+                    });
+                });
+            }
+        </script>
+    </body>
+</html>

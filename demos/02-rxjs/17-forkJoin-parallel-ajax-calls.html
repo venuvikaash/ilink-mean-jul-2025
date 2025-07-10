@@ -11,6 +11,7 @@
         <script>
             const ajax = rxjs.ajax.ajax; // like Angular this.http.get()
 
+            const of = rxjs.of;
             const retry = rxjs.operators.retry;
             const catchError = rxjs.operators.catchError;
             const map = rxjs.operators.map;
@@ -22,10 +23,30 @@
                 // There is ONLY 1 response event for ajax() observable and then it completes
                 // For understanding sake, lets say, there are more events
                 // first ajax() call, i.e. source --- res1 --- res2 --- res3 --- ....
-                return ajax( `https://jsonplaceholder.typicode.com/users?username=${name}` ).pipe(
+                return ajax( `https://jsonplaceholder.typicode.com/user?username=${name}` ).pipe(
                     switchMap( res1 => ajax( `https://jsonplaceholder.typicode.com/users/${res1.response[0].id}/posts` ) ),
                     switchMap( res2 => ajax( `https://jsonplaceholder.typicode.com/comments?postId=${res2.response[0].id}` ) ),
+                    map( res => res.response ),
+                    catchError( handleError )
                 )
+            }
+
+            function handleError( error ) {
+                console.log( error );
+
+                if( error.status >= 400 ) {
+                    console.log( 'client side error' );
+                } else {
+                    console.log( 'network issue' );
+                }
+
+                // if you want to terminate the request throw a custom error
+                // const wrapperError = new Error( 'Something went wrong when fetching data from the server' );
+                // wrapperError.originalError = error;
+                // throw wrapperError;
+
+                // if you want to recover from an error pass a recovery Observable
+                return of([]);
             }
 
             function getCommentsForFirstUserWithNames( ...names ) {
@@ -40,6 +61,9 @@
             getCommentsForFirstUserWithNames( 'Bret', 'Samantha' ).subscribe({
                 next( commentsLists ) {
                     console.log( commentsLists ); // [ response_data_from_obs1$, response_data_from_obs2$ ]
+                },
+                error( err ) {
+                    console.log( err.message );
                 }
             })
         </script>

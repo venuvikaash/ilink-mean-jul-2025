@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Document</title>
+        <style>
+            #error-message {
+                color: crimson;
+                font-size: 11px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="root">
+            <form method="POST" action="/login">
+                Username: <input type="text" name="username" id="username" />
+                Password: <input type="password" name="password" id="password" />
+                <button id="submit-button">Login</button>
+                <div id="error-message"></div>
+                <div id="giveaway">Psst... Username: john.doe@example.com / Password: password</div>
+            </form>
+        </div>
+    </body>
+</html>

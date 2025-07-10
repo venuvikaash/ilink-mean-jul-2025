@@ -1,0 +1,21 @@
+{
+    "name": "12-logging",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index-04.js",
+    "scripts": {
+        "start": "nodemon"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "app-root-path": "^2.1.0",
+        "chalk": "^4.1.1",
+        "debug": "^4.1.0",
+        "express": "^4.16.4",
+        "morgan": "^1.9.1",
+        "nodemon": "^2.0.12",
+        "winston": "^3.1.0"
+    }
+}
