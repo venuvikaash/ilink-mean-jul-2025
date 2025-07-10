@@ -2,8 +2,11 @@ const http = require( 'node:http' );
 
 const server = http.createServer(
     // request handler function - when an HTTP request comes from a client (say, browser), this function is called
+    // req -> first argument -> request object
+    // res -> second argument -> response object
     (req, res) => {
-        res.end( 'hello, world' );
+        console.log( req.method );
+        res.end( 'hello, world' ); // end() is a method of response object
     }
 );
 
