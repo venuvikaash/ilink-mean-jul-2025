@@ -13,10 +13,15 @@
 - Step 37: Setting up custom and cross-field validations
 - Step 41: Updating (Editing) workshop
 - All remaining steps in Angular which were demonstrated
+- Try all the RxJS code snippets which were demoed only
+- Try all Day 10 Node code
+- Explore transform streams
+- How 'error' event (if emitted by event emitter) has special status and MUST be handled.
 
 ## Questions
 - Best industry practices to not expose secrets from frontend
 - Does Angular provide any help for version upgrades? - Answered
+- What if we have read many chunks, stremed as response, but error occurs in a later chunk? What is a good way to handle it?
 
 ## Hosted backends
 - Workshops server - https://workshops-server.onrender.com/
