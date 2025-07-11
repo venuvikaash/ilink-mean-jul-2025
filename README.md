@@ -94,3 +94,11 @@
 - Higher-order mapping operators - `concatMap()`, `mergeMap()`
 - Operator composition using `pipe()`
 - Handling serial and parallel ajax calls with `switchMap()` and `forkJoin()`
+
+### Day 9: Node JS
+- Basic HTTP server
+- package.json and package-lock.json
+- Adding third-party modules - dependencies and development dependencies
+- Semantic versioning
+- Custom modules - modules.exports, exports, require, order of execution, module caching
+- Asynchronous programming - setTimeout, event queue and event loop, callbacks, callback hell, promises
