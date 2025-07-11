@@ -6,6 +6,11 @@ function sum( x, y ) {
             // console.log( typeof resolve ); // 'function'
             // console.log( typeof reject ); // 'function'
 
+            if ( typeof x !== 'number' || typeof y !== 'number' ) {
+                return reject( new Error( `At least one input was not a number. Received ${x}, ${y}` ) );
+                // return;
+            }
+
             setTimeout(
                 () => {
                     resolve( x + y ); // we are informing the promise object of the result (x + y)
@@ -26,7 +31,7 @@ sum( 1, 2 ) // p1
         function( result1 ) { // f
             console.log( result1 );
 
-            return sum( result1, 3 ); // NOTE: Not to forget to return the promise (p5) -> after some time when we get data 6
+            return sum( result1, 'hello' ); // NOTE: Not to forget to return the promise (p5) -> after some time when we get data 6
         }
     ) // p2 (p2 is a copycat of p5) -> p2 will also resolve with value 6
     .then(
@@ -40,6 +45,11 @@ sum( 1, 2 ) // p1
         function( result3 ) {
             console.log( result3 );
         }
-    ); // p4
+    ) // p4
+    .catch(
+        ( err ) => {
+            console.log( err.message );
+        }
+    ); // p6
 
 console.log( 'script ends' );

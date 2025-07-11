@@ -16,7 +16,7 @@
 
 ## Questions
 - Best industry practices to not expose secrets from frontend
-- Does Angular provide any help for version upgrades?
+- Does Angular provide any help for version upgrades? - Answered
 
 ## Hosted backends
 - Workshops server - https://workshops-server.onrender.com/
@@ -98,7 +98,7 @@
 ### Day 9: Node JS
 - Basic HTTP server
 - package.json and package-lock.json
-- Adding third-party modules - dependencies and development dependencies
+- Adding third-party modules - dependencies and development dependencies - nodemon, lodash
 - Semantic versioning
 - Custom modules - modules.exports, exports, require, order of execution, module caching
 - Asynchronous programming - setTimeout, event queue and event loop, callbacks, callback hell, promises
