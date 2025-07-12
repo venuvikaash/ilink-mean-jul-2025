@@ -107,3 +107,11 @@
 - Semantic versioning
 - Custom modules - modules.exports, exports, require, order of execution, module caching
 - Asynchronous programming - setTimeout, event queue and event loop, callbacks, callback hell, promises
+
+### Day 10: Advanced Node JS
+- async..await
+- readFile vs readFileSync, promise-based file handling, writeFile
+- Streamed file reading and writing, pipe() for connecting read and write streams
+- Event emitter for communication - on(), emit()
+- HTTP module - url, querystring, method, headers, status code
+- exec() for executing commands using the shell, and reading the results
