@@ -2206,9 +2206,9 @@ POST /api/auth/register
 
 ## Step 26: Hashing passwords using bcrypt
 - Passwords need to be hashed and store in databases so they are not available to anyone, including those with access to the database. The password needs to be __salted__ for additional security (even if 2 users have the same password, the hashed values are different - so a compromised password for one user, cannot be used to break into another user's account with the same password).
-- The `bcrypt` package that uses C++ modules under-the-hood (or `bcryptjs` for a pure JS implementation that is not as performant) is popularly used for this purpose (what we need can be implemented using the built-in crypto module, but the API is not as friendly). Additionally we need to generate JWTs. We shall use `jsonwebtoken` package for it. Install the packages
+- The `bcrypt` package that uses C++ modules under-the-hood (or `bcryptjs` for a pure JS implementation that is not as performant) is popularly used for this purpose (what we need can be implemented using the built-in crypto module, but the API is not as friendly). Install it
 ```bash
-npm i bcrypt jsonwebtoken
+npm i bcrypt
 ```
 - In `src/data/models/User.js` we set up a pre-save hook that hashes the password when a user is added (user registration). A convenience method is also added to the model methods, that will help verify the plain text password against the hashed password at the time of user login. Note that these have to be added to the schema before the model is created from it.
 ```js
@@ -2328,8 +2328,8 @@ const login = async ( req, res ) => {
             err.status = 403; // Email, password is provided but is incorrect -> 403
             throw err;
         } else {
-            err.status = 500;
-            throw err;
+            error.status = 500;
+            throw error;
         }
     }
 };
@@ -2344,6 +2344,7 @@ module.exports = {
 router.post( '/register', services.register );
 router.post( '/login', services.login );
 ```
+- __IMPORTANT__: You will need to create a fresh user account, as the one you may have created at the end of the earlier registration step would have the password stored as plain text.
 - Sample request
 ```
 POST /api/auth/login
@@ -2353,6 +2354,135 @@ POST /api/auth/login
     "password": "Password123#"
 }
 ```
+
+## Step 28: Generate and send a JWT on successful login
+- We shall generate a JSON Web Token (JWT) using the `jsonwebtoken` package. JWT hold user claims (privileges) along with other user information. The claims are digitally signed using a secret key on the server, and hence can be verified when access to secured API endpoints is needed. Install the package
+```bash
+npm i jsonwebtoken
+```
+- Add the secret key to `.env` - it will be used to sign the JWT (any key that is "secret enough" will do - like a password)
+```
+JWT_SECRET=xyz123abc%^&#
+```
+- In `src/controllers/users.controller.js` make the following change in the `login` method
+```js
+const jwt = require( 'jsonwebtoken' );
+```
+```js
+await services.checkPassword( user, password );
+
+// replace the code sending response currently with this...
+const claims = {
+    role: user.role,
+    email: user.email, // info useful for the backend in future requests
+};
+
+// The secret key which is used to generate the digital signature must be stored in environment variable and NEVER in code
+jwt.sign( claims, process.env.JWT_SECRET, function( error, token ) {
+    // some problem in generating JWT
+    if( error ) {
+        const err = new Error( "Internal Server Error" );
+        err.status = 500;
+        throw err;
+    }
+
+    res.json({
+        status: 'success',
+        data: {
+            name: user.name,
+            email: user.email, // useful for frontend app
+            // token: token
+            token
+        }
+    });
+});
+```
+
+## Step 29: Set up an authentication middleware
+- In `src/middleware/auth.js` add and export an `authenticate` middleware
+```js
+const jwt = require( 'jsonwebtoken' );
+
+const authenticate = ( req, res, next ) => {
+    const authHeader = req.header('Authorization');
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        const err = new Error( 'Missing or invalid Authorization header' );
+        err.status = 401;
+        throw err;
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    
+    jwt.verify( token, process.env.JWT_SECRET, function( error, claims ) {
+        if( error ) {
+            const err = new Error( 'Bad credentials' );
+            err.status = 401;
+            throw err;
+        }
+
+        res.locals.claims = claims;
+        
+        next();
+    });
+
+};
+
+module.exports = {
+    authenticate
+};
+```
+- Apply the above as a route-level middleware in `src/routes/workshops.route.js`. The order is important - it must be applied before the controller for the route, so that user is authenticated before the request reaches the controller.
+```js
+const { authenticate } = require( '../middleware/auth' );
+```
+```js
+router.route('/')
+    .get( controllers.getWorkshops )
+    .post( authenticate, controllers.postWorkshop );
+```
+- You should now, not be able to add a workshop unless you send the token correctly. Sample request
+```
+POST /api/workshops
+
+Header
+---
+Authorization: Bearer <token_obtained_on_login>
+
+Body
+---
+{
+    "name": "jQuery",
+    "category": "frontend",
+    "description": "jQuery is a JavaScript library",
+    "startDate": "2020-03-01T04:00:00.000Z",
+    "endDate": "2020-03-03T08:00:00.000Z",
+    "startTime": {
+        "hours": 9,
+        "minutes": 30
+    },
+    "endTime": {
+        "hours": 13,
+        "minutes": 30
+    },
+    "speakers": [
+        "John Doe",
+        "Jane Doe"
+    ],
+    "location": {
+        "address": "Tata Elxsi, Prestige Shantiniketan",
+        "city": "Bangalore",
+        "state": "Karnataka"
+    },
+    "modes": {
+        "inPerson": true,
+        "online": false
+    },
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/JQuery_logo.svg/524px-JQuery_logo.svg.png"
+}
+```
+
+## Step 30: 
 
 ## Step x: Enable file upload
 - We use `multer` package to upload files. Install `multer`
