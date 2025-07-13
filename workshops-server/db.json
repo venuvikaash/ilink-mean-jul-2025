@@ -59,6 +59,8 @@
     },
     {
       "name": "Mastering Node JS and Express",
+      "category": "backend",
+      "id": 4,
       "description": "<p><strong>Node.js</strong> is an open-source, cross-platform JavaScript run-time environment that executes JavaScript code outside of a browser. Typically, JavaScript is used primarily for client-side scripting, in which scripts written in JavaScript are embedded in a webpage's HTML and run client-side by a JavaScript engine in the user's web browser. Node.js lets developers use JavaScript to write command line tools and for server-side scripting - running scripts server-side to produce dynamic web page content before the page is sent to the user's web browser. Consequently, Node.js represents a \"JavaScript everywhere\" paradigm, unifying web application development around a single programming language, rather than different languages for server side and client side scripts.</p><p>The Node.js distributed development project, governed by the Node.js Foundation, is facilitated by the Linux Foundation's Collaborative Projects program.</p>",
       "startDate": "2019-10-20T07:00:00.000Z",
       "endDate": "2019-20-22T07:00:00.000Z",
@@ -71,12 +73,32 @@
       "modes": {
         "inPerson": true
       },
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Node.js_logo.svg/1024px-Node.js_logo.svg.png",
-      "id": 4
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Node.js_logo.svg/1024px-Node.js_logo.svg.png"
+    },
+    {
+      "name": "HTML and CSS",
+      "category": "frontend",
+      "id": 5,
+      "description": "HTML and CSS introduction",
+      "startDate": "2019-11-05T07:00:00.000Z",
+      "endDate": "2019-11-06T07:00:00.000Z",
+      "time": "9:00 am - 5:00 pm",
+      "location": {
+        "address": "Zenmonics",
+        "city": "Bangalore",
+        "state": "Karnataka"
+      },
+      "modes": {
+        "inPerson": true,
+        "online": false
+      },
+      "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAz1BMVEXjTyb////vZSrr6+vpWijtYSnr8PHuWg7jQwv61czjRxbvYR7owrz++fb5y7/mnpDjSx7r5ePouLDhPgD2sZ3leGDiRhXiSRvlUybvYSHuVwDiQQb76OTr8/ThOgD6497xrqH98/D73NLyt6vwq53jUiroc1jqgWrmmovrinXpzsj31M30wbbsk4DnbVDjWTXnrqPkYD/q2NTxdkX1pYv3var2rpb0m3zzj2v5zb7mZkXxfVHwajDqZz3odVrovrXmi3jyimXxe075xbX0noHFi51LAAANlElEQVR4nN3d61rbOBAGYAI0MYaAwZAAIQnhFE5JOJRDabeFpfd/TWvT7kKlmfnksRQvzL99nm3wi030RRopM7W3tZHMvP/qLPxhmvnjv07aVV+eh0r7gvA4rvryPFS6Iwj3W1VfnodqNQXheVT15XmopCYIFzpVX56HmkjCflr15ZWvZCwJdz6AsH0iCZsf4J0mPpaEtQ8w4rcOROHk/ROjc1E4fv/Czpko/ACxLd0ThR8gthmhzRQevP8307QpCj9AbGvXRGH42Db/yXNt/vn6yaUs3AseauZnPZcpHMvC8LEtuHAoC5vvT2i8fnskC8PHttBCM7RZwsvQxNDCaB8Ij96b8JMpXAbCYejYFlpohjZLOAod23wL503hDhAGj23BhQMg3A8d20ILoxoQLr93YYKEwWObb6EZaR6QMHhsCy00Q5slHIT+cOFbaLy8FdosYe29/R0aL99agcL3lmlMoRnabOFDYKJnIQxttnD4voXpGRSOAgfT0MI+FK4Ejm2ehTC02cLQy8CBhXETCkPHtsDCiemxhWeBQ41nIQxtthAvA0flqlGmtpDwOxYOkDBaWypTZwslau/OJBoXZy4AU8Im+pCfXtXLlHUFhep2URbGVmizhbUJEHZO58pUOeEdELZ2HYQotkVL9eqET+",
+      "createdDate": "Jun 21, 2019"
     },
     {
       "name": "TypeScript",
       "category": "language",
+      "id": 6,
       "description": "TypeScript language fundamentals",
       "startDate": "2019-06-24",
       "endDate": "2019-06-24",
@@ -90,8 +112,7 @@
         "inPerson": true,
         "online": false
       },
-      "imageUrl": "https://raw.githubusercontent.com/remojansen/logo.ts/master/ts.png",
-      "id": 6
+      "imageUrl": "https://raw.githubusercontent.com/remojansen/logo.ts/master/ts.png"
     },
     {
       "name": "Angular",
@@ -187,26 +208,6 @@
         "online": true
       },
       "imageUrl": "https://camo.githubusercontent.com/055e8995558e293e52e92d7c93b9ec49a9ea6c78/68747470733a2f2f63646e2e7261776769742e636f6d2f7a656b652f6a6176617363726970742d79656c6c6f772f6d61737465722f6c6f676f2e737667"
-    },
-    {
-      "name": "Some workshop",
-      "category": "backend",
-      "description": "Some description",
-      "startDate": "2025-07-07",
-      "endDate": "2025-07-10",
-      "time": "12:00 - 2:00 PM",
-      "location": {
-        "address": "Some adress",
-        "city": "",
-        "state": ""
-      },
-      "modes": {
-        "inPerson": true,
-        "online": false
-      },
-      "imageUrl": "https://someyrl.com/somimage",
-      "createdDate": "Jul 07, 2025",
-      "id": 13
     }
   ],
   "sessions": [
@@ -406,7 +407,7 @@
       "abstract": "In this session you will learn about the basics of usin Mobx",
       "upvoteCount": 3,
       "createdDate": "May 08, 2019",
-      "workshopId": "2",
+      "workshopId": 2,
       "id": 18
     },
     {
@@ -418,7 +419,7 @@
       "level": "Intermediate",
       "upvoteCount": 0,
       "createdDate": "May 10, 2019",
-      "workshopId": "1",
+      "workshopId": 1,
       "id": 24
     },
     {
@@ -611,22 +612,7 @@
       "upvoteCount": 505
     },
     {
-      "sequenceId": 12,
-      "workshopId": 2,
-      "upvoteCount": 0,
-      "duration": null,
-      "createdDate": "Jan 08, 2025",
-      "id": 45
-    },
-    {
-      "sequenceId": 13,
-      "workshopId": 2,
-      "upvoteCount": 0,
-      "duration": null,
-      "createdDate": "Jan 08, 2025",
-      "id": 46
-    },
-    {
+      "id": 47,
       "workshopId": 2,
       "upvoteCount": 0,
       "sequenceId": 123,
@@ -635,10 +621,10 @@
       "level": "Intermediate",
       "duration": 1,
       "abstract": "New session",
-      "createdDate": "Jan 08, 2025",
-      "id": 47
+      "createdDate": "Jan 08, 2025"
     },
     {
+      "id": 48,
       "sequenceId": 12,
       "name": "New session",
       "speaker": "John Doe",
@@ -647,8 +633,7 @@
       "abstract": "New session New session",
       "upvoteCount": 0,
       "workshopId": 2,
-      "createdDate": "May 23, 2025",
-      "id": 48
+      "createdDate": "May 23, 2025"
     }
   ],
   "users": [
