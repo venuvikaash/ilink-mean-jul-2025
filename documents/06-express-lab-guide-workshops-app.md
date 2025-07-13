@@ -814,10 +814,10 @@ module.exports = logger;
 - In `src/middleware/errors.js`
 ```js
 // resource not found middleware
-const notFoundHandler = ( req, res, next ) => {
+const notFoundHandler = ( req, res ) => {
     const err = new Error( 'Resource not found' );
     err.status = 404;
-    next( err );
+    throw err;
 };
 
 // global error handler middleware
@@ -944,7 +944,7 @@ const getWorkshops = (req, res) => {
     });
 };
 
-const postWorkshops = (req, res) => {
+const postWorkshop = (req, res) => {
     const newWorkshop = req.body;
 
     // Check if body is sent and not empty
@@ -978,7 +978,7 @@ const postWorkshops = (req, res) => {
 
 module.exports = {
     getWorkshops,
-    postWorkshops
+    postWorkshop
 };
 ```
 - In `src/routes/workshops.route.js`
@@ -990,7 +990,7 @@ const router = express.Router();
 
 router.route('/')
     .get( controllers.getWorkshops )
-    .post( controllers.postWorkshops );
+    .post( controllers.postWorkshop );
 
 module.exports = router;
 ```
@@ -1209,7 +1209,7 @@ const getWorkshops = async (req, res) => {
     });
 };
 
-const postWorkshops = async (req, res) => {
+const postWorkshop = async (req, res) => {
     const newWorkshop = req.body;
 
     // Check if body is sent and not empty
@@ -1233,7 +1233,7 @@ const postWorkshops = async (req, res) => {
 
 module.exports = {
     getWorkshops,
-    postWorkshops
+    postWorkshop
 };
 ```
 - You should now be able to get all workshops in the database (initially empty), and add new workshops. Also check if field validations are working fine. You will see most are, but type-casting is allowed by default (eg. name is passed as a number and is accepted). We disable this behavior by setting this in `src/data/init.js`
@@ -1365,7 +1365,7 @@ module.exports = {
 - Now in `src/controllers/workshops.controller.js`, we support `GET /api/workshops/:id`. Note how a dynamic path parameter is configured in the Express router - the `:` indicates a dynamic path parameter, and `id` shall be the property within `req.params` which shall be set to the actual value.
 ```js
 // http://localhost:3000/api/workshops/:id
-const getWorkshopById = async ( req, res, next ) => {
+const getWorkshopById = async ( req, res ) => {
     const id = req.params.id;
 
     try {
@@ -1385,7 +1385,7 @@ const getWorkshopById = async ( req, res, next ) => {
 module.exports = {
     getWorkshops,
     getWorkshopById,
-    postWorkshops
+    postWorkshop
 };
 ```
 - Add the route in `src/routes.workshops.route.js`. Note that since there is an extra dynamic path fragment, we need to configure the route separately.
@@ -1393,7 +1393,7 @@ module.exports = {
 router
   .route('/')
   .get(controllers.getWorkshops)
-  .post(controllers.postWorkshops);
+  .post(controllers.postWorkshop);
 
 router
   .route('/:id')
@@ -1456,7 +1456,7 @@ module.exports = {
 - In the controller `app/src/controllers/workshops.controller.js`
 ```js
 // @todo - Proper handling of error response status codes (400 vs 404)
-const patchWorkshop = async ( req, res, next ) => {
+const patchWorkshop = async ( req, res ) => {
     const id = req.params.id;
 
     const workshop = req.body;
@@ -1485,7 +1485,7 @@ const patchWorkshop = async ( req, res, next ) => {
 module.exports = {
     getWorkshops,
     getWorkshopById,
-    postWorkshops,
+    postWorkshop,
     patchWorkshop
 };
 ```
@@ -1493,7 +1493,7 @@ module.exports = {
 ```js
 router.route('/')
     .get( controllers.getWorkshops )
-    .post( controllers.postWorkshops );
+    .post( controllers.postWorkshop );
 
 router.route('/:id')
     .get( controllers.getWorkshopById )
@@ -1553,7 +1553,7 @@ module.exports = {
 ```
 - In
 ```js
-const deleteWorkshop = async ( req, res, next ) => {
+const deleteWorkshop = async ( req, res ) => {
     const id = req.params.id;
 
     try {
@@ -1572,7 +1572,7 @@ const deleteWorkshop = async ( req, res, next ) => {
 module.exports = {
     getWorkshops,
     getWorkshopById,
-    postWorkshops,
+    postWorkshop,
     patchWorkshop,
     deleteWorkshop
 };
@@ -1581,7 +1581,7 @@ module.exports = {
 ```js
 router.route('/')
     .get( controllers.getWorkshops )
-    .post( controllers.postWorkshops );
+    .post( controllers.postWorkshop );
 
 router.route('/:id')
     .get( controllers.getWorkshopById )
@@ -1646,7 +1646,7 @@ module.exports = {
 //     "john.doe@example.com",
 //     "jane.doe@example.com"
 // ]
-const addSpeakers = async ( req, res, next ) => {
+const addSpeakers = async ( req, res ) => {
     const id = req.params.id;
     const speakers = req.body;
 
@@ -1672,7 +1672,7 @@ const addSpeakers = async ( req, res, next ) => {
 module.exports = {
     getWorkshops,
     getWorkshopById,
-    postWorkshops,
+    postWorkshop,
     patchWorkshop,
     deleteWorkshop,
     addSpeakers
@@ -1682,7 +1682,7 @@ module.exports = {
 ```js
 router.route('/')
     .get( controllers.getWorkshops )
-    .post( controllers.postWorkshops );
+    .post( controllers.postWorkshop );
 
 router.route('/:id')
     .get( controllers.getWorkshopById )
@@ -1747,7 +1747,249 @@ const sessionSchema = new mongoose.Schema({
 
 module.exports = mongoose.model('Session', sessionSchema);
 ```
-- Make changes in `src/data/models/Workshop.js` so it gets a __virtual field__ which shall hold the array of sessions for the workshop. When sending out workshop(s) in the response we generally would like the virtual fields to be serialized to JSON as well. For this reason we add appropriate options when setting up the `Workshop` model.
+- Import the new model file in `src/data/init.js` so the `Session` model is defined at app startup.
+```js
+require( './models/Workshop' );
+require( './models/Session' );
+```
+
+## Step 20: API to add a topics (sessions)
+- In `src/services/sessions.service.js`
+```js
+const mongoose = require( 'mongoose' );
+const Session = mongoose.model( 'Session' );
+const Workshop = mongoose.model( 'Workshop' );
+
+const addSession = async ( session ) => {
+    let workshop;
+
+    try {
+        workshop = await Workshop.findById( session.workshopId );
+
+        if ( workshop ) {
+            const insertedSession = await Session.create( session );
+            return insertedSession;
+        }
+    } catch( error ) {
+        if( error.name === 'ValidationError' ) {
+            const dbError = new Error( `Validation error : ${error.message}` );
+            dbError.type = 'ValidationError';
+            throw dbError;
+        }
+
+        if( error.name === 'CastError' ) {
+            const dbError = new Error( `Data type error : ${error.message}` );
+            dbError.type = 'CastError';
+            throw dbError;
+        }
+    }
+
+    if( !workshop ) {
+        const error = new Error( `Workshop not found` );
+        error.type = 'ValidationError';
+        throw error;
+    }
+};
+
+module.exports = {
+    addSession
+};
+```
+- In `src/controllers/sessions.controller.js`
+```js
+const services = require( '../services/sessions.service' );
+
+const postSession = async ( req, res ) => {
+    const session = req.body;
+    
+    try {
+        let newSession = await services.addSession( session );
+        
+        res.status( 201 ).json({
+            status: 'success',
+            data: newSession
+        });
+    } catch( error ) {
+        error.status = 400;
+        throw error;
+    }
+};
+
+module.exports = {
+    postSession
+}
+```
+- In `src/routes/sessions.route.js`
+```js
+const express = require( 'express' );
+const services = require( '../controllers/sessions.controller' );
+
+const router = express.Router();
+
+router.route('/')
+    .post( services.postSession );
+
+module.exports = router;
+```
+- Add the new router as a middleware in `src/app.js`
+```js
+const sessionsRouter = require( './routes/sessions.route' );
+```
+```js
+app.use( '/api/sessions', sessionsRouter );
+```
+- Sample request
+```
+POST /api/sessions
+
+{
+    "workshopId": "68736598bcd41b2ebd0233e1",
+    "sequenceId": 1,
+    "name": "Introduction to Express JS",
+    "speaker": "John Doe",
+    "duration": 1,
+    "level": "Basic",
+    "abstract": "In this session you will learn about the basics of Express JS"
+}
+```
+
+## Step 21: Add a topic through workshops route
+- With REST APIs, related resources can often be accesed in multiple ways. For example, we shall support accessing sessions both standalone (`/api/sessions`), and through the resource workshop resource (`/api/workshops/:id/sessions`). We now make changes to support access via the second route.
+- In `src/controllers/workshops.controller.js`
+```js
+const sessionServices = require( '../services/sessions.service' );
+```
+```js
+const postSession = async ( req, res ) => {
+    const workshopId = req.params.id;
+
+    const session = {
+        // workshopId: workshopId,
+        workshopId,
+        ...req.body
+    };
+    
+    try {
+        let newSession = await sessionServices.addSession( session );
+        
+        res.status( 201 ).json({
+            status: 'success',
+            data: newSession
+        });
+    } catch( error ) {
+        error.status = 400;
+        throw error;
+    }
+};
+```
+```js
+module.exports = {
+    // existing exports...
+    // ...,
+
+    postSession
+};
+```
+- In `src/routes/workshops.route.js` add this
+```js
+router.route( '/:id/sessions' )
+    .post( controllers.postSession );
+```
+- Sample request
+```
+POST /api/workshops/68736598bcd41b2ebd0233e1/sessions
+
+{
+    "sequenceId": 1,
+    "name": "Introduction to Express JS",
+    "speaker": "John Doe",
+    "duration": 1,
+    "level": "Basic",
+    "abstract": "In this session you will learn about the basics of Express JS"
+}
+```
+
+## Step 22: Fetching all sessions of a workshop
+- In `src/services/sessions.service.js`
+```js
+const getSessions = async ( workshopId ) => {
+    let workshop;
+
+    try {
+        workshop = await Workshop.findById( workshopId );
+
+        if( workshop ) {
+            const sessions = await Session.find({
+                workshopId: workshopId
+            });
+            return sessions;
+        }
+    } catch( error ) {
+        if( error.name === 'CastError' ) {
+            const dbError = new Error( `Data type error : ${error.message}` );
+            dbError.type = 'CastError';
+            throw dbError;
+        }
+    }
+
+    if( !workshop ) {
+        const error = new Error( `Workshop not found` );
+        error.type = 'NotFound';
+        throw error;
+    }
+};
+```
+```js
+module.exports = {
+    addSession,
+    getSessions
+};
+```
+- In `src/controllers/workshops.controller.js`
+```js
+// Sample: http://localhost:3000/api/workshops/62ed150ad0d302eca77f0f38/sessions
+const getSessions = async ( req, res ) => {
+    const workshopId = req.params.id;
+
+    try {
+        const sessions = await sessionServices.getSessions( workshopId );
+        res.json({
+            status: 'success',
+            data: sessions
+        });
+    } catch( error ) {
+        if( error.type === 'CastError' ) {
+            error.status = 400;
+            throw error;
+        } else if( error.type === 'NotFound' ) {
+            error.status = 404;
+            throw error;
+        }
+    }
+};
+```
+```js
+module.exports = {
+    // existing exports...
+    // ...,
+
+    getSessions
+};
+```
+- In `src/routes/workshops.route.js`
+```js
+router.route( '/:id/sessions' )
+    .get( controllers.getSessions )
+    .post( controllers.postSession );
+```
+- Sample request
+```
+GET http://localhost:3000/api/workshops/62ed150ad0d302eca77f0f38/sessions
+```
+- __EXERCISE__: Modify the service, controller and add count of documents to the response.
+
+## Step 23: Embed sessions when fetching details of a workshop
+- We enable serving the list of sessions along with the workshop details. Make changes in `src/data/models/Workshop.js` so it gets a __virtual field__ which shall hold the array of sessions for the workshop. When sending out workshop(s) in the response we generally would like the virtual fields to be serialized to JSON as well. For this reason we add appropriate options when setting up the `Workshop` model.
 ```js
 const workshopsSchema = new mongoose.Schema(
     {
@@ -1766,67 +2008,49 @@ workshopsSchema.virtual( 'sessions', {
     foreignField: 'workshopId' // the field in the other collection (Session) that references a document in this collection (Workshop)
 });
 ```
-- Import the new model file in `src/data/init.js` so the `Session` model is defined at app startup.
+- In `src/services/workshops.service.js` makes changes to populate the virtual `sessions` property with the list of sessions for the workshop, if `embedSessions` is set to `true`. For this we use the Mongoose model method - `populate()`
 ```js
-require( './models/Workshop' );
-require( './models/Session' );
-```
-
-## Step 20: API to add a topics (sessions)
-- In `src/services/sessions.service.js`
-```js
-const mongoose = require( 'mongoose' );
-const Session = mongoose.model( 'Session' );
-
-const addSession = async ( session ) => {
+const getWorkshopById = async (id, embedSessions = false) => {
     try {
-        const insertedSession = await Session.create( session );
-        return insertedSession;
-    } catch( error ) {
-        if( error.name === 'ValidationError' ) {
-            const dbError = new Error( `Validation error : ${error.message}` );
-            dbError.type = 'ValidationError';
-            throw dbError;
-        }
+        const query = Workshop.findById( id );
         
-        if( error.name === 'CastError' ) {
-            const dbError = new Error( `Data type error : ${error.message}` );
-            dbError.type = 'CastError';
-            throw dbError;
+        if ( embedSessions ) {
+            query.populate( 'sessions' );
         }
+
+        const workshop = await query.exec();
+        
+        // rest of code...
+        // ...
+    } catch ( error ) {
+        // rest of code...
+        // ...
+    }
+}
+```
+- In `src/controllers/workshops.controller.js` pass on `embedSessions` based on the `embed` query string parameter value.
+```js
+// http://localhost:3000/api/workshops/:id
+// http://localhost:3000/api/workshops/:id?embed=sessions
+const getWorkshopById = async ( req, res ) => {
+    const id = req.params.id;
+    const embedSessions = req.query.embed === 'sessions';
+
+    try {
+        const workshop = await services.getWorkshopById( id, embedSessions );
+
+        res.json({
+            status: 'success',
+            data: workshop
+        });
+    } catch( error ) {
+        error.status = 404;
+        throw error;
     }
 };
-
-module.exports = {
-    addSession
-};
 ```
-- In `src/controllers/sessions.controller.js`
-```js
+- Sample requests
 ```
-- In `src/routes/sessions.route.js`
-```js
-const express = require( 'express' );
-const services = require( '../controllers/sessions.controller' );
-
-const router = express.Router();
-
-router.route('/')
-    .post( services.postSession );
-
-module.exports = router;
-```
-- Sample request
-```
-POST /api/sessions
-
-{
-    "workshopId": "68736598bcd41b2ebd0233e1",
-    "sequenceId": 1,
-    "name": "Introduction to Express JS",
-    "speaker": "John Doe",
-    "duration": 1,
-    "level": "Basic",
-    "abstract": "In this session you will learn about the basics of Express JS"
-}
+GET http://localhost:3000/api/workshops/62ed150ad0d302eca77f0f38
+GET http://localhost:3000/api/workshops/62ed150ad0d302eca77f0f38?embed=sessions
 ```
