@@ -2054,3 +2054,308 @@ const getWorkshopById = async ( req, res ) => {
 GET http://localhost:3000/api/workshops/62ed150ad0d302eca77f0f38
 GET http://localhost:3000/api/workshops/62ed150ad0d302eca77f0f38?embed=sessions
 ```
+
+## Step 24: Enable authentication and authorization - Add user model
+- We now enable authentication and authorization. First add the `User` model in `src/data/models/User.js`. Note how we set up custom validators on certain paths (fields). Note that these have to be added to the schema before the model is created from it.
+```js
+const mongoose = require( 'mongoose' );
+
+const userSchema = new mongoose.Schema({
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    role: {
+        type: String,
+        default: 'general',
+        enum: [ 'admin', 'general' ]
+    }
+});
+
+const emailPat = /^[A-Za-z0-9_\.]+@example\.com$/;
+const passwordPat = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,16}$/;
+
+// we can customize the schema further before model is created
+userSchema.path( 'email' ).validate(
+    email => emailPat.test( email ),
+    "Invalid email. Please make sure the email is an example.com email."
+);
+
+userSchema.path( 'password' ).validate(
+    password => passwordPat.test( password ),
+    "Password must have at least 1 upper case, 1 lower case, 1 digit, 1 special characters, and should be 8 characters in length."
+);
+
+mongoose.model( 'User', userSchema );
+```
+- Import the new model file in `src/data/init.js` so the `User` model is defined at app startup.
+```js
+require( './models/User' );
+require( './models/Workshop' );
+require( './models/Session' );
+```
+
+## Step 25: Add user registration support
+- In `src/services/users.service.js`
+```js
+const mongoose = require( 'mongoose' );
+const User = mongoose.model( 'User' );
+
+const addUser = async ( user ) => {
+    try {
+        const insertedUser = await User.create( user );
+        return insertedUser;
+    } catch( error ) {
+        if( error.name === 'ValidationError' ) {
+            const dbError = new Error( `Validation error : ${error.message}` );
+            dbError.type = 'ValidationError';
+            throw dbError;
+        }
+        
+        if( error.name === 'CastError' ) {
+            const dbError = new Error( `Data type error : ${error.message}` );
+            dbError.type = 'CastError';
+            throw dbError;
+        }
+
+        throw error;
+    }
+};
+
+module.exports = {
+    addUser
+};
+```
+- In `src/controllers/users.controller.js`
+```js
+const services = require( '../services/users.service' );
+
+const register = async ( req, res ) => {
+    const user = req.body;
+
+    // if user = req.body -> {}
+    if( Object.keys( user ).length === 0 ) {
+        const error = new Error( "Body is missing" );
+        error.status = 400;
+        throw error;
+    }
+
+    try {
+        const updatedUser = await services.addUser( user );
+        const userToSend = {
+            ...updatedUser.toObject()
+        };
+        delete userToSend.password;
+
+        res.status( 201 ).json({
+            status: 'success',
+            data: userToSend // internally userToSend.toJSON() runs which returns details about the user that are part of the user document
+        });
+    } catch( error ) {
+        error.status = 400;
+        throw error;
+    }
+};
+
+module.exports = {
+    register
+};
+```
+- In `src/routes/users.route.js`
+```js
+const express = require( 'express' );
+const services = require( '../controllers/users.controller' );
+
+const router = express.Router();
+
+router.post( '/register', services.register );
+
+module.exports = router;
+```
+- Set the router as an application middleware in `src/app.js`
+```js
+const usersRouter = require( './routes/users.route' );
+```
+```js
+app.use( indexRouter );
+app.use( '/api/auth', usersRouter );
+app.use( '/api/workshops', workshopsRouter );
+app.use( '/api/sessions', sessionsRouter );
+```
+- You should now be able to register a user. Sample request
+```
+POST /api/auth/register
+
+{
+    "email": "john.doe@example.com",
+    "name": "John Doe",
+    "password": "Password123#",
+    "role": "admin"
+}
+```
+- __NOTE__: A public registration API like this would not support adding users with _admin_ role. Here it is enabled just for convenience.
+
+## Step 26: Hashing passwords using bcrypt
+- Passwords need to be hashed and store in databases so they are not available to anyone, including those with access to the database. The password needs to be __salted__ for additional security (even if 2 users have the same password, the hashed values are different - so a compromised password for one user, cannot be used to break into another user's account with the same password).
+- The `bcrypt` package that uses C++ modules under-the-hood (or `bcryptjs` for a pure JS implementation that is not as performant) is popularly used for this purpose (what we need can be implemented using the built-in crypto module, but the API is not as friendly). Additionally we need to generate JWTs. We shall use `jsonwebtoken` package for it. Install the packages
+```bash
+npm i bcrypt jsonwebtoken
+```
+- In `src/data/models/User.js` we set up a pre-save hook that hashes the password when a user is added (user registration). A convenience method is also added to the model methods, that will help verify the plain text password against the hashed password at the time of user login. Note that these have to be added to the schema before the model is created from it.
+```js
+const bcrypt = require( 'bcrypt' );
+```
+```js
+// IMPORTANT: Decides the "strength" of the salt (should not be too high as salting will take long time and occupy CPU time (blocking) - nothing else will execute in the app in that time. should not be too low, else the password is not securely hashed)
+const SALT_ROUNDS = 10;
+
+// IMPORTANT: DO NOT use arrow function here (the "this" binding will not be set correctly for an arrow function)
+userSchema.pre( 'save', function( done ) {
+    const user = this; // const user -> new User()
+
+    if( !user.isModified( 'password' ) ) {
+        return done();
+    }
+
+    bcrypt.genSalt( SALT_ROUNDS, function( err, salt ) {
+        if( err ) {
+            return done( err ); // Mongoose will not insert the user document 
+        }
+
+        bcrypt.hash( user.password, salt, function( err, hashedPassword ) {
+            if( err ) {
+                return done( err );
+            }
+
+            user.password = hashedPassword;
+            done(); // pass no arguments to done() to signify success
+        });
+    })
+});
+
+// will be used to compare plain text password with the hashed password at the time of login
+userSchema.methods.checkPassword = async function( plainTextPassword ) {
+    const hashedPassword = this.password;
+    
+    // this line will throw an error sometimes
+    // if on the other hand bcrypt is able to compare it will return true / false
+    const isMatch = await bcrypt.compare( plainTextPassword, hashedPassword );
+    return isMatch;
+}
+
+mongoose.model( 'User', userSchema );
+```
+
+## Step 27: Add login support
+- In `src/services/users.service.js`
+```js
+const getUserByEmail = async ( email ) => {
+    const user = await User.findOne({
+        // email: email
+        email
+    });
+
+    if( user === null ) {
+        const error = new Error( 'Bad Credentials' );
+        error.type = 'BadCredentials';
+        throw error;
+    }
+
+    return user;
+};
+
+const checkPassword = async ( user, plainTextPassword ) => {
+    let  isMatch;
+
+    try {
+        isMatch = await user.checkPassword( plainTextPassword );
+    } catch( err ) {
+        const error = new Error( 'Something went wrong checking credentials' );
+        error.type = 'DBError';
+        throw error;
+    }
+
+    if( !isMatch ) {
+        const error = new Error( 'Bad Credentials' );
+        error.type = 'BadCredentials';
+        throw error;
+    }
+
+    return isMatch;
+};
+
+module.exports = {
+    addUser,
+    getUserByEmail,
+    checkPassword
+};
+```
+- In `src/controllers/users.controller.js`
+```js
+const login = async ( req, res ) => {
+    const credentials = req.body;
+
+    if( !( credentials?.email && credentials?.password ) ) {
+        const error = new Error( "Bad request" );
+        error.status = 400;
+        throw error;
+    }
+
+    const { email, password } = credentials;
+
+    try {
+        const user = await services.getUserByEmail( email );
+
+        await services.checkPassword( user, password );
+
+        res.json({
+            status: 'success',
+            data: "Token to be generated"
+        });
+    } catch( error ) {
+        if( error.type === 'BadCredentials' ) {
+            // It is a good practice not to expose to the client what exactly went wrong - such information could aid hackers
+            const err = new Error( "Bad credentials" );
+            err.status = 403; // Email, password is provided but is incorrect -> 403
+            throw err;
+        } else {
+            err.status = 500;
+            throw err;
+        }
+    }
+};
+
+module.exports = {
+    register,
+    login
+};
+```
+- In `src/routes/users.route.js`, add the login route
+```js
+router.post( '/register', services.register );
+router.post( '/login', services.login );
+```
+- Sample request
+```
+POST /api/auth/login
+
+{
+    "email": "john.doe@example.com",
+    "password": "Password123#"
+}
+```
+
+## Step x: Enable file upload
+- We use `multer` package to upload files. Install `multer`
+```bash
+npm i multer
+```
