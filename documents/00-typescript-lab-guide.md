@@ -716,10 +716,6 @@ function speak(animal: Animal) {
 ```
 - When the function `isDog` returns `true`, TypeScript narrows the type of `animal` to `Dog`
 
-💯 Yes! That’s **exactly** a **discriminated union** 👏
-
-You're on point.
-
 ---
 
 ## Step 18: Discriminated union
@@ -762,7 +758,7 @@ Not strictly! In this case, **no** — because TypeScript can already narrow bas
 BUT… a custom guard like `isDog()` can still be useful if:
 - You want to **encapsulate** the logic (especially if it gets complex).
 - You want to **reuse** the check across multiple places.
-- You’re working with more complex unions or partial objects where `kind` isn't guaranteed to exist.
+- You are working with more complex unions or partial objects where `kind` isn't guaranteed to exist.
 
 ### Step 19: Utility types
 
