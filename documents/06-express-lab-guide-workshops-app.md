@@ -1065,9 +1065,9 @@ const timeSchema = require( './Time' );
 
 /**
  * In MongoDB, the documents can store related information together
- * For example, we can store the topics for a particular workshop
- *      1. in the workshop document as an array, say "topics" (preferred way)
- *      2. in a separate collection (say, Topics), and store the array of related topic ids
+ * For example, we can store the sessions (topics) for a particular workshop
+ *      1. in the workshop document as an array, say "sessions" (preferred way)
+ *      2. in a separate collection (say, Sessions), and store the array of related session ids
  */
 const workshopsSchema = new mongoose.Schema(
   {
@@ -1126,15 +1126,15 @@ const workshopsSchema = new mongoose.Schema(
         required: true
     },
 
-    // 1. store topics as an array - preferred way
-    // topics: {
+    // 1. store sessions as an array - preferred way
+    // sessions: {
     //     type: [
-    //         topicSchema
+    //         sessionSchema
     //     ]
     // }
 
-    // 2. store topic ids
-    // topics: {
+    // 2. store session ids
+    // sessions: {
     //     type: [ mongoose.Schema.Types.ObjectId ]
     // },
   }
@@ -1261,11 +1261,22 @@ require( './models/Workshop' );
 - Restart and check now - you should not be able to add name as a number (for example).
 
 ## Step 14: Adding sorting and pagination support
-- We now support serving the list of workshop sorted by a user-supplied field, and also 10 records at a time. In the service `src/services/workshops.service.js`
+- We now support serving the list of workshop sorted by a user-supplied field, and also 10 records at a time. Additionally list API does not need to serve all fields to the client - hence we omit description, reducing the API response size. Both `find()` and `countDocuments()` take a filtering criteria as an argument. In the service `src/services/workshops.service.js`
 ```js
-const getAllWorkshops = async (page, sortField) => {
+const getAllWorkshops = async (page, sortField, category = '') => {
+    const filters = {};
+
+    if (category) {
+        filters.category = category;
+    }
+
     // if we do not await, the query does not execute immediately (it will only execute when the function pauses/completes without pausing) - this allows us to customize the query (Add sorting, pagination etc.)
-    const query = Workshop.find();
+    const query = Workshop.find(filters);
+
+    // We can either blacklist or whitelist fields. Here we blacklist (i.e. omit certain fields)
+    query.select({
+        description: false
+    });
 
     if (sortField) {
         query.sort({
@@ -1276,16 +1287,25 @@ const getAllWorkshops = async (page, sortField) => {
     // pagination (assuming 10 per page)
     query.skip(10 * (page - 1)).limit(10);
 
-    const workshops = await query.exec();
-    return workshops;
+    const [ workshops, count ] = await Promise.all(
+        [
+            query.exec(),
+            Workshop.countDocuments(filters)
+        ]
+    );
+
+    return {
+        workshops,
+        count
+    };
 };
 ```
 - In the controller `src/controllers/workshops.controller.js` we add support for `page` and `sort` query string parameters.
 ```js
 // http://localhost:3000/api/workshops
-// http://localhost:3000/api/workshops?page=1&sort=name
+// http://localhost:3000/api/workshops?page=1&sort=name&category=frontend
 const getWorkshops = async ( req, res ) => {
-    let { page, sort : sortField } = req.query;
+    let { page, sort : sortField, category } = req.query;
 
     if( page ) {
         page = +page;
@@ -1293,7 +1313,7 @@ const getWorkshops = async ( req, res ) => {
         page = 1;
     }
 
-    const workshops = await services.getAllWorkshops( page, sortField );
+    const workshops = await services.getAllWorkshops( page, sortField, category );
 
     // send(), redirect(), json(), sendFile(), render() are other methods on response `res` object
     res.json({
@@ -1305,7 +1325,7 @@ const getWorkshops = async ( req, res ) => {
 - Some sample requests
 ```
 http://localhost:3000/api/workshops
-http://localhost:3000/api/workshops?page=1&sort=name
+http://localhost:3000/api/workshops?page=1&sort=name&category=frontend
 ```
 
 ## Step 15: Support getting a single workshop by its id
@@ -1573,3 +1593,240 @@ router.route('/:id')
 DELETE http://localhost:3000/api/workshops/6873679dac11710477aa5d60
 ```
 
+## Step 18: Adding speakers
+- If we do not want to replace and array field, and instead want to handle updates to it differently - for example by pushing new items to it, we need to do updates a bit differently (for example using the MongoDB `$addToSet` operator). We now support adding speakers for a workshop this way.
+- In `src/services/workshops.service.js`
+```js
+const addSpeakers = async (id, speakers) => {
+    // by default, $set is applied to the fields
+    // Therefore we ned to construct the update clause ourselves
+    const updateClause = {
+        $addToSet: {
+            speakers: {
+                $each: speakers,
+            },
+        },
+    };
+
+    try {
+        const updatedWorkshop = await Workshop.findByIdAndUpdate(
+            id,
+            updateClause
+        );
+        return updatedWorkshop;
+    } catch (error) {
+        if (error.name === "CastError") {
+            const dbError = new Error(`Data type error : ${error.message}`);
+            dbError.type = "CastError";
+            throw dbError;
+        } else if (error.name === "ValidationError") {
+            const dbError = new Error(`Validation error : ${error.message}`);
+            dbError.type = "ValidationError";
+            throw dbError;
+        } else {
+            throw error;
+        }
+    }
+};
+```
+```js
+module.exports = {
+    getAllWorkshops,
+    getWorkshopById,
+    addWorkshop,
+    updateWorkshop,
+    deleteWorkshop,
+    addSpeakers
+};
+```
+- In `src/controllers/workshops.controller.js`
+```js
+// http://localhost:3000/api/workshops/62ed07b0437f58e437c01f57/speakers
+// body -> [
+//     "john.doe@example.com",
+//     "jane.doe@example.com"
+// ]
+const addSpeakers = async ( req, res, next ) => {
+    const id = req.params.id;
+    const speakers = req.body;
+
+    if( !( speakers instanceof Array ) || speakers.length === 0 ) {
+        const error = new Error( "Speakers must be a non-empty array. Data is missing or formed incorrectly" );
+        error.status = 400;
+        throw error;
+    }
+
+    try {
+        const updatedWorkshop = await services.addSpeakers( id, speakers );
+        res.json({
+            status: 'success',
+            data: updatedWorkshop
+        });
+    } catch( error ) {
+        error.status = 404;
+        throw error;
+    }
+};
+```
+```js
+module.exports = {
+    getWorkshops,
+    getWorkshopById,
+    postWorkshops,
+    patchWorkshop,
+    deleteWorkshop,
+    addSpeakers
+};
+```
+- In `src/routes/workshops.route.js`
+```js
+router.route('/')
+    .get( controllers.getWorkshops )
+    .post( controllers.postWorkshops );
+
+router.route('/:id')
+    .get( controllers.getWorkshopById )
+    .patch( controllers.patchWorkshop )
+    .delete( controllers.deleteWorkshop );
+
+router.route('/:id/speakers' )
+    .patch( controllers.addSpeakers );
+```
+- Sample request
+```
+PATCH localhost:3000/api/workshops/6873676dc9f4ad0bf84713f0/speakers
+
+[
+    "Diana Taylor",
+    "David Taylor"
+]
+```
+
+## Step 19: Adding topics for workshops - The Session Model
+- We shall add topics (called sessions in the application) for a workshop. Begin by defining a `Session` model in `src/data/models/Session.js`
+```js
+const mongoose = require('mongoose');
+
+const sessionSchema = new mongoose.Schema({
+  workshopId: {
+    type: Number,
+    required: true
+  },
+  sequenceId: {
+    type: Number,
+    required: true
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  speaker: {
+    type: String,
+    required: true
+  },
+  duration: {
+    type: Number,
+    required: true, // assuming duration is in hours
+    min: 0.25        // optional: 15 minutes as minimum
+  },
+  level: {
+    type: String,
+    enum: ['Basic', 'Intermediate', 'Advanced'],
+    required: true
+  },
+  abstract: {
+    type: String,
+    required: true,
+    maxlength: 1024
+  },
+  upvoteCount: {
+    type: Number,
+    default: 0
+  }
+});
+
+module.exports = mongoose.model('Session', sessionSchema);
+```
+- Make changes in `src/data/models/Workshop.js` so it gets a __virtual field__ which shall hold the array of sessions for the workshop. When sending out workshop(s) in the response we generally would like the virtual fields to be serialized to JSON as well. For this reason we add appropriate options when setting up the `Workshop` model.
+```js
+const workshopsSchema = new mongoose.Schema(
+    {
+        // the field defintions
+        // existing code...
+    },
+    {
+        toObject: { virtuals: true },
+        toJSON: { virtuals: true }
+    }
+);
+
+workshopsSchema.virtual( 'sessions', {
+    ref: 'Session',
+    localField: '_id',
+    foreignField: 'workshopId' // the field in the other collection (Session) that references a document in this collection (Workshop)
+});
+```
+- Import the new model file in `src/data/init.js` so the `Session` model is defined at app startup.
+```js
+require( './models/Workshop' );
+require( './models/Session' );
+```
+
+## Step 20: API to add a topics (sessions)
+- In `src/services/sessions.service.js`
+```js
+const mongoose = require( 'mongoose' );
+const Session = mongoose.model( 'Session' );
+
+const addSession = async ( session ) => {
+    try {
+        const insertedSession = await Session.create( session );
+        return insertedSession;
+    } catch( error ) {
+        if( error.name === 'ValidationError' ) {
+            const dbError = new Error( `Validation error : ${error.message}` );
+            dbError.type = 'ValidationError';
+            throw dbError;
+        }
+        
+        if( error.name === 'CastError' ) {
+            const dbError = new Error( `Data type error : ${error.message}` );
+            dbError.type = 'CastError';
+            throw dbError;
+        }
+    }
+};
+
+module.exports = {
+    addSession
+};
+```
+- In `src/controllers/sessions.controller.js`
+```js
+```
+- In `src/routes/sessions.route.js`
+```js
+const express = require( 'express' );
+const services = require( '../controllers/sessions.controller' );
+
+const router = express.Router();
+
+router.route('/')
+    .post( services.postSession );
+
+module.exports = router;
+```
+- Sample request
+```
+POST /api/sessions
+
+{
+    "workshopId": "68736598bcd41b2ebd0233e1",
+    "sequenceId": 1,
+    "name": "Introduction to Express JS",
+    "speaker": "John Doe",
+    "duration": 1,
+    "level": "Basic",
+    "abstract": "In this session you will learn about the basics of Express JS"
+}
+```
