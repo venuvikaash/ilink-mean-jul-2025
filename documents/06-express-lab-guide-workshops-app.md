@@ -77,7 +77,7 @@ npm start
 
 ## Step 4: Modularizing routing using Router
 - An app would have routes for various resources (`workshops`, `sessions`, `users` etc.). It is better to use the alternative way of setting up routes for every resource in a separate file. The `Router` object of Express helps do exactly this. We use one for every resource instead of setting up all routes on the `Application` object.
-- First in `src/routes/index.route.js`, add the router with the index route (home route) set up. Note the difference between `res.end()` and `res.send()`.
+- First in `src/routes/index.route.js`, add the router with the index route (home route) set up. Note the difference between `res.end()` and `res.send()`. Redirection mechanism is also shown.
 ```js
 const express = require( 'express' );
 
@@ -86,6 +86,11 @@ const router = express.Router();
 router.get('/', ( req, res ) => {
     // res.send() is an Express method built on top of Node JS ServerResponse object's res.end(). It automatically sets the appropriate Content-Type header based on the data.
     res.send( 'This is the workshops app. It serves details of workshops happening nearby.' );
+});
+
+router.get( '/home', ( req, res ) => {
+    // tell the browser to make request to / instead. On receiving this response, the browser makes a new request to /
+    res.redirect( '/' );
 });
 
 module.exports = router;
@@ -110,213 +115,363 @@ app.listen( PORT );
 ```json
 [
     {
-      "name": "Angular JS Bootcamp",
-      "category": "frontend",
-      "id": 1,
-      "description": "<p><strong>AngularJS</strong> (also written as <strong>Angular.js</strong>) is a JavaScript-based open-source front-end web application framework mainly maintained by Google and by a community of individuals and corporations to address many of the challenges encountered in developing single-page applications.</p><p>It aims to simplify both the development and the testing of such applications by providing a framework for client-side model–view–controller (MVC) and model–view–viewmodel (MVVM) architectures, along with components commonly used in rich Internet applications. (This flexibility has led to the acronym MVW, which stands for \"model-view-whatever\" and may also encompass model–view–presenter and model–view–adapter.)</p>",
-      "startDate": "2019-01-01T04:00:00.000Z",
-      "endDate": "2019-01-03T08:00:00.000Z",
-      "time": "9:30 am - 1:30 pm",
-      "location": {
-        "address": "Tata Elxsi, Prestige Shantiniketan",
-        "city": "Bangalore",
-        "state": "Karnataka"
-      },
-      "modes": {
-        "inPerson": true,
-        "online": false
-      },
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/AngularJS_logo.svg/2000px-AngularJS_logo.svg.png"
+        "id": 1,
+        "name": "Angular JS Bootcamp",
+        "category": "frontend",
+        "description": "<p><strong>AngularJS</strong> (also written as <strong>Angular.js</strong>) is a JavaScript-based open-source front-end web application framework mainly maintained by Google and by a community of individuals and corporations to address many of the challenges encountered in developing single-page applications.</p><p>It aims to simplify both the development and the testing of such applications by providing a framework for client-side model–view–controller (MVC) and model–view–viewmodel (MVVM) architectures, along with components commonly used in rich Internet applications. (This flexibility has led to the acronym MVW, which stands for \"model-view-whatever\" and may also encompass model–view–presenter and model–view–adapter.)</p>",
+        "startDate": "2019-01-01T04:00:00.000Z",
+        "endDate": "2019-01-03T08:00:00.000Z",
+        "startTime": {
+            "hours": 9,
+            "minutes": 30
+        },
+        "endTime": {
+            "hours": 13,
+            "minutes": 30
+        },
+        "speakers": [
+            "John Doe",
+            "Jane Doe"
+        ],
+        "location": {
+            "address": "Tata Elxsi, Prestige Shantiniketan",
+            "city": "Bangalore",
+            "state": "Karnataka"
+        },
+        "modes": {
+            "inPerson": true,
+            "online": false
+        },
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/AngularJS_logo.svg/2000px-AngularJS_logo.svg.png"
     },
     {
-      "name": "React JS Masterclass",
-      "category": "frontend",
-      "id": 2,
-      "description": "<p><strong>React</strong> (also known as <strong>React.js</strong> or <strong>ReactJS</strong>) is a JavaScript library for building user interfaces. It is maintained by Facebook and a community of individual developers and companies.</p><p>React can be used as a base in the development of single-page or mobile applications. Complex React applications usually require the use of additional libraries for state management, routing, and interaction with an API.</p>",
-      "startDate": "2019-01-14T04:30:00.000Z",
-      "endDate": "2019-01-16T12:30:00.000Z",
-      "time": "10:00 am - 6:00 pm",
-      "location": {
-        "address": "Tata Elxsi, IT Park",
-        "city": "Trivandrum",
-        "state": "Kerala"
-      },
-      "modes": {
-        "inPerson": true,
-        "online": true
-      },
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/640px-React-icon.svg.png"
+        "id": 2,
+        "name": "React JS Masterclass",
+        "category": "frontend",
+        "description": "<p><strong>React</strong> (also known as <strong>React.js</strong> or <strong>ReactJS</strong>) is a JavaScript library for building user interfaces. It is maintained by Facebook and a community of individual developers and companies.</p><p>React can be used as a base in the development of single-page or mobile applications. Complex React applications usually require the use of additional libraries for state management, routing, and interaction with an API.</p>",
+        "startDate": "2019-01-14T04:30:00.000Z",
+        "endDate": "2019-01-16T12:30:00.000Z",
+        "startTime": {
+            "hours": 10,
+            "minutes": 0
+        },
+        "endTime": {
+            "hours": 18,
+            "minutes": 0
+        },
+        "speakers": [
+            "John Doe",
+            "Jane Doe"
+        ],
+        "location": {
+            "address": "Tata Elxsi, IT Park",
+            "city": "Trivandrum",
+            "state": "Kerala"
+        },
+        "modes": {
+            "inPerson": true,
+            "online": true
+        },
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/640px-React-icon.svg.png"
     },
     {
-      "name": "Crash course in MongoDB",
-      "category": "database",
-      "id": 3,
-      "description": "<p><strong>MongoDB</strong> is a cross-platform document-oriented database program. It is issued under the Server Side Public License (SSPL) version 1, which was submitted for certification to the Open Source Initiative but later withdrawn in lieu of SSPL version 2. Classified as a NoSQL database program, MongoDB uses JSON-like documents with schemata. MongoDB is developed by MongoDB Inc.</p><p>MongoDB supports field, range query, and regular expression searches. Queries can return specific fields of documents and also include user-defined JavaScript functions. Queries can also be configured to return a random sample of results of a given size.</p>",
-      "startDate": "2019-01-20T07:00:00.000Z",
-      "endDate": "2019-01-22T11:00:00.000Z",
-      "time": "12:30 pm - 4:30 pm",
-      "location": {
-        "address": "HCL, Electronic City Phase 1",
-        "city": "Bangalore",
-        "state": "Karnataka"
-      },
-      "modes": {
-        "inPerson": false,
-        "online": true
-      },
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/32/Mongo-db-logo.png"
+        "id": 3,
+        "name": "Crash course in MongoDB",
+        "category": "database",
+        "description": "<p><strong>MongoDB</strong> is a cross-platform document-oriented database program. It is issued under the Server Side Public License (SSPL) version 1, which was submitted for certification to the Open Source Initiative but later withdrawn in lieu of SSPL version 2. Classified as a NoSQL database program, MongoDB uses JSON-like documents with schemata. MongoDB is developed by MongoDB Inc.</p><p>MongoDB supports field, range query, and regular expression searches. Queries can return specific fields of documents and also include user-defined JavaScript functions. Queries can also be configured to return a random sample of results of a given size.</p>",
+        "startDate": "2019-01-20T07:00:00.000Z",
+        "endDate": "2019-01-22T11:00:00.000Z",
+        "startTime": {
+            "hours": 12,
+            "minutes": 30
+        },
+        "endTime": {
+            "hours": 16,
+            "minutes": 30
+        },
+        "speakers": [
+            "Mark Smith",
+            "Mary Smith"
+        ],
+        "location": {
+            "address": "HCL, Electronic City Phase 1",
+            "city": "Bangalore",
+            "state": "Karnataka"
+        },
+        "modes": {
+            "inPerson": false,
+            "online": true
+        },
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/3/32/Mongo-db-logo.png"
     },
     {
-      "name": "Mastering Node JS and Express",
-      "category": "backend",
-      "id": 4,
-      "description": "<p><strong>Node.js</strong> is an open-source, cross-platform JavaScript run-time environment that executes JavaScript code outside of a browser. Typically, JavaScript is used primarily for client-side scripting, in which scripts written in JavaScript are embedded in a webpage's HTML and run client-side by a JavaScript engine in the user's web browser. Node.js lets developers use JavaScript to write command line tools and for server-side scripting - running scripts server-side to produce dynamic web page content before the page is sent to the user's web browser. Consequently, Node.js represents a \"JavaScript everywhere\" paradigm, unifying web application development around a single programming language, rather than different languages for server side and client side scripts.</p><p>The Node.js distributed development project, governed by the Node.js Foundation, is facilitated by the Linux Foundation's Collaborative Projects program.</p>",
-      "startDate": "2019-10-20T07:00:00.000Z",
-      "endDate": "2019-20-22T07:00:00.000Z",
-      "time": "9:45 am - 5:45 pm",
-      "location": {
-        "address": "Harman Connected Services\nITPL, Whitefield",
-        "city": "Bangalore",
-        "state": "Karnataka"
-      },
-      "modes": {
-        "inPerson": true
-      },
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Node.js_logo.svg/1024px-Node.js_logo.svg.png"
+        "id": 4,
+        "name": "Mastering Node JS and Express",
+        "category": "backend",
+        "description": "<p><strong>Node.js</strong> is an open-source, cross-platform JavaScript run-time environment that executes JavaScript code outside of a browser. Typically, JavaScript is used primarily for client-side scripting, in which scripts written in JavaScript are embedded in a webpage's HTML and run client-side by a JavaScript engine in the user's web browser. Node.js lets developers use JavaScript to write command line tools and for server-side scripting - running scripts server-side to produce dynamic web page content before the page is sent to the user's web browser. Consequently, Node.js represents a \"JavaScript everywhere\" paradigm, unifying web application development around a single programming language, rather than different languages for server side and client side scripts.</p><p>The Node.js distributed development project, governed by the Node.js Foundation, is facilitated by the Linux Foundation's Collaborative Projects program.</p>",
+        "startDate": "2019-10-20T07:00:00.000Z",
+        "endDate": "2019-20-22T07:00:00.000Z",
+        "startTime": {
+            "hours": 9,
+            "minutes": 45
+        },
+        "endTime": {
+            "hours": 17,
+            "minutes": 45
+        },
+        "speakers": [
+            "Mark Smith",
+            "Mary Smith"
+        ],
+        "location": {
+            "address": "Harman Connected Services\nITPL, Whitefield",
+            "city": "Bangalore",
+            "state": "Karnataka"
+        },
+        "modes": {
+            "inPerson": true
+        },
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Node.js_logo.svg/1024px-Node.js_logo.svg.png"
     },
     {
-      "name": "HTML and CSS",
-      "category": "frontend",
-      "id": 5,
-      "description": "HTML and CSS introduction",
-      "startDate": "2019-11-05T07:00:00.000Z",
-      "endDate": "2019-11-06T07:00:00.000Z",
-      "time": "9:00 am - 5:00 pm",
-      "location": {
-        "address": "Zenmonics",
-        "city": "Bangalore",
-        "state": "Karnataka"
-      },
-      "modes": {
-        "inPerson": true,
-        "online": false
-      },
-      "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAz1BMVEXjTyb////vZSrr6+vpWijtYSnr8PHuWg7jQwv61czjRxbvYR7owrz++fb5y7/mnpDjSx7r5ePouLDhPgD2sZ3leGDiRhXiSRvlUybvYSHuVwDiQQb76OTr8/ThOgD6497xrqH98/D73NLyt6vwq53jUiroc1jqgWrmmovrinXpzsj31M30wbbsk4DnbVDjWTXnrqPkYD/q2NTxdkX1pYv3var2rpb0m3zzj2v5zb7mZkXxfVHwajDqZz3odVrovrXmi3jyimXxe075xbX0noHFi51LAAANlElEQVR4nN3d61rbOBAGYAI0MYaAwZAAIQnhFE5JOJRDabeFpfd/TWvT7kKlmfnksRQvzL99nm3wi030RRopM7W3tZHMvP/qLPxhmvnjv07aVV+eh0r7gvA4rvryPFS6Iwj3W1VfnodqNQXheVT15XmopCYIFzpVX56HmkjCflr15ZWvZCwJdz6AsH0iCZsf4J0mPpaEtQ8w4rcOROHk/ROjc1E4fv/Czpko/ACxLd0ThR8gthmhzRQevP8307QpCj9AbGvXRGH42Db/yXNt/vn6yaUs3AseauZnPZcpHMvC8LEtuHAoC5vvT2i8fnskC8PHttBCM7RZwsvQxNDCaB8Ij96b8JMpXAbCYejYFlpohjZLOAod23wL503hDhAGj23BhQMg3A8d20ILoxoQLr93YYKEwWObb6EZaR6QMHhsCy00Q5slHIT+cOFbaLy8FdosYe29/R0aL99agcL3lmlMoRnabOFDYKJnIQxttnD4voXpGRSOAgfT0MI+FK4Ejm2ehTC02cLQy8CBhXETCkPHtsDCiemxhWeBQ41nIQxtthAvA0flqlGmtpDwOxYOkDBaWypTZwslau/OJBoXZy4AU8Im+pCfXtXLlHUFhep2URbGVmizhbUJEHZO58pUOeEdELZ2HYQotkVL9eqET+",
-      "createdDate": "Jun 21, 2019"
+        "id": 5,
+        "name": "HTML and CSS",
+        "category": "frontend",
+        "description": "HTML and CSS introduction",
+        "startDate": "2019-11-05T07:00:00.000Z",
+        "endDate": "2019-11-06T07:00:00.000Z",
+        "startTime": {
+            "hours": 9,
+            "minutes": 0
+        },
+        "endTime": {
+            "hours": 17,
+            "minutes": 0
+        },
+        "speakers": [
+            "John Doe",
+            "Jane Doe"
+        ],
+        "location": {
+            "address": "Zenmonics",
+            "city": "Bangalore",
+            "state": "Karnataka"
+        },
+        "modes": {
+            "inPerson": true,
+            "online": false
+        },
+        "imageUrl": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAz1BMVEXjTyb////vZSrr6+vpWijtYSnr8PHuWg7jQwv61czjRxbvYR7owrz++fb5y7/mnpDjSx7r5ePouLDhPgD2sZ3leGDiRhXiSRvlUybvYSHuVwDiQQb76OTr8/ThOgD6497xrqH98/D73NLyt6vwq53jUiroc1jqgWrmmovrinXpzsj31M30wbbsk4DnbVDjWTXnrqPkYD/q2NTxdkX1pYv3var2rpb0m3zzj2v5zb7mZkXxfVHwajDqZz3odVrovrXmi3jyimXxe075xbX0noHFi51LAAANlElEQVR4nN3d61rbOBAGYAI0MYaAwZAAIQnhFE5JOJRDabeFpfd/TWvT7kKlmfnksRQvzL99nm3wi030RRopM7W3tZHMvP/qLPxhmvnjv07aVV+eh0r7gvA4rvryPFS6Iwj3W1VfnodqNQXheVT15XmopCYIFzpVX56HmkjCflr15ZWvZCwJdz6AsH0iCZsf4J0mPpaEtQ8w4rcOROHk/ROjc1E4fv/Czpko/ACxLd0ThR8gthmhzRQevP8307QpCj9AbGvXRGH42Db/yXNt/vn6yaUs3AseauZnPZcpHMvC8LEtuHAoC5vvT2i8fnskC8PHttBCM7RZwsvQxNDCaB8Ij96b8JMpXAbCYejYFlpohjZLOAod23wL503hDhAGj23BhQMg3A8d20ILoxoQLr93YYKEwWObb6EZaR6QMHhsCy00Q5slHIT+cOFbaLy8FdosYe29/R0aL99agcL3lmlMoRnabOFDYKJnIQxttnD4voXpGRSOAgfT0MI+FK4Ejm2ehTC02cLQy8CBhXETCkPHtsDCiemxhWeBQ41nIQxtthAvA0flqlGmtpDwOxYOkDBaWypTZwslau/OJBoXZy4AU8Im+pCfXtXLlHUFhep2URbGVmizhbUJEHZO58pUOeEdELZ2HYQotkVL9eqET+",
     },
     {
-      "name": "TypeScript",
-      "category": "language",
-      "id": 6,
-      "description": "TypeScript language fundamentals",
-      "startDate": "2019-06-24",
-      "endDate": "2019-06-24",
-      "time": "9:00 am - 5:00 pm",
-      "location": {
-        "address": "Zenmonics",
-        "city": "Bangalore",
-        "state": "Karnataka"
-      },
-      "modes": {
-        "inPerson": true,
-        "online": false
-      },
-      "imageUrl": "https://raw.githubusercontent.com/remojansen/logo.ts/master/ts.png"
+        "id": 6,
+        "name": "TypeScript",
+        "category": "language",
+        "description": "TypeScript language fundamentals",
+        "startDate": "2019-06-24",
+        "endDate": "2019-06-24",
+        "startTime": {
+            "hours": 9,
+            "minutes": 0
+        },
+        "endTime": {
+            "hours": 17,
+            "minutes": 0
+        },
+        "speakers": [
+            "Mark Smith",
+            "Mary Smith"
+        ],
+        "location": {
+            "address": "Zenmonics",
+            "city": "Bangalore",
+            "state": "Karnataka"
+        },
+        "modes": {
+            "inPerson": true,
+            "online": false
+        },
+        "imageUrl": "https://raw.githubusercontent.com/remojansen/logo.ts/master/ts.png"
     },
     {
-      "name": "Angular",
-      "category": "frontend",
-      "id": 7,
-      "description": "<p>Google's <strong>Angular</strong> framework, is a much sought-after skill in the industry today. It is a single-page application (SPA) framework that includes most of the features required to build SPA applications. The Angular training gets you prepared for building enterprise-grade applications using the latest version of Angular.</p>",
-      "startDate": "2019-11-01T04:00:00.000Z",
-      "endDate": "2019-11-03T08:00:00.000Z",
-      "time": "9:30 am - 1:30 pm",
-      "location": {
-        "address": "Tata Elxsi, Prestige Shantiniketan",
-        "city": "Bangalore",
-        "state": "Karnataka"
-      },
-      "modes": {
-        "inPerson": true,
-        "online": true
-      },
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Angular_full_color_logo.svg/512px-Angular_full_color_logo.svg.png"
+        "id": 7,
+        "name": "Angular",
+        "category": "frontend",
+        "description": "<p>Google's <strong>Angular</strong> framework, is a much sought-after skill in the industry today. It is a single-page application (SPA) framework that includes most of the features required to build SPA applications. The Angular training gets you prepared for building enterprise-grade applications using the latest version of Angular.</p>",
+        "startDate": "2019-11-01T04:00:00.000Z",
+        "endDate": "2019-11-03T08:00:00.000Z",
+        "startTime": {
+            "hours": 9,
+            "minutes": 30
+        },
+        "endTime": {
+            "hours": 13,
+            "minutes": 30
+        },
+        "speakers": [
+            "John Doe",
+            "Jane Doe"
+        ],
+        "location": {
+            "address": "Tata Elxsi, Prestige Shantiniketan",
+            "city": "Bangalore",
+            "state": "Karnataka"
+        },
+        "modes": {
+            "inPerson": true,
+            "online": true
+        },
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Angular_full_color_logo.svg/512px-Angular_full_color_logo.svg.png"
     },
     {
-      "name": "Migrating from Angular JS to Angular",
-      "category": "frontend",
-      "id": 8,
-      "description": "<p>Google's <strong>Angular</strong> framework, is a much sought-after skill in the industry today. <strong>Angular JS</strong> is the first version of this framework. Angular (the name for the framework since version 2) is a ground-up rewrite of Angular JS.</p><p>Migration from Angular JS to Angular is not a straightforward task. This training prepares you for migration of existing Angular JS to the latest version of Angular.</p>",
-      "startDate": "2019-12-01T04:00:00.000Z",
-      "endDate": "2019-12-03T08:00:00.000Z",
-      "time": "9:30 am - 1:30 pm",
-      "location": {
-        "address": "Tata Elxsi, Prestige Shantiniketan",
-        "city": "Bangalore",
-        "state": "Karnataka"
-      },
-      "modes": {
-        "inPerson": true,
-        "online": true
-      },
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Angular_full_color_logo.svg/512px-Angular_full_color_logo.svg.png"
+        "id": 8,
+        "name": "Migrating from Angular JS to Angular",
+        "category": "frontend",
+        "description": "<p>Google's <strong>Angular</strong> framework, is a much sought-after skill in the industry today. <strong>Angular JS</strong> is the first version of this framework. Angular (the name for the framework since version 2) is a ground-up rewrite of Angular JS.</p><p>Migration from Angular JS to Angular is not a straightforward task. This training prepares you for migration of existing Angular JS to the latest version of Angular.</p>",
+        "startDate": "2019-12-01T04:00:00.000Z",
+        "endDate": "2019-12-03T08:00:00.000Z",
+        "startTime": {
+            "hours": 9,
+            "minutes": 30
+        },
+        "endTime": {
+            "hours": 13,
+            "minutes": 30
+        },
+        "speakers": [
+            "Mark Smith",
+            "Mary Smith"
+        ],
+        "location": {
+            "address": "Tata Elxsi, Prestige Shantiniketan",
+            "city": "Bangalore",
+            "state": "Karnataka"
+        },
+        "modes": {
+            "inPerson": true,
+            "online": true
+        },
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Angular_full_color_logo.svg/512px-Angular_full_color_logo.svg.png"
     },
     {
-      "name": "Apache Cordova",
-      "category": "mobile",
-      "id": 10,
-      "description": "<p>Developing a mobile app requires extensive knowledge of native programming techniques for multiple platforms. <strong>Apache Cordova</strong> lets you use your existing skills in web development (HTML, CSS, and JavaScript) to build powerful mobile apps. Your apps also get the power of integration with native device features like the camera and file system.</p><p>In this bootcamp, you will learn to build apps from the Cordova CLI, how to make use of device features like the camera and accelerometer, and how to submit your apps to Google Play Store / Apple App Store.</p>",
-      "startDate": "2019-12-20T04:00:00.000Z",
-      "endDate": "2019-12-23T08:00:00.000Z",
-      "time": "9:00 am - 5:00 pm",
-      "location": {
-        "address": "Nissan Digital, IT Park",
-        "city": "Trivandrum",
-        "state": "Kerala"
-      },
-      "modes": {
-        "inPerson": true,
-        "online": true
-      },
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/9/92/Apache_Cordova_Logo.svg/494px-Apache_Cordova_Logo.svg.png"
+        "id": 9,
+        "name": "Bootstrap Bootcamp",
+        "category": "frontend",
+        "description": "<p><strong>Bootstrap</strong> is a front-end web framework that provides useful styles and components for creating responsive web pages quickly. Bootstrap v4 is the latest stable version of this framework and is covered in this bootcamp.</p>",
+        "startDate": "2019-12-12T04:00:00.000Z",
+        "endDate": "2019-12-14T08:00:00.000Z",
+        "startTime": {
+            "hours": 9,
+            "minutes": 0
+        },
+        "endTime": {
+            "hours": 17,
+            "minutes": 0
+        },
+        "speakers": [
+            "Jane Doe",
+            "Mark Smith"
+        ],
+        "location": {
+            "address": "SAP Labs, Whitefield",
+            "city": "Bangalore",
+            "state": "Karnataka"
+        },
+        "modes": {
+            "inPerson": true,
+            "online": false
+        },
+        "imageUrl": "https://getbootstrap.com/docs/4.4/assets/brand/bootstrap-solid.svg"
     },
     {
-      "name": "Practical Git",
-      "category": "devops",
-      "id": 11,
-      "description": "<p><strong>Git</strong> is a distributed Version Control System (VCS) created by Linus Torvalds. It is by far the most popular VCS in use today.</p>",
-      "startDate": "2019-12-28T04:00:00.000Z",
-      "endDate": "2019-12-28T08:00:00.000Z",
-      "time": "9:00 am - 5:00 pm",
-      "location": {
-        "address": "SAP Labs, Whitefield",
-        "city": "Bangalore",
-        "state": "Karnataka"
-      },
-      "modes": {
-        "inPerson": true,
-        "online": false
-      },
-      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Git-logo.svg/512px-Git-logo.svg.png"
+        "id": 10,
+        "name": "Apache Cordova",
+        "category": "mobile",
+        "description": "<p>Developing a mobile app requires extensive knowledge of native programming techniques for multiple platforms. <strong>Apache Cordova</strong> lets you use your existing skills in web development (HTML, CSS, and JavaScript) to build powerful mobile apps. Your apps also get the power of integration with native device features like the camera and file system.</p><p>In this bootcamp, you will learn to build apps from the Cordova CLI, how to make use of device features like the camera and accelerometer, and how to submit your apps to Google Play Store / Apple App Store.</p>",
+        "startDate": "2019-12-20T04:00:00.000Z",
+        "endDate": "2019-12-23T08:00:00.000Z",
+        "startTime": {
+            "hours": 9,
+            "minutes": 30
+        },
+        "endTime": {
+            "hours": 13,
+            "minutes": 30
+        },
+        "speakers": [
+            "John Doe",
+            "Mary Smith"
+        ],
+        "location": {
+            "address": "Nissan Digital, IT Park",
+            "city": "Trivandrum",
+            "state": "Kerala"
+        },
+        "modes": {
+            "inPerson": true,
+            "online": true
+        },
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/9/92/Apache_Cordova_Logo.svg/494px-Apache_Cordova_Logo.svg.png"
     },
     {
-      "name": "JavaScript Fundamentals",
-      "category": "language",
-      "id": 12,
-      "description": "<p><strong>JavaScript (JS)</strong> is the language for scripting web pages – to enable user interactions on a web page, communicate with the backend etc.</p><p>The latest versions of JavaScript like ES2015 (ES6) have introduced a plethora of great new features that have found adoption in modern frontend and backend frameworks. A good understanding of JS, especially ES2015 features, lays a strong foundation to get started with frameworks like React and Angular, as also Node.js and Express.</p>",
-      "startDate": "2020-01-08T04:00:00.000Z",
-      "endDate": "2020-01-10T08:00:00.000Z",
-      "time": "9:00 am - 5:00 pm",
-      "location": {
-        "address": "SAP Labs, Whitefield",
-        "city": "Bangalore",
-        "state": "Karnataka"
-      },
-      "modes": {
-        "inPerson": true,
-        "online": true
-      },
-      "imageUrl": "https://camo.githubusercontent.com/055e8995558e293e52e92d7c93b9ec49a9ea6c78/68747470733a2f2f63646e2e7261776769742e636f6d2f7a656b652f6a6176617363726970742d79656c6c6f772f6d61737465722f6c6f676f2e737667"
+        "id": 11,
+        "name": "Practical Git",
+        "category": "devops",
+        "description": "<p><strong>Git</strong> is a distributed Version Control System (VCS) created by Linus Torvalds. It is by far the most popular VCS in use today.</p>",
+        "startDate": "2019-12-28T04:00:00.000Z",
+        "endDate": "2019-12-28T08:00:00.000Z",
+        "startTime": {
+            "hours": 9,
+            "minutes": 0
+        },
+        "endTime": {
+            "hours": 17,
+            "minutes": 0
+        },
+        "speakers": [
+            "John Doe",
+            "Mark Smith"
+        ],
+        "location": {
+            "address": "SAP Labs, Whitefield",
+            "city": "Bangalore",
+            "state": "Karnataka"
+        },
+        "modes": {
+            "inPerson": true,
+            "online": false
+        },
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Git-logo.svg/512px-Git-logo.svg.png"
+    },
+    {
+        "id": 12,
+        "name": "JavaScript Fundamentals",
+        "category": "language",
+        "description": "<p><strong>JavaScript (JS)</strong> is the language for scripting web pages – to enable user interactions on a web page, communicate with the backend etc.</p><p>The latest versions of JavaScript like ES2015 (ES6) have introduced a plethora of great new features that have found adoption in modern frontend and backend frameworks. A good understanding of JS, especially ES2015 features, lays a strong foundation to get started with frameworks like React and Angular, as also Node.js and Express.</p>",
+        "startDate": "2020-01-08T04:00:00.000Z",
+        "endDate": "2020-01-10T08:00:00.000Z",
+        "startTime": {
+            "hours": 9,
+            "minutes": 0
+        },
+        "endTime": {
+            "hours": 17,
+            "minutes": 0
+        },
+        "speakers": [
+            "Jane Doe",
+            "Mary Smith"
+        ],
+        "location": {
+            "address": "SAP Labs, Whitefield",
+            "city": "Bangalore",
+            "state": "Karnataka"
+        },
+        "modes": {
+            "inPerson": true,
+            "online": true
+        },
+        "imageUrl": "https://camo.githubusercontent.com/055e8995558e293e52e92d7c93b9ec49a9ea6c78/68747470733a2f2f63646e2e7261776769742e636f6d2f7a656b652f6a6176617363726970742d79656c6c6f772f6d61737465722f6c6f676f2e737667"
     }
 ]
 ```
@@ -387,7 +542,18 @@ router.post( '/workshops', ( req, res ) => {
     "description": "jQuery is a JavaScript library",
     "startDate": "2020-03-01T04:00:00.000Z",
     "endDate": "2020-03-03T08:00:00.000Z",
-    "time": "9:30 am - 1:30 pm",
+    "startTime": {
+        "hours": 9,
+        "minutes": 30
+    },
+    "endTime": {
+        "hours": 13,
+        "minutes": 30
+    },
+    "speakers": [
+        "John Doe",
+        "Jane Doe"
+    ],
     "location": {
         "address": "Tata Elxsi, Prestige Shantiniketan",
         "city": "Bangalore",
@@ -474,23 +640,32 @@ const Joi = require('joi');
 ```
 ```js
 // set up the Joi schema for validation
+const timeSchema = Joi.object({
+    hours: Joi.number().integer().min(0).max(23).required(),
+    minutes: Joi.number().integer().min(0).max(59).required()
+});
+
 const workshopSchema = Joi.object({
-  name: Joi.string().required(),
-  category: Joi.string().required(),
-  description: Joi.string().required(),
-  startDate: Joi.string().isoDate().required(),
-  endDate: Joi.string().isoDate().required(),
-  time: Joi.string().required(),
-  location: Joi.object({
-    address: Joi.string().required(),
-    city: Joi.string().required(),
-    state: Joi.string().required()
-  }).required(),
-  modes: Joi.object({
-    inPerson: Joi.boolean().required(),
-    online: Joi.boolean().required()
-  }).required(),
-  imageUrl: Joi.string().uri().required()
+    name: Joi.string().required(),
+    category: Joi.string()
+        .valid("frontend", "backend", "database", "devops", "language", "mobile")
+        .required(),
+    description: Joi.string().max(1024).required(),
+    startDate: Joi.string().isoDate().required(),
+    endDate: Joi.string().isoDate().required(),
+    startTime: timeSchema.required(),
+    endTime: timeSchema.required(),
+    speakers: Joi.array().items(Joi.string()).min(1).required(),
+    location: Joi.object({
+        address: Joi.string().required(),
+        city: Joi.string().required(),
+        state: Joi.string().required()
+    }).required(),
+    modes: Joi.object({
+        inPerson: Joi.boolean().required(),
+        online: Joi.boolean().required()
+    }).required(),
+    imageUrl: Joi.string().uri().required()
 });
 ```
 ```js
@@ -682,6 +857,22 @@ const PORT = process.env.PORT || 3000;
 
 app.listen( PORT );
 ```
+- Finally we set up the popular HTTP request logging middleware - __Morgan__. Firstly, install morgan
+```bash
+npm i morgan
+```
+- Set it up as the first middleware - you may comment out our custom logger now. In `src/app.js`
+```js
+const morgan = require( 'morgan' );
+```
+```js
+app.use( morgan( 'combined' ) ); // Passing 'combined' enables Apache HTTP server style request logs
+// app.use( 'logger' );
+```
+- When requests are received, you will find logs in this format
+```
+::1 - - [13/Jul/2025:06:37:46 +0000] "GET / HTTP/1.1" 200 - "-" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
+```
 
 ## Step 10: Refactoring to create controllers
 - We refactor the app such that the route files set up the routing logic only. The actual request handling is done by controllers. Create `src/controllers/index.controller.js`
@@ -690,18 +881,24 @@ const getIndex = ( req, res ) => {
     res.end( 'This is the workshops app. It serves details of workshops happening nearby.' );
 };
 
+const getHome = ( req, res ) => {
+    res.redirect( '/' );
+};
+
 module.exports = {
-    getIndex
+    getIndex,
+    getHome
 };
 ```
 - Now in `src/routes/index.route.js`
 ```js
 const express = require( 'express' );
-const { getIndex } = require( '../controllers/index.controller' );
+const controllers = require( '../controllers/index.controller' );
 
 const router = express.Router();
 
-router.get('/', getIndex);
+router.get('/', controllers.getIndex);
+router.get('/home', controllers.getHome);
 
 module.exports = router;
 ```
@@ -710,23 +907,32 @@ module.exports = router;
 const Joi = require('joi');
 const workshops = require( '../data/workshops.json' );
 
+const timeSchema = Joi.object({
+    hours: Joi.number().integer().min(0).max(23).required(),
+    minutes: Joi.number().integer().min(0).max(59).required()
+});
+
 const workshopSchema = Joi.object({
-  name: Joi.string().required(),
-  category: Joi.string().required(),
-  description: Joi.string().required(),
-  startDate: Joi.string().isoDate().required(),
-  endDate: Joi.string().isoDate().required(),
-  time: Joi.string().required(),
-  location: Joi.object({
-    address: Joi.string().required(),
-    city: Joi.string().required(),
-    state: Joi.string().required()
-  }).required(),
-  modes: Joi.object({
-    inPerson: Joi.boolean().required(),
-    online: Joi.boolean().required()
-  }).required(),
-  imageUrl: Joi.string().uri().required()
+    name: Joi.string().required(),
+    category: Joi.string()
+        .valid("frontend", "backend", "database", "devops", "language", "mobile")
+        .required(),
+    description: Joi.string().max(1024).required(),
+    startDate: Joi.string().isoDate().required(),
+    endDate: Joi.string().isoDate().required(),
+    startTime: timeSchema.required(),
+    endTime: timeSchema.required(),
+    speakers: Joi.array().items(Joi.string()).min(1).required(),
+    location: Joi.object({
+        address: Joi.string().required(),
+        city: Joi.string().required(),
+        state: Joi.string().required()
+    }).required(),
+    modes: Joi.object({
+        inPerson: Joi.boolean().required(),
+        online: Joi.boolean().required()
+    }).required(),
+    imageUrl: Joi.string().uri().required()
 });
 
 let nextId = 13;
@@ -796,7 +1002,7 @@ npm i mongoose
 ```
 - Update the `.env` file with `DB_CONNECTION_STRING`. Get the `<db_password>` from the instructor.
 ```
-DB_CONNECTION_STRING=mongodb+srv://admin:<db_password>@cluster0.9d7mmqx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+DB_CONNECTION_STRING=mongodb+srv://admin:<db_password>@cluster0.9d7mmqx.mongodb.net//workshopsDB?retryWrites=true&w=majority&appName=Cluster0
 ```
 - Create an `src/data/init.js` file. In it
 ```js
@@ -810,6 +1016,7 @@ const connect = async () => {
         console.log( 'connected to the db' );
     } catch( error ) {
         console.log( 'unable to connect to the db : ' + error.message );
+        process.exit(1);
     }
 };
 
@@ -828,13 +1035,44 @@ const express = require( 'express' );
 
 ## Step 12: Define Workshops Model
 - Mongoose let you define a __schema__ for a resource. When we try to add a new document to the MongoDB collection for example, the document is validated against the schema, and added only if it is valid. Once a schema is defined a __Model__ is created from it. The Model is a class for every resource that lets us make queries on the related collection.
-- Define the workshop resource schema and model in `src/data/models/Workshop.js`
+- Define the Time schema in `src/data/models/Time.js` - we need to define the Model class only if a corresponding collection is needed. Time schema here is just part of the larger schema - Workshop (defined below). Hence a model is not to be created for it.
 ```js
+/** No model is created from this schema (therefore no collection as well). This is intended to be used as part of other schemas */
 const mongoose = require( 'mongoose' );
 
+const timeSchema = new mongoose.Schema({
+    hours: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 23
+    },
+    minutes: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 59
+    },
+    _id: false // a unique _id will be generated for every time part of every document. But we do not need it in this app.
+});
+
+module.exports = timeSchema;
+```
+- Define the Workshop resource schema and model in `src/data/models/Workshop.js`
+```js
+const mongoose = require( 'mongoose' );
+const timeSchema = require( './Time' );
+
+/**
+ * In MongoDB, the documents can store related information together
+ * For example, we can store the topics for a particular workshop
+ *      1. in the workshop document as an array, say "topics" (preferred way)
+ *      2. in a separate collection (say, Topics), and store the array of related topic ids
+ */
 const workshopsSchema = new mongoose.Schema(
   {
     // name: String, // if we do not want validation except type validation, we can do this
+
     name: {
         type: String,
         required: true,
@@ -865,7 +1103,14 @@ const workshopsSchema = new mongoose.Schema(
         type: Date,
         default: Date.now
     },
-    time: String,
+    startTime: {
+        type: timeSchema,
+        required: true
+    },
+    endTime: {
+        type: timeSchema,
+        required: true
+    },
     location: {
         address: String,
         city: String,
@@ -876,6 +1121,22 @@ const workshopsSchema = new mongoose.Schema(
         online: Boolean
     },
     imageUrl: String,
+    speakers: {
+        type: [ String ],
+        required: true
+    },
+
+    // 1. store topics as an array - preferred way
+    // topics: {
+    //     type: [
+    //         topicSchema
+    //     ]
+    // }
+
+    // 2. store topic ids
+    // topics: {
+    //     type: [ mongoose.Schema.Types.ObjectId ]
+    // },
   }
 );
 
@@ -886,8 +1147,115 @@ mongoose.model( 'Workshop', workshopsSchema );
 ```js
 const mongoose = require( 'mongoose' );
 
+// create the collections (tables) if not present
+require( './models/Workshop' );
+
+// rest of code...
+// ...
+```
+
+## Step 13: Define Workshop Service
+- We shall create methods to get workshops, create a new workshop etc. This logic may be used in various places repeatedly. Hence we define these in a separate _Services_ layer. Services in general refer to any logic shared across the application.
+- In `src/services/workshops.service.js`, define the methods to get all workshops and create a new workshop
+```js
+const mongoose = require("mongoose");
+const Workshop = mongoose.model("Workshop");
+
+const getAllWorkshops = async () => {
+    const workshops = await Workshop.find();
+    return workshops;
+};
+
+const addWorkshop = async (workshop) => {
+    try {
+        const insertedWorkshop = await Workshop.create(workshop);
+        return insertedWorkshop;
+    } catch (error) {
+        if (error.name === "MongoServerError" && error.code === 11000 ) {
+            const dbError = new Error(`Validation error : ${error.message}`);
+            dbError.type = "ValidationError";
+            throw dbError;
+        }
+
+        if (error.name === "ValidationError") {
+            const dbError = new Error(`Validation error : ${error.message}`);
+            dbError.type = "ValidationError";
+            throw dbError;
+        }
+
+        if (error.name === "CastError") {
+            const dbError = new Error(`Data type error : ${error.message}`);
+            dbError.type = "CastError";
+            throw dbError;
+        }
+    }
+};
+
+module.exports = {
+    getAllWorkshops,
+    addWorkshop,
+};
+```
+- Modify the workshops controller to make use of the database. You don't need Joi for validation now as Mongoose does that for you. In `src/controllers/workshops.controller.js`
+```js
+const services = require( '../services/workshops.service' );
+
+const getWorkshops = async (req, res) => {
+    const workshops = await getAllWorkshops();
+
+    res.json({
+        status: 'success',
+        data: workshops
+    });
+};
+
+const postWorkshops = async (req, res) => {
+    const newWorkshop = req.body;
+
+    // Check if body is sent and not empty
+    if (!newWorkshop || Object.keys(newWorkshop).length === 0) {
+        const err = new Error('The request body is empty. Workshop object expected.');
+        err.status = 400;
+        throw err;
+    }
+
+    try {
+        const updatedWorkshop = await addWorkshop( newWorkshop );
+        res.status(201).json({
+            status: 'success',
+            data: updatedWorkshop
+        });
+    } catch( error ) {
+        error.status = 400;
+        throw error;
+    }
+};
+
+module.exports = {
+    getWorkshops,
+    postWorkshops
+};
+```
+- You should now be able to get all workshops in the database (initially empty), and add new workshops. Also check if field validations are working fine. You will see most are, but type-casting is allowed by default (eg. name is passed as a number and is accepted). We disable this behavior by setting this in `src/data/init.js`
+```js
 const mongoose = require( 'mongoose' );
+
+// disallows saving fields not in the schema
+mongoose.set('strictQuery', true);
+mongoose.set('strict', true);
+
+// prevent casting - Be careful, this affects all String fields globally!
+mongoose.Schema.Types.String.cast(v => {
+  if (typeof v !== 'string') {
+    throw new Error('Value must be a string');
+  }
+  return v;
+});
 
 // create the collections (tables) if not present
 require( './models/Workshop' );
+
+// rest of code...
+// ...
 ```
+- Restart and check now - you should not be able to add name as a number (for example).
