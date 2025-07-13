@@ -2,38 +2,41 @@
 - June 30 - July 18, 2025 for iLink Digital
 
 ## Exercises
-- Step 20: Implementing filtering of workshops list (by category) in the backend
-- Step 25: Complete loading, error handling, and optionally, refactor and create a sessions list item component
-- Step 27: Using environment files for enabling environment-based settings
-- Step 28: Set up a toast message service and container to display toast messages
-- Step 30: Deleting a workshop (Last part to show a dialog box)
-- Step 34: Use the toast service to display toast after trying to add a session
-- Step 35: Complete it by enabling submission of the new session data to the backend
-- Step 36: Using Form Builder
-- Step 37: Setting up custom and cross-field validations
-- Step 41: Updating (Editing) workshop
-- All remaining steps in Angular which were demonstrated
-- Try all the RxJS code snippets which were demoed only
-- Try all Day 10 Node code
-- Explore transform streams
-- How 'error' event (if emitted by event emitter) has special status and MUST be handled.
+- Angular
+    - Step 20: Implementing filtering of workshops list (by category) in the backend
+    - Step 25: Complete loading, error handling, and optionally, refactor and create a sessions list item component
+    - Step 27: Using environment files for enabling environment-based settings
+    - Step 28: Set up a toast message service and container to display toast messages
+    - Step 30: Deleting a workshop (Last part to show a dialog box)
+    - Step 34: Use the toast service to display toast after trying to add a session
+    - Step 35: Complete it by enabling submission of the new session data to the backend
+    - Step 36: Using Form Builder
+    - Step 37: Setting up custom and cross-field validations
+    - Step 41: Updating (Editing) workshop
+    - All remaining steps in Angular which were demonstrated
+- RxJS
+    - Try all the RxJS code snippets which were demoed only
+- Node JS and Express JS
+    - Try all Day 10 Node code
+    - Explore transform streams
+    - How 'error' event (if emitted by event emitter) has special status and MUST be handled.
 
 ## Questions
 - Best industry practices to not expose secrets from frontend
 - Does Angular provide any help for version upgrades? - Answered
-- What if we have read many chunks, stremed as response, but error occurs in a later chunk? What is a good way to handle it?
+- What if we have read many chunks, streamed as response, but error occurs in a later chunk? What is a good way to handle it?
 
 ## Hosted backends
 - Workshops server - https://workshops-server.onrender.com/
 - Mantra online store server - https://mantra-server-nzl2.onrender.com/api
 
 ## Topics if time permits
-- Signals
+- Signals (We will do)
 - Angular Universal
 - Taking care of browser inconsistencies
 - MFE in Angular
 - Data tables
-- HTTPS (we will do)
+- HTTPS (we will do) - DONE
 - Publishing npm packages
 
 ## Daywise Summary
