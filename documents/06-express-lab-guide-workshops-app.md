@@ -2482,9 +2482,115 @@ Body
 }
 ```
 
-## Step 30: 
+## Step 30: Set up an authorization middleware
+- In `src/middleware/auth.js` add and export an `authorize` middleware - it is created as a higher-order function (it is a function that exports a function) in order to support configuring roles that the returned middleware needs to allow.
+```js
+const authorize = ( allowedRoles ) => { // when called, this returns the middleware
+    return ( req, res, next ) => { // this is the actual middleware
+        const { claims } = res.locals;
 
-## Step x: Enable file upload
+        if( !allowedRoles.includes( claims.role ) ) {
+            const error = new Error( 'Unauthorized' );
+            // for a valid user, but one who has insufficient privileges (send 403)
+            error.status = 403;
+            throw error;
+        }
+
+        next();
+    };
+};
+
+module.exports = {
+    authenticate,
+    authorize
+};
+```
+- Apply the above as a route-level middleware in `src/routes/workshops.route.js`. The order is important - it must be applied after the `authenticate` middleware for the route (but before the controller), so that user is authenticated and user details, specifically the _role_, is available on `res.locals` when authorization check is done.
+```js
+const { authenticate, authorize } = require( '../middleware/auth' );
+```
+```js
+router.route('/')
+    .get( controllers.getWorkshops )
+    .post( authenticate, authorize( [ 'admin' ] ), controllers.postWorkshop );
+```
+- You should now, not be able to add a workshop unless you send the token of an _admin_ user. Try with the token of an _admin_ and a _general_ user. Sample request
+```
+POST /api/workshops
+
+Header
+---
+Authorization: Bearer <token_obtained_on_login_of_an_admin_user>
+
+Body
+---
+{
+    "name": "jQuery",
+    "category": "frontend",
+    "description": "jQuery is a JavaScript library",
+    "startDate": "2020-03-01T04:00:00.000Z",
+    "endDate": "2020-03-03T08:00:00.000Z",
+    "startTime": {
+        "hours": 9,
+        "minutes": 30
+    },
+    "endTime": {
+        "hours": 13,
+        "minutes": 30
+    },
+    "speakers": [
+        "John Doe",
+        "Jane Doe"
+    ],
+    "location": {
+        "address": "Tata Elxsi, Prestige Shantiniketan",
+        "city": "Bangalore",
+        "state": "Karnataka"
+    },
+    "modes": {
+        "inPerson": true,
+        "online": false
+    },
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9e/JQuery_logo.svg/524px-JQuery_logo.svg.png"
+}
+```
+
+## Step 31: Set up authentication/authorization for relevant API endpoints
+- All endpoints that mutate __workshops__ resource are allowed for _admin_ role, and all endpoints that mutate __sessions__ resource are allowed for authenticated users (no role-specific authorization).
+- In `src/routes/workshops.route.js`
+```js
+router.route('/')
+    .get( controllers.getWorkshops )
+    .post( authenticate, authorize( [ 'admin' ] ), controllers.postWorkshop );
+
+router.route('/:id')
+    .get( controllers.getWorkshopById )
+    .patch( authenticate, authorize( [ 'admin' ] ), controllers.patchWorkshop )
+    .delete( authenticate, authorize( [ 'admin' ] ), controllers.deleteWorkshop );
+
+router.route('/:id/speakers' )
+    .patch( authenticate, authorize( [ 'admin' ] ), controllers.addSpeakers );
+
+router.route( '/:id/sessions' )
+    .get( controllers.getSessions )
+    .post( authenticate, controllers.postSession );
+```
+- In `src/routes/sessions.route.js`
+```js
+const express = require( 'express' );
+const services = require( '../controllers/sessions.controller' );
+const { authenticate, authorize } = require( '../middleware/auth' );
+
+const router = express.Router();
+
+router.route('/')
+    // .get( services.getSessions )
+    .post( authenticate, services.postSession );
+
+module.exports = router;
+```
+
+## Step 32: Enable file upload
 - We use `multer` package to upload files. Install `multer`
 ```bash
 npm i multer
