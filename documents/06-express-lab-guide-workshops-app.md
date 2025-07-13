@@ -1154,7 +1154,7 @@ require( './models/Workshop' );
 // ...
 ```
 
-## Step 13: Define Workshop Service
+## Step 13: Define Workshop Service and use the MongoDB database
 - We shall create methods to get workshops, create a new workshop etc. This logic may be used in various places repeatedly. Hence we define these in a separate _Services_ layer. Services in general refer to any logic shared across the application.
 - In `src/services/workshops.service.js`, define the methods to get all workshops and create a new workshop
 ```js
@@ -1259,3 +1259,317 @@ require( './models/Workshop' );
 // ...
 ```
 - Restart and check now - you should not be able to add name as a number (for example).
+
+## Step 14: Adding sorting and pagination support
+- We now support serving the list of workshop sorted by a user-supplied field, and also 10 records at a time. In the service `src/services/workshops.service.js`
+```js
+const getAllWorkshops = async (page, sortField) => {
+    // if we do not await, the query does not execute immediately (it will only execute when the function pauses/completes without pausing) - this allows us to customize the query (Add sorting, pagination etc.)
+    const query = Workshop.find();
+
+    if (sortField) {
+        query.sort({
+            [sortField]: 1,
+        });
+    }
+
+    // pagination (assuming 10 per page)
+    query.skip(10 * (page - 1)).limit(10);
+
+    const workshops = await query.exec();
+    return workshops;
+};
+```
+- In the controller `src/controllers/workshops.controller.js` we add support for `page` and `sort` query string parameters.
+```js
+// http://localhost:3000/api/workshops
+// http://localhost:3000/api/workshops?page=1&sort=name
+const getWorkshops = async ( req, res ) => {
+    let { page, sort : sortField } = req.query;
+
+    if( page ) {
+        page = +page;
+    } else {
+        page = 1;
+    }
+
+    const workshops = await services.getAllWorkshops( page, sortField );
+
+    // send(), redirect(), json(), sendFile(), render() are other methods on response `res` object
+    res.json({
+        status: 'success',
+        data: workshops
+    });
+};
+```
+- Some sample requests
+```
+http://localhost:3000/api/workshops
+http://localhost:3000/api/workshops?page=1&sort=name
+```
+
+## Step 15: Support getting a single workshop by its id
+- The Mongoose Model `findById()` let's us retrieve a document by its unique `_id`. We use it to set up a service method to get a workshop by its `_id` in `src/services/workshops.service.js`
+```js
+const getWorkshopById = async (id) => {
+    try {
+        const workshop = await Workshop.findById(id);
+
+        if (workshop === null) {
+            const error = new Error("No such workshop");
+            error.type = "NotFound";
+            throw error;
+        }
+
+        return workshop;
+    } catch (error) {
+        if (error.name === "CastError") {
+            const dbError = new Error(`Data type error : ${error.message}`);
+            dbError.type = "CastError";
+            throw dbError;
+        }
+
+        if (error.type === "NotFound") {
+            throw error;
+        }
+    }
+};
+```
+```js
+module.exports = {
+    getAllWorkshops,
+    getWorkshopById,
+    addWorkshop,
+};
+```
+- Now in `src/controllers/workshops.controller.js`, we support `GET /api/workshops/:id`. Note how a dynamic path parameter is configured in the Express router - the `:` indicates a dynamic path parameter, and `id` shall be the property within `req.params` which shall be set to the actual value.
+```js
+// http://localhost:3000/api/workshops/:id
+const getWorkshopById = async ( req, res, next ) => {
+    const id = req.params.id;
+
+    try {
+        const workshop = await services.getWorkshopById( id );
+
+        res.json({
+            status: 'success',
+            data: workshop
+        });
+    } catch( error ) {
+        error.status = 404;
+        throw error;
+    }
+};
+```
+```js
+module.exports = {
+    getWorkshops,
+    getWorkshopById,
+    postWorkshops
+};
+```
+- Add the route in `src/routes.workshops.route.js`. Note that since there is an extra dynamic path fragment, we need to configure the route separately.
+```js
+router
+  .route('/')
+  .get(controllers.getWorkshops)
+  .post(controllers.postWorkshops);
+
+router
+  .route('/:id')
+  .get(controllers.getWorkshopById);
+```
+- A sample request (surely, a workshop with the given `_id` shoudl exist in the database)
+```
+http://localhost:3000/api/workshops/6873679dac11710477aa5d60
+```
+
+## Step 16: Supporting update of workshop
+- The Mongoose Model `findByIdAndUpdate()` let's us update a document having the unique `_id`. We use it to set up a service method to partially update a workshop matching the given `_id` in `src/services/workshops.service.js`
+```js
+const updateWorkshop = async (id, workshop) => {
+    // NOTES
+    // ---
+    // 1. By default, MongoDB $set operator is applied to the fields. FOr an array field, we explicitly use an operator like $push to addd to an existing array (else it will be completely replaced).
+    /**
+     *  {
+            $set: {
+                "name": "Express JS v5",
+                "category": "backend"
+            }
+        }
+     */
+    // 2. By default Mongoose will not perform schema validations on update. We need to explicitly configure Mongoose to do so.
+    try {
+        // we do not need to pass returnOriginal / new if it has been configured similalrly at a global level
+        const updatedWorkshop = await Workshop.findByIdAndUpdate(
+            id,
+            workshop /*, {
+            // returnOriginal: false
+            new: true
+        } */
+        );
+        return updatedWorkshop;
+    } catch (error) {
+        if (error.name === "CastError") {
+            const dbError = new Error(`Data type error : ${error.message}`);
+            dbError.type = "CastError";
+            throw dbError;
+        } else if (error.name === "ValidationError") {
+            const dbError = new Error(`Validation error : ${error.message}`);
+            dbError.type = "ValidationError";
+            throw dbError;
+        } else {
+            throw error;
+        }
+    }
+};
+```
+```js
+module.exports = {
+    getAllWorkshops,
+    getWorkshopById,
+    addWorkshop,
+    updateWorkshop
+};
+```
+- In the controller `app/src/controllers/workshops.controller.js`
+```js
+// @todo - Proper handling of error response status codes (400 vs 404)
+const patchWorkshop = async ( req, res, next ) => {
+    const id = req.params.id;
+
+    const workshop = req.body;
+
+    // if workshop = req.body -> {}
+    if( Object.keys( workshop ).length === 0 ) {
+        const err = new Error('The request body is empty. A partial Workshop object expected.');
+        err.status = 400;
+        throw err;
+    }
+
+    try {
+        const updatedWorkshop = await services.updateWorkshop( id, workshop );
+        res.json({
+            status: 'success',
+            data: updatedWorkshop
+        });
+    } catch( error ) {
+        const err = new Error( error.message );
+        err.status = 404;
+        throw err;
+    }
+};
+```
+```js
+module.exports = {
+    getWorkshops,
+    getWorkshopById,
+    postWorkshops,
+    patchWorkshop
+};
+```
+- In the route file `app/src/routes/workshops.route.js`
+```js
+router.route('/')
+    .get( controllers.getWorkshops )
+    .post( controllers.postWorkshops );
+
+router.route('/:id')
+    .get( controllers.getWorkshopById )
+    .patch( controllers.patchWorkshop );
+``` 
+- Make a request to update a workshop by its id. Sample request
+```
+localhost:3000/api/workshops/6873679dac11710477aa5d60
+
+{
+    "name": "Angular JS v1",
+    "startTime": {
+        "hours": 9,
+        "minutes": 45
+    },
+    "endTime": {
+        "hours": 13,
+        "minutes": 45
+    }
+}
+```
+- You will see that validations do not run and the old details are returned. Now configure Mongoose to do validations on update, and return the updated document details by default. In `src/data/init.js`
+```js
+mongoose.set('strictQuery', true);
+mongoose.set('strict', true);
+
+// add these...
+mongoose.set( 'returnOriginal', false );
+mongoose.set( 'runValidators', true );
+
+```
+- Make an update request again. You will see the new details being returned.
+
+## Step 17: Supporting deletion of workshop
+- The Mongoose Model `findByIdAndDelete()` let's us update a document having the unique `_id`. We use it to set up a service method to partially update a workshop matching the given `_id` in `src/services/workshops.service.js`
+```js
+const deleteWorkshop = async (id) => {
+    const deletedWorkshop = await Workshop.findByIdAndDelete(id);
+
+    if (deletedWorkshop === null) {
+        const error = new Error("No such workshop");
+        error.type = "NotFound";
+        throw error;
+    }
+
+    return deletedWorkshop;
+};
+```
+```js
+module.exports = {
+    getAllWorkshops,
+    getWorkshopById,
+    addWorkshop,
+    updateWorkshop,
+    deleteWorkshop
+};
+```
+- In
+```js
+const deleteWorkshop = async ( req, res, next ) => {
+    const id = req.params.id;
+
+    try {
+        await services.deleteWorkshop( id );
+        // 204 -> use this status code for successful operation but you do not want to send any data in response (as in res.status(204).end())
+        res.json({
+            status: 'success'
+        });
+    } catch( error ) {
+        error.status = 404;
+        throw error;
+    }
+};
+```
+```js
+module.exports = {
+    getWorkshops,
+    getWorkshopById,
+    postWorkshops,
+    patchWorkshop,
+    deleteWorkshop
+};
+```
+- In `src/routes/workshops.route.js`
+```js
+router.route('/')
+    .get( controllers.getWorkshops )
+    .post( controllers.postWorkshops );
+
+router.route('/:id')
+    .get( controllers.getWorkshopById )
+    .patch( controllers.patchWorkshop )
+    .delete( controllers.deleteWorkshop );
+```
+- Sample request
+```
+DELETE http://localhost:3000/api/workshops/6873679dac11710477aa5d60
+```
+
