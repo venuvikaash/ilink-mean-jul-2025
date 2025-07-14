@@ -9,7 +9,7 @@ const app = express();
 app.use( express.json() );
 
 app.use( indexRouter );
-app.use( workshopsRouter );
+app.use( '/api/workshops', workshopsRouter );
 
 const PORT = process.env.PORT || 3000;
 
