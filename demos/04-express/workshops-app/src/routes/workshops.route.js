@@ -43,16 +43,15 @@ router.route( '/' )
             data: workshops
         });
     })
-    .post(( req, res ) => {
+    .post(( req, res /*, next */ ) => {
         const newWorkshop = req.body;
 
         // Check if body is sent and not empty
         if (!newWorkshop || Object.keys(newWorkshop).length === 0) {
-            res.status(400).json({
-                status: 'error',
-                message: 'The request body is empty. Workshop object expected.'
-            });
-            return;
+            const err = new Error('The request body is empty. Workshop object expected.');
+            err.status = 400;
+            // next( err ); // old Express way
+            throw err;
         }
 
         // Validate using Joi
@@ -62,11 +61,9 @@ router.route( '/' )
         });
 
         if (error) {
-            return res.status(400).json({
-                status: 'error',
-                message: 'Validation failed',
-                details: error.details.map(err => err.message)
-            });
+            const err = new Error(error.details.map(d => d.message));
+            err.status = 400;
+            throw err;
         }
 
         newWorkshop.id = nextId;
