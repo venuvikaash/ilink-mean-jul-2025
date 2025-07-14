@@ -49,7 +49,7 @@ mkdir src
 
 - In `src/app.js` load the variables in `.env` into `process.env` object of Node JS. Create a basic Express `Application` object and start the server associated with it on the specified port.
 ```js
-require( 'dotenv' ).config(); // this is now we read and load the variables from the .env file
+require( 'dotenv' ).config(); // this is how we read and load the variables from the .env file
 const express = require( 'express' );
 
 const app = express();
