@@ -1,10 +1,12 @@
 require( 'dotenv' ).config(); // this is how we read and load the variables from the .env file
 const express = require( 'express' );
 const indexRouter = require( './routes/index.route' );
+const workshopsRouter = require( './routes/workshops.route' );
 
 const app = express();
 
 app.use( indexRouter );
+app.use( workshopsRouter );
 
 const PORT = process.env.PORT || 3000;
 
