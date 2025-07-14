@@ -38,7 +38,7 @@ export class WorkshopDetails implements OnInit {
   loading = true;
   error : Error | null = null;
   workshop!: IWorkshop;
-  workshopId!: number;
+  workshopId!: number | string;
 
   // icons = {
   //   faCheckCircle: faCheckCircle,
@@ -60,7 +60,7 @@ export class WorkshopDetails implements OnInit {
     this.activatedRoute.paramMap.subscribe({
       next: (params) => {
         const idStr = params.get('id');
-        this.workshopId = +(idStr as string);
+        this.workshopId = (idStr as string);
 
         this.workshopsService
             .getWorkshopById(this.workshopId)

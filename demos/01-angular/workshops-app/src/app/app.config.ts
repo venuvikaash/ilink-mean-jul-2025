@@ -6,7 +6,7 @@ import { provideHttpClient, HTTP_INTERCEPTORS,
 import { routes } from './app.routes';
 import { routes as workshopsRoutes } from './workshops/workshops.routes';
 import { jwtInterceptor } from './common/auth/jwt-interceptor';
-
+import { responseDataInterceptor } from './common/auth/response-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,7 +15,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(workshopsRoutes),
     provideRouter(routes), // the page not found route will be matched at the very end
     provideHttpClient(
-      withInterceptors([jwtInterceptor])
+      withInterceptors([jwtInterceptor, responseDataInterceptor])
     ),
   ]
 };

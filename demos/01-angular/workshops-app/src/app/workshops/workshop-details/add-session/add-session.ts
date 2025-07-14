@@ -143,7 +143,7 @@ export class AddSession {
 
     console.log(addSessionForm.value);
 
-    const id = +(this.activatedRoute.snapshot.parent?.paramMap.get(
+    const id = (this.activatedRoute.snapshot.parent?.paramMap.get(
       'id'
     ) as string);
 

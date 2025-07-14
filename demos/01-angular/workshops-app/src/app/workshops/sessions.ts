@@ -13,7 +13,7 @@ export class Sessions {
 
   constructor(private http: HttpClient) {}
 
-  getSessionsForWorkshop(workshopId: number) {
+  getSessionsForWorkshop(workshopId: number | string) {
       return this.http.get<ISession[]>(
           `${this.apiUrl}/workshops/${workshopId}/sessions`
       );

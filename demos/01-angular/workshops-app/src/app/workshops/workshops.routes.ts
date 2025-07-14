@@ -29,7 +29,7 @@ export const routes: Routes = [
     {
         path: 'workshops/:id',
         title: 'Details of workshop',
-        canActivate: [validateWorkshopGuard],
+        // canActivate: [validateWorkshopGuard],
         loadComponent: () =>
             import('./workshop-details/workshop-details').then(
                 (m) => m.WorkshopDetails

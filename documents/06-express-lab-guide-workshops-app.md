@@ -2055,7 +2055,117 @@ GET http://localhost:3000/api/workshops/62ed150ad0d302eca77f0f38
 GET http://localhost:3000/api/workshops/62ed150ad0d302eca77f0f38?embed=sessions
 ```
 
-## Step 24: Enable authentication and authorization - Add user model
+## Step 24: Enable voting on sessions
+- We enable user to upvote / downvote on sessions. The session `upvoteCount` property is incremented / decremented in such case using the `$inc` operator of MongoDB.
+- In `src/services/sessions.service.js`
+```js
+const upvoteSession = async (sessionId) => {
+  try {
+    const session = await Session.findByIdAndUpdate(
+      sessionId,
+      { $inc: { upvoteCount: 1 } }
+    );
+
+    if (!session) {
+      const error = new Error('Session not found');
+      error.type = 'ValidationError';
+      throw error;
+    }
+
+    return session;
+  } catch (error) {
+    if (error.name === 'CastError') {
+      const dbError = new Error(`Invalid session ID: ${error.message}`);
+      dbError.type = 'CastError';
+      throw dbError;
+    }
+
+    throw error;
+  }
+};
+
+const downvoteSession = async (sessionId) => {
+  try {
+    const session = await Session.findByIdAndUpdate(
+      sessionId,
+      { $inc: { upvoteCount: -1 } }
+    );
+
+    if (!session) {
+      const error = new Error('Session not found');
+      error.type = 'ValidationError';
+      throw error;
+    }
+
+    return session;
+  } catch (error) {
+    if (error.name === 'CastError') {
+      const dbError = new Error(`Invalid session ID: ${error.message}`);
+      dbError.type = 'CastError';
+      throw dbError;
+    }
+
+    throw error;
+  }
+};
+
+module.exports = {
+    addSession,
+    getSessions,
+    upvoteSession,
+    downvoteSession
+};
+```
+- In `src/controllers/sessions.controller.js`
+```js
+const patchUpvote = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const updatedSession = await services.upvoteSession(id);
+    res.json({
+      status: 'success',
+      data: updatedSession
+    });
+  } catch (error) {
+    error.status = 400;
+    throw error;
+  }
+};
+
+const patchDownvote = async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const updatedSession = await services.downvoteSession(id);
+    res.json({
+      status: 'success',
+      data: updatedSession
+    });
+  } catch (error) {
+    error.status = 400;
+    throw error;
+  }
+};
+
+module.exports = {
+    postSession,
+    patchUpvote,
+    patchDownvote
+}
+```
+- In `src/routes/sessions.route.js`
+```js
+router.patch( '/:id/upvote', services.patchUpvote );
+router.patch( '/:id/downvote', services.patchDownvote );
+```
+- Sample request
+```
+PATCH localhost:3000/api/sessions/6873b8b9f5aef68c5fcccad0/upvote
+PATCH localhost:3000/api/sessions/6873b8b9f5aef68c5fcccad0/downvote
+```
+
+## Step 25: Enable authentication and authorization - Add user model
 - We now enable authentication and authorization. First add the `User` model in `src/data/models/User.js`. Note how we set up custom validators on certain paths (fields). Note that these have to be added to the schema before the model is created from it.
 ```js
 const mongoose = require( 'mongoose' );
@@ -2104,7 +2214,7 @@ require( './models/Workshop' );
 require( './models/Session' );
 ```
 
-## Step 25: Add user registration support
+## Step 26: Add user registration support
 - In `src/services/users.service.js`
 ```js
 const mongoose = require( 'mongoose' );
@@ -2204,7 +2314,7 @@ POST /api/auth/register
 ```
 - __NOTE__: A public registration API like this would not support adding users with _admin_ role. Here it is enabled just for convenience.
 
-## Step 26: Hashing passwords using bcrypt
+## Step 27: Hashing passwords using bcrypt
 - Passwords need to be hashed and store in databases so they are not available to anyone, including those with access to the database. The password needs to be __salted__ for additional security (even if 2 users have the same password, the hashed values are different - so a compromised password for one user, cannot be used to break into another user's account with the same password).
 - The `bcrypt` package that uses C++ modules under-the-hood (or `bcryptjs` for a pure JS implementation that is not as performant) is popularly used for this purpose (what we need can be implemented using the built-in crypto module, but the API is not as friendly). Install it
 ```bash
@@ -2255,7 +2365,7 @@ userSchema.methods.checkPassword = async function( plainTextPassword ) {
 mongoose.model( 'User', userSchema );
 ```
 
-## Step 27: Add login support
+## Step 28: Add login support
 - In `src/services/users.service.js`
 ```js
 const getUserByEmail = async ( email ) => {
@@ -2355,7 +2465,7 @@ POST /api/auth/login
 }
 ```
 
-## Step 28: Generate and send a JWT on successful login
+## Step 29: Generate and send a JWT on successful login
 - We shall generate a JSON Web Token (JWT) using the `jsonwebtoken` package. JWT hold user claims (privileges) along with other user information. The claims are digitally signed using a secret key on the server, and hence can be verified when access to secured API endpoints is needed. Install the package
 ```bash
 npm i jsonwebtoken
@@ -2398,7 +2508,7 @@ jwt.sign( claims, process.env.JWT_SECRET, function( error, token ) {
 });
 ```
 
-## Step 29: Set up an authentication middleware
+## Step 30: Set up an authentication middleware
 - In `src/middleware/auth.js` add and export an `authenticate` middleware
 ```js
 const jwt = require( 'jsonwebtoken' );
@@ -2482,7 +2592,7 @@ Body
 }
 ```
 
-## Step 30: Set up an authorization middleware
+## Step 31: Set up an authorization middleware
 - In `src/middleware/auth.js` add and export an `authorize` middleware - it is created as a higher-order function (it is a function that exports a function) in order to support configuring roles that the returned middleware needs to allow.
 ```js
 const authorize = ( allowedRoles ) => { // when called, this returns the middleware
@@ -2555,7 +2665,7 @@ Body
 }
 ```
 
-## Step 31: Set up authentication/authorization for relevant API endpoints
+## Step 32: Set up authentication/authorization for relevant API endpoints
 - All endpoints that mutate __workshops__ resource are allowed for _admin_ role, and all endpoints that mutate __sessions__ resource are allowed for authenticated users (no role-specific authorization).
 - In `src/routes/workshops.route.js`
 ```js
@@ -2587,10 +2697,116 @@ router.route('/')
     // .get( services.getSessions )
     .post( authenticate, services.postSession );
 
+router.patch( '/:id/upvote', authenticate, services.patchUpvote );
+router.patch( '/:id/downvote', authenticate, services.patchDownvote );
+
 module.exports = router;
 ```
 
-## Step 32: Enable file upload
+## Step 34: up CORS middleware
+```bash
+npm i cors
+```
+- In `src/app.js`
+```js
+const cors = require(cors);
+```
+```js
+app.use(cors()); // @todo improve this to restrict based on domain, and allow domain based on environment (development/production)
+```
+
+## Step 35: Implement session voting feature using web sockets
+- Web sockets enable real-time 2-way data communication between client and server in web applications. The Web Socket protocol is built on top of HTTP in the sense the `ws` connection is established over `http` / `https`. We enable web socket support using `socket.io`. Install it.
+```bash
+npm i socket.io
+```
+- In `src/middleware/socket-auth.js`
+```js
+const jwt = require('jsonwebtoken');
+
+const socketAuthMiddleware = (socket, next) => {
+  console.log( 'socket middleware' );
+  const token = socket.handshake.auth?.token || socket.handshake.headers['authorization'];
+
+  if (!token || !token.startsWith('Bearer ')) {
+    return next(new Error('Authentication token missing or invalid'));
+  }
+
+  const actualToken = token.replace('Bearer ', '');
+
+  try {
+    const payload = jwt.verify(actualToken, process.env.JWT_SECRET);
+    socket.user = payload; // attach decoded user info to the socket
+    next();
+  } catch (err) {
+    next(new Error('Invalid or expired token'));
+  }
+};
+
+module.exports = socketAuthMiddleware;
+```
+- In `src/sockets/voting.socket.js`
+```js
+const sessionService = require('../services/sessions.service');
+const socketAuth = require('../middleware/socket-auth');
+
+module.exports = (io) => {
+  // Attach middleware to every connection
+  io.use(socketAuth);
+
+  io.on('connection', (socket) => {
+    console.log(`User ${socket.user?.email || socket.user?.id} connected via socket`, socket.id);
+
+    socket.on('upvote', async (sessionId) => {
+      try {
+        const updated = await sessionService.upvoteSession(sessionId);
+        io.emit('sessionUpdated', updated);
+      } catch (err) {
+        socket.emit('error', { message: err.message });
+      }
+    });
+
+    socket.on('downvote', async (sessionId) => {
+      try {
+        const updated = await sessionService.downvoteSession(sessionId);
+        io.emit('sessionUpdated', updated);
+      } catch (err) {
+        socket.emit('error', { message: err.message });
+      }
+    });
+
+    socket.on('disconnect', () => {
+      console.log('User disconnected:', socket.id);
+    });
+  });
+};
+```
+- In `src/app.js`
+```js
+const { Server } = require('socket.io');
+```
+```js
+// app.listen( PORT );
+
+// Replaced app.listen( PORT ) with the following for setting up web socket support
+const server = http.createServer(app);
+
+// Attach Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: '*', // ⚠️ set this appropriately for production
+    methods: ['GET', 'POST', 'PATCH']
+  }
+});
+
+require('./sockets/voting.socket')(io); // socket logic in separate module
+
+server.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
+```
+
+## Step 36: Enable file upload
 - We use `multer` package to upload files. Install `multer`
 ```bash
 npm i multer

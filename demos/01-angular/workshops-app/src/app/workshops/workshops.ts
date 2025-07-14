@@ -28,13 +28,13 @@ export class WorkshopsService {
     );
   }
 
-  getWorkshopById(workshopId: number) {
+  getWorkshopById(workshopId: number | string) {
     return this.http.get<IWorkshop>(
         `${this.apiUrl}/workshops/${workshopId}`
     );
   }
 
-  deleteWorkshopById(workshopId: number) {
+  deleteWorkshopById(workshopId: number | string) {
     return this.http.delete<void>(`${this.apiUrl}/workshops/${workshopId}`);
   }
 
