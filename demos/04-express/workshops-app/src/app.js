@@ -1,4 +1,8 @@
 require( 'dotenv' ).config(); // this is how we read and load the variables from the .env file
+
+// add this...
+require( './data/init' );
+
 const express = require( 'express' );
 const morgan = require( 'morgan' );
 const indexRouter = require( './routes/index.route' );
