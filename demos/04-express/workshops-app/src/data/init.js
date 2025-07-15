@@ -17,6 +17,7 @@ mongoose.Schema.Types.String.cast(v => {
 
 // import model files here...
 require('./models/Workshop');
+require('./models/Session');
 
 const connectionStr = process.env.DB_CONNECTION_STRING;
 
