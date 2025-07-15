@@ -7,4 +7,7 @@ router.route( '/' )
     .get(controllers.getWorkshops)
     .post(controllers.postWorkshop);
 
+router.route( '/:id' )
+    .get(controllers.getWorkshopById)
+
 module.exports = router;

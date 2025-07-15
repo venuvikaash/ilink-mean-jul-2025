@@ -37,7 +37,25 @@ const postWorkshop = async ( req, res /*, next */ ) => {
     }
 };
 
+// http://localhost:3000/api/workshops/:id
+const getWorkshopById = async ( req, res ) => {
+    const id = req.params.id;
+
+    try {
+        const workshop = await services.getWorkshopById( id );
+
+        res.json({
+            status: 'success',
+            data: workshop
+        });
+    } catch( error ) {
+        error.status = 404;
+        throw error;
+    }
+};
+
 module.exports = {
     getWorkshops,
-    postWorkshop
+    postWorkshop,
+    getWorkshopById
 }
