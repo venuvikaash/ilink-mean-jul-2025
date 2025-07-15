@@ -1,5 +1,8 @@
 const mongoose = require( 'mongoose' );
 
+// import model files here...
+require('./models/Workshop');
+
 const connectionStr = process.env.DB_CONNECTION_STRING;
 
 const connect = async () => {
