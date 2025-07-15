@@ -7,6 +7,7 @@ const express = require( 'express' );
 const morgan = require( 'morgan' );
 const indexRouter = require( './routes/index.route' );
 const workshopsRouter = require( './routes/workshops.route' );
+const sessionsRouter = require( './routes/sessions.route' );
 
 const logger = require( './middleware/logger' );
 const { notFoundHandler, errorHandler } = require( './middleware/errors' );
@@ -21,6 +22,7 @@ app.use( express.json() );
 
 app.use( indexRouter );
 app.use( '/api/workshops', workshopsRouter );
+app.use( '/api/sessions', sessionsRouter );
 
 app.use( notFoundHandler );
 app.use( errorHandler );
