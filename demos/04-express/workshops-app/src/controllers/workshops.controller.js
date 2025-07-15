@@ -1,10 +1,15 @@
 const services = require( '../services/workshops.service' );
 
+// http://localhost:3000/api/workshops?page=1&sort=name&category=frontend
 const getWorkshops = async ( req, res ) => {
-    const workshops = await services.getAllWorkshops();
+    let { page, sort : sortField, category } = req.query;
+
+    const { workshops, count } = await services.getAllWorkshops(page, sortField, category);
 
     res.json({
         status: 'success',
+        // count: count,
+        count,
         data: workshops
     });
 };

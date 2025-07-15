@@ -4,6 +4,7 @@ const mongoose = require( 'mongoose' );
 mongoose.set('strictQuery', true);
 mongoose.set('strict', true);
 
+// { "name" : 1234 -> "name" : "1234" } // we prevent such conversions using code set up below
 // prevent casting - Be careful, this affects all String fields globally!
 mongoose.Schema.Types.String.cast(v => {
   if (typeof v !== 'string') {
