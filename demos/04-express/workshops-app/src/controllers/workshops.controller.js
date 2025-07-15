@@ -38,12 +38,13 @@ const postWorkshop = async ( req, res /*, next */ ) => {
     }
 };
 
-// http://localhost:3000/api/workshops/:id
+// http://localhost:3000/api/workshops/:id?_embed=sessions
 const getWorkshopById = async ( req, res ) => {
     const id = req.params.id;
+    const embedSessions = req.query._embed === 'sessions';
 
     try {
-        const workshop = await services.getWorkshopById( id );
+        const workshop = await services.getWorkshopById( id, embedSessions );
 
         res.json({
             status: 'success',

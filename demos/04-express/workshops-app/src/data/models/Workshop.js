@@ -78,5 +78,11 @@ const workshopsSchema = new mongoose.Schema(
   }
 );
 
+workshopsSchema.virtual( 'sessions', {
+    ref: 'Session',
+    localField: '_id',
+    foreignField: 'workshopId' // the field in the other collection (Session) that references a document in this collection (Workshop)
+});
+
 // The name of the collection is the plural form of the name of the Model
 mongoose.model( 'Workshop', workshopsSchema );

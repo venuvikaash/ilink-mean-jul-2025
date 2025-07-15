@@ -64,9 +64,17 @@ const addWorkshop = async (workshop) => {
     }
 };
 
-const getWorkshopById = async (id) => {
+const getWorkshopById = async (id, embedSessions = false) => {
     try {
-        const workshop = await Workshop.findById(id);
+        const query = Workshop.findById( id );
+
+        // console.log( embedSessions );
+
+        if (embedSessions) {
+            query.populate( 'sessions' );
+        }
+
+        const workshop = await query.exec();
 
         if (workshop === null) {
             const error = new Error("No such workshop");
