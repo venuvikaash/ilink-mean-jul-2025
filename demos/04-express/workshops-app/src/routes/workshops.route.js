@@ -12,4 +12,7 @@ router.route( '/:id' )
     .patch(controllers.patchWorkshop)
     .delete(controllers.deleteWorkshop);
 
+router.route( '/:id/speakers' )
+    .patch( controllers.addSpeakers );
+
 module.exports = router;

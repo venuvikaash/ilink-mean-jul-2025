@@ -95,10 +95,38 @@ const deleteWorkshop = async ( req, res ) => {
     }
 };
 
+// http://localhost:3000/api/workshops/62ed07b0437f58e437c01f57/speakers
+// body -> [
+//     "john.doe@example.com",
+//     "jane.doe@example.com"
+// ]
+const addSpeakers = async ( req, res ) => {
+    const id = req.params.id;
+    const speakers = req.body;
+
+    if( !( speakers instanceof Array ) || speakers.length === 0 ) {
+        const error = new Error( "Speakers must be a non-empty array. Data is missing or formed incorrectly" );
+        error.status = 400;
+        throw error;
+    }
+
+    try {
+        const updatedWorkshop = await services.addSpeakers( id, speakers );
+        res.json({
+            status: 'success',
+            data: updatedWorkshop
+        });
+    } catch( error ) {
+        error.status = 404;
+        throw error;
+    }
+};
+
 module.exports = {
     getWorkshops,
     postWorkshop,
     getWorkshopById,
     patchWorkshop,
-    deleteWorkshop
+    deleteWorkshop,
+    addSpeakers
 }
