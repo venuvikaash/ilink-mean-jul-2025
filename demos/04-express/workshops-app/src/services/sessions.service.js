@@ -33,6 +33,34 @@ const addSession = async ( session ) => {
     }
 };
 
+const getSessions = async ( workshopId ) => {
+    let workshop;
+
+    try {
+        workshop = await Workshop.findById( workshopId );
+
+        if( workshop ) {
+            const sessions = await Session.find({
+                workshopId: workshopId
+            });
+            return sessions;
+        }
+    } catch( error ) {
+        if( error.name === 'CastError' ) {
+            const dbError = new Error( `Data type error : ${error.message}` );
+            dbError.type = 'CastError';
+            throw dbError;
+        }
+    }
+
+    if( !workshop ) {
+        const error = new Error( `Workshop not found` );
+        error.type = 'NotFound';
+        throw error;
+    }
+};
+
 module.exports = {
-    addSession
+    addSession,
+    getSessions
 };

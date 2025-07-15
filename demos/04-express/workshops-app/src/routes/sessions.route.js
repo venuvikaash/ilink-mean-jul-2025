@@ -5,5 +5,6 @@ const router = express.Router();
 
 router.route('/')
     .post( services.postSession );
+    // .get( services.getSessions )
 
 module.exports = router;
