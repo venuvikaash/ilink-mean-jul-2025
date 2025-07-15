@@ -9,6 +9,7 @@ router.route( '/' )
 
 router.route( '/:id' )
     .get(controllers.getWorkshopById)
-    .patch(controllers.patchWorkshop);
+    .patch(controllers.patchWorkshop)
+    .delete(controllers.deleteWorkshop);
 
 module.exports = router;

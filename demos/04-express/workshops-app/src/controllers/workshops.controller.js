@@ -80,9 +80,25 @@ const patchWorkshop = async ( req, res ) => {
     }
 };
 
+const deleteWorkshop = async ( req, res ) => {
+    const id = req.params.id;
+
+    try {
+        await services.deleteWorkshop( id );
+        // 204 -> use this status code for successful operation but you do not want to send any data in response (as in res.status(204).end())
+        res.json({
+            status: 'success'
+        });
+    } catch( error ) {
+        error.status = 404;
+        throw error;
+    }
+};
+
 module.exports = {
     getWorkshops,
     postWorkshop,
     getWorkshopById,
-    patchWorkshop
+    patchWorkshop,
+    deleteWorkshop
 }
