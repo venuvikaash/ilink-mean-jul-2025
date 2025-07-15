@@ -118,3 +118,11 @@
 - Event emitter for communication - on(), emit()
 - HTTP module - url, querystring, method, headers, status code
 - exec() for executing commands using the shell, and reading the results
+
+## Day 11: Introduction to Express JS
+- Why use Express JS rather than vanilla Node JS?
+- Setting up the web server in Express
+- Routing using the Application object, Modularizing routing using the Router object
+- Sending responses, redirects, HTML response, JSON response, status code, handling GET, POST request
+- Setting up middleware, body parsing middleware for parsing request JSON body, request logging using morgan, error-handling middleware, handling HTTP errors
+- Joi for schema-based validations
