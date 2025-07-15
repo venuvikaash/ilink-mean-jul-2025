@@ -20,6 +20,8 @@
     - Try all Day 10 Node code
     - Explore transform streams
     - How 'error' event (if emitted by event emitter) has special status and MUST be handled.
+- Express JS
+    - Step 14 onwards (remaining API endpoints)
 
 ## Questions
 - Best industry practices to not expose secrets from frontend

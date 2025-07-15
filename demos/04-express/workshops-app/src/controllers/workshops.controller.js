@@ -54,8 +54,35 @@ const getWorkshopById = async ( req, res ) => {
     }
 };
 
+// @todo - Proper handling of error response status codes (400 vs 404)
+const patchWorkshop = async ( req, res ) => {
+    const id = req.params.id;
+
+    const workshop = req.body;
+
+    // if workshop = req.body -> {}
+    if( Object.keys( workshop ).length === 0 ) {
+        const err = new Error('The request body is empty. A partial Workshop object expected.');
+        err.status = 400;
+        throw err;
+    }
+
+    try {
+        const updatedWorkshop = await services.updateWorkshop( id, workshop );
+        res.json({
+            status: 'success',
+            data: updatedWorkshop
+        });
+    } catch( error ) {
+        const err = new Error( error.message );
+        err.status = 404;
+        throw err;
+    }
+};
+
 module.exports = {
     getWorkshops,
     postWorkshop,
-    getWorkshopById
+    getWorkshopById,
+    patchWorkshop
 }

@@ -88,8 +88,47 @@ const getWorkshopById = async (id) => {
     }
 };
 
+const updateWorkshop = async (id, workshop) => {
+    // NOTES
+    // ---
+    // 1. By default, MongoDB $set operator is applied to the fields. FOr an array field, we explicitly use an operator like $push to addd to an existing array (else it will be completely replaced).
+    /**
+     *  {
+            $set: {
+                "name": "Express JS v5",
+                "category": "backend"
+            }
+        }
+     */
+    // 2. By default Mongoose will not perform schema validations on update. We need to explicitly configure Mongoose to do so.
+    try {
+        // we do not need to pass returnOriginal / new if it has been configured similalrly at a global level
+        const updatedWorkshop = await Workshop.findByIdAndUpdate(
+            id,
+            workshop /*, {
+            // returnOriginal: false
+            new: true
+        } */
+        );
+        return updatedWorkshop;
+    } catch (error) {
+        if (error.name === "CastError") {
+            const dbError = new Error(`Data type error : ${error.message}`);
+            dbError.type = "CastError";
+            throw dbError;
+        } else if (error.name === "ValidationError") {
+            const dbError = new Error(`Validation error : ${error.message}`);
+            dbError.type = "ValidationError";
+            throw dbError;
+        } else {
+            throw error;
+        }
+    }
+};
+
 module.exports = {
     getAllWorkshops,
     addWorkshop,
-    getWorkshopById
+    getWorkshopById,
+    updateWorkshop
 };

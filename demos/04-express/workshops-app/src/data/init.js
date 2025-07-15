@@ -3,6 +3,8 @@ const mongoose = require( 'mongoose' );
 // disallows saving fields not in the schema
 mongoose.set('strictQuery', true);
 mongoose.set('strict', true);
+mongoose.set( 'returnOriginal', false );
+mongoose.set( 'runValidators', true );
 
 // { "name" : 1234 -> "name" : "1234" } // we prevent such conversions using code set up below
 // prevent casting - Be careful, this affects all String fields globally!
