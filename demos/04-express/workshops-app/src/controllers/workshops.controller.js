@@ -16,6 +16,8 @@ const getWorkshops = async ( req, res ) => {
 };
 
 const postWorkshop = async ( req, res /*, next */ ) => {
+    console.log( res.locals );
+    
     const newWorkshop = req.body;
 
     // Check if body is sent and not empty

@@ -29,16 +29,6 @@ app.use( '/api/sessions', sessionsRouter );
 app.use( notFoundHandler );
 app.use( errorHandler );
 
-// global error handler middleware
-app.use(( err, req, res, next ) => { // a middleware with 4 arguments is an "Error handler middleware"
-    const status = err.status || 500;
-    res.status( status ).json({
-        status: 'error',
-        message: err.message
-    });
-    // next(); // not a good idea to call next when a response is also sent
-});
-
 const PORT = process.env.PORT || 3000;
 
 app.listen( PORT, () => {
