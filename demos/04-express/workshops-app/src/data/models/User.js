@@ -71,6 +71,6 @@ userSchema.methods.checkPassword = async function( plainTextPassword ) {
     // if on the other hand bcrypt is able to compare it will return true / false
     const isMatch = await bcrypt.compare( plainTextPassword, hashedPassword );
     return isMatch;
-}
+};
 
 mongoose.model( 'User', userSchema );

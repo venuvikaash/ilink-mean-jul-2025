@@ -27,6 +27,40 @@ const register = async ( req, res ) => {
     }
 };
 
+const login = async ( req, res ) => {
+    const credentials = req.body;
+
+    if( !( credentials?.email && credentials?.password ) ) {
+        const error = new Error( "Bad request" );
+        error.status = 400;
+        throw error;
+    }
+
+    const { email, password } = credentials;
+
+    try {
+        const user = await services.getUserByEmail( email );
+
+        await services.checkPassword( user, password );
+
+        res.json({
+            status: 'success',
+            data: "Token to be generated"
+        });
+    } catch( error ) {
+        if( error.type === 'BadCredentials' ) {
+            // It is a good practice not to expose to the client what exactly went wrong - such information could aid hackers
+            const err = new Error( "Bad credentials" );
+            err.status = 403; // Email, password is provided but is incorrect -> 403
+            throw err;
+        } else {
+            error.status = 500;
+            throw error;
+        }
+    }
+};
+
 module.exports = {
-    register
+    register,
+    login
 };
