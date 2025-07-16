@@ -1,10 +1,13 @@
 const express = require( 'express' );
-const services = require( '../controllers/sessions.controller' );
+const controllers = require( '../controllers/sessions.controller' );
 
 const router = express.Router();
 
 router.route('/')
-    .post( services.postSession );
+    .post( controllers.postSession );
     // .get( services.getSessions )
+
+router.patch( '/:id/upvote', controllers.patchUpvote );
+router.patch( '/:id/downvote', controllers.patchDownvote );
 
 module.exports = router;

@@ -60,7 +60,59 @@ const getSessions = async ( workshopId ) => {
     }
 };
 
+const upvoteSession = async (sessionId) => {
+  try {
+    const session = await Session.findByIdAndUpdate(
+      sessionId,
+      { $inc: { upvoteCount: 1 } }
+    );
+
+    if (!session) {
+      const error = new Error('Session not found');
+      error.type = 'ValidationError';
+      throw error;
+    }
+
+    return session;
+  } catch (error) {
+    if (error.name === 'CastError') {
+      const dbError = new Error(`Invalid session ID: ${error.message}`);
+      dbError.type = 'CastError';
+      throw dbError;
+    }
+
+    throw error;
+  }
+};
+
+const downvoteSession = async (sessionId) => {
+  try {
+    const session = await Session.findByIdAndUpdate(
+      sessionId,
+      { $inc: { upvoteCount: -1 } }
+    );
+
+    if (!session) {
+      const error = new Error('Session not found');
+      error.type = 'ValidationError';
+      throw error;
+    }
+
+    return session;
+  } catch (error) {
+    if (error.name === 'CastError') {
+      const dbError = new Error(`Invalid session ID: ${error.message}`);
+      dbError.type = 'CastError';
+      throw dbError;
+    }
+
+    throw error;
+  }
+};
+
 module.exports = {
     addSession,
-    getSessions
+    getSessions,
+    upvoteSession,
+    downvoteSession
 };

@@ -1822,12 +1822,12 @@ module.exports = {
 - In `src/routes/sessions.route.js`
 ```js
 const express = require( 'express' );
-const services = require( '../controllers/sessions.controller' );
+const controllers = require( '../controllers/sessions.controller' );
 
 const router = express.Router();
 
 router.route('/')
-    .post( services.postSession );
+    .post( controllers.postSession );
 
 module.exports = router;
 ```
@@ -2156,8 +2156,8 @@ module.exports = {
 ```
 - In `src/routes/sessions.route.js`
 ```js
-router.patch( '/:id/upvote', services.patchUpvote );
-router.patch( '/:id/downvote', services.patchDownvote );
+router.patch( '/:id/upvote', controllers.patchUpvote );
+router.patch( '/:id/downvote', controllers.patchDownvote );
 ```
 - Sample request
 ```
