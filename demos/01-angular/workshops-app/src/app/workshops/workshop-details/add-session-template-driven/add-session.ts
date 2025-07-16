@@ -13,7 +13,7 @@ import { Toast as ToastService } from '../../../common/toast';
   imports: [
     RouterLink,
     FormsModule,
-    JsonPipe
+    // JsonPipe
   ],
   templateUrl: './add-session.html',
   styleUrl: './add-session.scss'

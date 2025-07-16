@@ -58,7 +58,7 @@ function durationAndLevel(form: AbstractControl) {
 
 @Component({
   selector: 'app-add-session',
-  imports: [RouterLink, ReactiveFormsModule, JsonPipe],
+  imports: [RouterLink, ReactiveFormsModule/*, JsonPipe*/],
   templateUrl: './add-session.html',
   styleUrl: './add-session.scss',
 })

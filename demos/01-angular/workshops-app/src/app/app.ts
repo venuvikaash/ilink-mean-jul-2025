@@ -8,7 +8,7 @@ import { Toast } from './common/toast/toast';
 
 @Component({
   selector: 'app-root',
-  imports: [NgbAlert, CommonModule, Menu, Home, RouterOutlet, Toast],
+  imports: [NgbAlert, CommonModule, Menu/*, Home*/, RouterOutlet, Toast],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

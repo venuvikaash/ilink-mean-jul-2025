@@ -47,10 +47,13 @@ export class SessionsList implements OnInit {
                 this.loading = false;
 
                 this.socketService.onSessionUpdated().subscribe((updatedSession) => {
+                    console.log( this.sessions );
+                    console.log( updatedSession );
+
                     // Only update session if it belongs to this workshop
                     if (updatedSession.workshopId === this.workshopId) {
                         this.sessions = this.sessions.map(s =>
-                            s.id === updatedSession.id ? updatedSession : s
+                            (s as any)._id === (updatedSession as any)._id ? updatedSession : s
                         );
                     }
                 });
