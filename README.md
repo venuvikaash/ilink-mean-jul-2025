@@ -128,3 +128,10 @@
 - Sending responses, redirects, HTML response, JSON response, status code, handling GET, POST request
 - Setting up middleware, body parsing middleware for parsing request JSON body, request logging using morgan, error-handling middleware, handling HTTP errors
 - Joi for schema-based validations
+
+## Day 12: Buildings APIs in Express
+- Refactoring to create controller, service layers
+- Defining schemas and creating, registering models in Mongoose
+- Model methods for updating the database, and querying, including pagination, sorting, filtering, projecting, updating single and multi-valued (array) fields
+- Handling query and path parameters
+- Handling relationships between collections and joins, adding virtual fields in schema
