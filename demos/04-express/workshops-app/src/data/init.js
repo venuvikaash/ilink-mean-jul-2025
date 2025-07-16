@@ -16,6 +16,7 @@ mongoose.Schema.Types.String.cast(v => {
 });
 
 // import model files here...
+require('./models/User');
 require('./models/Workshop');
 require('./models/Session');
 
