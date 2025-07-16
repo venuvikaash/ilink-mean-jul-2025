@@ -8,6 +8,7 @@ const morgan = require( 'morgan' );
 const indexRouter = require( './routes/index.route' );
 const workshopsRouter = require( './routes/workshops.route' );
 const sessionsRouter = require( './routes/sessions.route' );
+const usersRouter = require( './routes/users.route' );
 
 const logger = require( './middleware/logger' );
 const { notFoundHandler, errorHandler } = require( './middleware/errors' );
@@ -21,6 +22,7 @@ app.use( morgan( 'combined' ) );
 app.use( express.json() );
 
 app.use( indexRouter );
+app.use( '/api/auth', usersRouter );
 app.use( '/api/workshops', workshopsRouter );
 app.use( '/api/sessions', sessionsRouter );
 
