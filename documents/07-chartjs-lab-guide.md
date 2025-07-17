@@ -60,7 +60,7 @@ import { provideCharts, withDefaultRegisterables } from "ng2-charts";
 export class AppModule {}
 ```
 
-## Step 2: Creating a Basic Chart (using <canvas>)
+## Step 2: Creating a Basic Chart (using &lt;canvas&gt;)
 
 -   Include `BaseChartDirective` in the App component class, i.e. in `src/app/app.ts`. Also add data for it.
     **Note**: We removed the `<router-outlet></router-oulet>` and the corresponding `RouterOutlet` import.
