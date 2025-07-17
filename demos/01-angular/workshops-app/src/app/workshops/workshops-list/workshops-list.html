@@ -16,19 +16,18 @@
         type="search"
         class="form-control"
         placeholder="Type to search by name"
-        [(ngModel)]="filterKey"
-        (input)="filterWorkshops()"
+        (input)="filterWorkshops($event)"
     />
 
-    @if ( filterKey !== '' ) {
+    @if ( filterable.hasFilteredOutItems ) {
         <div>
             Workshops whose name has
-            <span class="text-primary">{{ filterKey }}</span> are shown.
+            <span class="text-primary">{{ filterable.filterKey() }}</span> are shown.
         </div>
     }
 
     <div class="row">
-        @for ( workshopItem of filteredWorkshops; track workshopItem.id ) {
+        @for ( workshopItem of filterable.filteredArray(); track workshopItem.id ) {
             <div class="col-12 col-lg-4 my-3 d-flex">
                 <app-item
                     [workshop]="workshopItem"

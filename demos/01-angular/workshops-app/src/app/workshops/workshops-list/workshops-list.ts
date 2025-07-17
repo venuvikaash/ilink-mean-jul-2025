@@ -10,6 +10,8 @@ import { WorkshopsService } from '../workshops';
 import IWorkshop from '../models/IWorkshop';
 import { Toast as ToastService } from '../../common/toast';
 
+import { useFilterableData } from '../../signals/filter.signal';
+
 @Component({
   selector: 'app-workshops-list',
   imports: [
@@ -24,12 +26,15 @@ import { Toast as ToastService } from '../../common/toast';
   styleUrl: './workshops-list.scss'
 })
 export class WorkshopsList implements OnInit {
-  workshops!: IWorkshop[]; // all the 10 workshops for the page
-  filteredWorkshops!: IWorkshop[]; // only filtered workshops
   error: Error | null = null;
   loading = true;
   page = 1;
-  filterKey = '';
+
+  // workshops!: IWorkshop[]; // all the 10 workshops for the page
+  // filteredWorkshops!: IWorkshop[]; // only filtered workshops
+  // filterKey = '';
+
+  filterable: ReturnType<typeof useFilterableData<IWorkshop>> = useFilterableData<IWorkshop>();
 
   // short syntax for data member creation and initialization
   constructor(
@@ -47,10 +52,10 @@ export class WorkshopsList implements OnInit {
         // called when operation (backend call) is successful - it is passed the data
         next: ( w ) => {
           console.log( w );
-          this.workshops = w;
+          this.filterable.array.set(w);
           this.loading = false;
 
-          this.filterWorkshops();
+          // this.filterWorkshops();
         },
 
         // called when operation is unsuccessful - it is passed the error
@@ -101,10 +106,14 @@ export class WorkshopsList implements OnInit {
     );
   }
 
-  filterWorkshops() {
-    this.filteredWorkshops = this.workshops.filter(
-      (w) => w.name.toLowerCase().includes(this.filterKey.toLowerCase())
-    );
+  // filterWorkshops() {
+  //   this.filteredWorkshops = this.workshops.filter(
+  //     (w) => w.name.toLowerCase().includes(this.filterKey.toLowerCase())
+  //   );
+  // }
+
+  filterWorkshops(event: Event) {
+    this.filterable.filterKey.set((event?.target as HTMLInputElement).value);
   }
 
   deleteWorkshop(workshop: IWorkshop) {
@@ -120,10 +129,10 @@ export class WorkshopsList implements OnInit {
                 duration: 5000,
             });
             // update this.workshops
-            this.workshops = this.workshops.filter(
+            this.filterable.array.set(this.filterable.array().filter(
                 (w) => w.id !== workshop.id
-            );
-            this.filterWorkshops();
+            ));
+            // this.filterWorkshops();
         },
         error: () => {
             // alert(`Could not delete workshop with id = ${workshop.id}`);

@@ -33,7 +33,7 @@
 - Mantra online store server - https://mantra-server-nzl2.onrender.com/api
 
 ## Topics if time permits
-- Signals (We will do)
+- Signals (We will do) - DONE
 - Angular Universal
 - Taking care of browser inconsistencies
 - MFE in Angular
