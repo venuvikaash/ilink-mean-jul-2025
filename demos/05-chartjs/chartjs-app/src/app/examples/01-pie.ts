@@ -1,4 +1,4 @@
-import type { ChartData } from "chart.js";
+import type { ChartData, ChartOptions } from "chart.js";
 import { PieChartType } from "./types";
 
 const chartType: PieChartType = "pie";
@@ -13,7 +13,35 @@ const chartData: ChartData<PieChartType, number[], string | string[]> = {
     ],
 };
 
+const chartOptions: ChartOptions<PieChartType> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    // maintainAspectRatio: true,
+    // aspectRatio: 1.5,
+    plugins: {
+        legend: {
+            position: "bottom",
+            labels: {
+                color: "black",
+                font: {
+                    size: 14,
+                },
+            },
+        },
+        title: {
+            display: true,
+            text: "Sales Distribution",
+            color: "darkblue",
+            font: {
+                size: 18,
+                weight: "bold",
+            },
+        },
+    }
+}
+
 export default {
     chartType,
     chartData,
+    chartOptions
 };
