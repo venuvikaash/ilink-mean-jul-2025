@@ -1807,3 +1807,81 @@ resetZoom() {
 ```
 
 __Further exploration__: You can further improve performance by using the __decimation plugin__ (built-in to Chart.js) to reduce visible data points. Expore it!
+
+## Step 17: Mixed Chart
+
+In **Chart.js**, you can **mix chart types** by using the `type: 'bar'` (or another base chart type) on the overall chart, and specifying different types per dataset using the `type` property on each dataset. This is commonly referred to as a **mixed chart** or **combo chart**.
+
+### ✅ Compatible Chart Types for Mixing
+
+You can mix any combination of **the following Cartesian chart types**:
+
+| Chart Type    | Can be Mixed?                        |
+| ------------- | ------------------------------------ |
+| `bar`         | ✅ Yes                                |
+| `line`        | ✅ Yes                                |
+| `bubble`      | ✅ Yes                                |
+| `scatter`     | ✅ Yes                                |
+| `area`        | ✅ (via line with `fill`)             |
+| `candlestick` | ❌ (requires chartjs-chart-financial) |
+| `radar`       | ❌ No                                 |
+| `doughnut`    | ❌ No                                 |
+| `pie`         | ❌ No                                 |
+| `polarArea`   | ❌ No                                 |
+
+> **Mixable** if they share the same axes (e.g. `bar` and `line`) on Cartesian (X/Y) plane.
+
+### Example: Mixed Bar and Line Chart
+- In `src/app/app.ts`
+```ts
+public mixedExample = {
+  type: 'bar',
+  data: {
+    labels: ['Jan', 'Feb', 'Mar'],
+    datasets: [
+      {
+        type: 'bar',
+        label: 'Sales',
+        data: [50, 60, 70],
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+      },
+      {
+        type: 'line',
+        label: 'Trend',
+        data: [55, 58, 65],
+        borderColor: 'rgba(255, 99, 132, 1)',
+        fill: false,
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    scales: {
+      y: { beginAtZero: true },
+    },
+  },
+};
+```
+-   Update `src/app/app.html` to add the new chart
+
+```html
+<div class="row">
+    <!-- ... -->
+
+    <!-- Mixed Chart -->
+    <div class="col col-md-4">
+        <canvas
+            baseChart
+            [data]="mixedExample.data"
+            [type]="mixedExample.type"
+            [options]="mixedExample.options"
+        ></canvas>
+    </div>
+</div>
+```
+
+### Notes
+
+* All mixed types must be **Cartesian charts** (x/y axes).
+* **Radar**, **pie**, **polarArea**, and **doughnut** charts are **not compatible** for mixing with others.
+* Axes settings might need to be adjusted to accommodate mixed types (e.g., dual axes).
