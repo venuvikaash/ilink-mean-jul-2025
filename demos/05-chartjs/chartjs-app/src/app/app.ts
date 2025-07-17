@@ -7,6 +7,7 @@ import LineExample3 from './examples/03-line';
 import DoughnutExample4 from './examples/04-doughnut';
 import BubbleExample5 from './examples/05-bubble';
 import PolarAreaExample6 from './examples/06-polar-area';
+import AnimationsExample7 from './examples/07-animations';
 
 @Component({
   selector: 'app-root',
@@ -25,4 +26,5 @@ export class App {
   public example4 = DoughnutExample4;
   public example5 = BubbleExample5;
   public example6 = PolarAreaExample6;
+  public example7 = AnimationsExample7;
 }
