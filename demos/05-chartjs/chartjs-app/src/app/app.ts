@@ -3,6 +3,10 @@ import { RouterOutlet } from '@angular/router';
 import { BaseChartDirective } from "ng2-charts";
 import PieExample1 from "./examples/01-pie";
 import BarExample2 from "./examples/02-bar";
+import LineExample3 from './examples/03-line';
+import DoughnutExample4 from './examples/04-doughnut';
+import BubbleExample5 from './examples/05-bubble';
+import PolarAreaExample6 from './examples/06-polar-area';
 
 @Component({
   selector: 'app-root',
@@ -17,4 +21,8 @@ export class App {
 
   public example1 = PieExample1;
   public example2 = BarExample2;
+  public example3 = LineExample3;
+  public example4 = DoughnutExample4;
+  public example5 = BubbleExample5;
+  public example6 = PolarAreaExample6;
 }
