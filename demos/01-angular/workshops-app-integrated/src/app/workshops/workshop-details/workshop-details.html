@@ -1,0 +1,78 @@
+@if(loading) {
+    <app-loading-spinner variant="success"></app-loading-spinner>
+} @else if(!loading && error) {
+    <app-error-alert [error]="error"></app-error-alert>
+} @else {
+    <h1>{{ workshop.name }}</h1>
+    <button [routerLink]="['..', workshop._id + 1]">Next workshop</button>
+
+    <hr />
+
+    <div class="row">
+        <div class="col-12 col-md-4">
+            <img [src]="workshop.imageUrl" [alt]="workshop.name" class="img-fluid" />
+        </div>
+        <div class="col-12 col-md-8">
+            <div class="my-3">
+                <div>{{ workshop.time }}</div>
+                <div>
+                    {{ workshop.startDate | date : "EEEE, MMMM d, y" }} -
+                    {{ workshop.endDate | date : "EEEE, MMMM d, y" }}
+                </div>
+
+                <div>{{ workshop.location | location }}</div>
+
+                <!-- Add this -->
+                <div class="my-2">
+                    <span class="me-4">
+                        <fa-icon
+                            [icon]="
+                                workshop.modes.inPerson
+                                    ? icons.faCheckCircle
+                                    : icons.faTimesCircle
+                            "
+                        ></fa-icon>
+                        In person
+                    </span>
+                    <span>
+                        <fa-icon
+                            [icon]="
+                                workshop.modes.online
+                                    ? icons.faCheckCircle
+                                    : icons.faTimesCircle
+                            "
+                        ></fa-icon>
+                        Online
+                    </span>
+                </div>
+
+            </div>
+            <div [innerHTML]="workshop.description"></div>
+        </div>
+
+        <div class="mt-5">
+            <!-- Alternatively, [routerLink]="['.']" -->
+            <button
+                [routerLink]="['.']"
+                routerLinkActive="btn-active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                class="btn btn-primary btn-sm btn-child-link me-2"
+            >
+                Sessions List
+            </button>
+            <!-- Alternatively, [routerLink]="['add-session']" -->
+            <button
+                [routerLink]="['add-session']"
+                routerLinkActive="btn-active"
+                [routerLinkActiveOptions]="{ exact: true }"
+                class="btn btn-primary btn-sm btn-child-link"
+            >
+                Add a session
+            </button>
+        </div>
+
+        <div class="my-5">
+            <router-outlet></router-outlet>
+        </div>
+    </div>
+}

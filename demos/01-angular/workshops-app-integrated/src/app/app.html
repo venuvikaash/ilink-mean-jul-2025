@@ -1,0 +1,20 @@
+<ngb-alert type="info" *ngIf="isOpen" (closed)="toggle()">
+  Note that this app is built using Angular 18. The APIs in Angular <= 16 are
+  significantly different.
+</ngb-alert>
+
+<app-toast></app-toast>
+
+<!-- menu -->
+<app-menu></app-menu>
+
+<!-- <h2 class="highlight">App component</h2>
+<div>{{ title }}</div>
+<button (click)="count = count + 1">Click me</button>
+<button (click)="increment()">Click me</button>
+<span>{{ count }}</span> -->
+
+<div class="container my-4">
+  <!-- Here any component can come based on the URL -->
+  <router-outlet></router-outlet>
+</div>

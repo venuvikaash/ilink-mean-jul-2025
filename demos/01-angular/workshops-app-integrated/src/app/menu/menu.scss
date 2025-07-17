@@ -1,0 +1,4 @@
+// make sure the selector specificity is at least as much as Bootstrap's selector for the element - you can use the SAME selector that Bootstrap uses.
+.navbar-nav .nav-link.active {
+    color: crimson;
+}

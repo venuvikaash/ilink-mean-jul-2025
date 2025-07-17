@@ -1,0 +1,54 @@
+@if( workshop ) {
+<div class="card p-3 w-100">
+  <span>
+    <fa-icon
+      [icon]="
+        favoritesService.isFavorite(workshop._id)
+          ? icons.faStar
+          : icons.faStarEmpty
+      "
+      class="favorite text-success"
+      (click)="favoritesService.toggleFavorite(workshop)"
+    ></fa-icon>
+  </span>
+
+  <div class="card-action-buttons">
+      <button class="me-2 btn btn-info btn-sm btn-action-button" title="Edit this workshop">
+          <fa-icon [icon]="icons.faPencil"></fa-icon>
+      </button>
+      <button class="btn btn-danger btn-sm btn-action-button" title="Delete this workshop">
+          <fa-icon
+            [icon]="icons.faTrash"
+            (click)="onDeleteWorkshop()"
+          ></fa-icon>
+      </button>
+  </div>
+
+  <div class="card-img-top-wrapper">
+    <img [src]="workshop.imageUrl" class="card-img-top" [alt]="workshop.name" />
+  </div>
+  <div class="card-body">
+    <h5 class="card-title my-0">{{ workshop.name }}</h5>
+    <div class="card-text">
+      <div>{{ workshop.time }}</div>
+
+      <!-- <div>{{ formatDate( workshop.startDate ) }} - {{ workshop.endDate }}</div> -->
+
+      <div>
+        {{ workshop.startDate | date:'MMMM d, y':'UTC' }} -
+        {{ workshop.endDate | date:'MMMM d, y':'UTC' }}
+      </div>
+
+      <div>
+        {{ workshop.location | location:'short' }}
+      </div>
+    </div>
+    <a
+      class="btn btn-primary btn-sm mt-4"
+      [routerLink]="[ workshop._id ]"
+      [attr.aria-label]="'Know more about ' + workshop.name"
+      >Know more</a
+    >
+  </div>
+</div>
+}

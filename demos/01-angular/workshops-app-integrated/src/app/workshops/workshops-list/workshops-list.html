@@ -1,0 +1,41 @@
+<!-- Alternative to *ngIf -->
+@if(loading) {
+    <app-loading-spinner variant="success"></app-loading-spinner>
+} @else if( !loading && error ) {
+    <!--
+        parent gets hold o the new page and calls its own changePage()
+    -->
+    <app-error-alert [error]="error"></app-error-alert>
+} @else {
+    <app-pagination
+        [page]="page"
+        (pageChange)="changePage($event)"
+    ></app-pagination>
+
+    <input
+        type="search"
+        class="form-control"
+        placeholder="Type to search by name"
+        [(ngModel)]="filterKey"
+        (input)="filterWorkshops()"
+    />
+
+    @if ( filterKey !== '' ) {
+        <div>
+            Workshops whose name has
+            <span class="text-primary">{{ filterKey }}</span> are shown.
+        </div>
+    }
+
+    <div class="row">
+        @for ( workshopItem of filteredWorkshops; track workshopItem._id ) {
+            <div class="col-12 col-lg-4 my-3 d-flex">
+                <app-item
+                    [workshop]="workshopItem"
+                    (delete)="deleteWorkshop(workshopItem)"
+                ></app-item>
+            </div>
+        }
+    </div>
+    <!-- <div *ngFor="let workshop of workshops">{{ workshop.name }}</div> -->
+}

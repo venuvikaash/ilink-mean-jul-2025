@@ -2703,7 +2703,7 @@ router.patch( '/:id/downvote', authenticate, services.patchDownvote );
 module.exports = router;
 ```
 
-## Step 34: up CORS middleware
+## Step 34: Setup CORS middleware
 ```bash
 npm i cors
 ```
@@ -2783,6 +2783,7 @@ module.exports = (io) => {
 ```
 - In `src/app.js`
 ```js
+const http = require( 'http' );
 const { Server } = require('socket.io');
 ```
 ```js

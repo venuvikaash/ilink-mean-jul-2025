@@ -1,13 +1,14 @@
 const express = require( 'express' );
-const controllers = require( '../controllers/sessions.controller' );
+const services = require( '../controllers/sessions.controller' );
+const { authenticate, authorize } = require( '../middleware/auth' );
 
 const router = express.Router();
 
 router.route('/')
-    .post( controllers.postSession );
     // .get( services.getSessions )
+    .post( authenticate, services.postSession );
 
-router.patch( '/:id/upvote', controllers.patchUpvote );
-router.patch( '/:id/downvote', controllers.patchDownvote );
+router.patch( '/:id/upvote', authenticate, services.patchUpvote );
+router.patch( '/:id/downvote', authenticate, services.patchDownvote );
 
 module.exports = router;

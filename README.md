@@ -135,3 +135,11 @@
 - Model methods for updating the database, and querying, including pagination, sorting, filtering, projecting, updating single and multi-valued (array) fields
 - Handling query and path parameters
 - Handling relationships between collections and joins, adding virtual fields in schema
+
+## Day 13: Authentication, Authorization, CORS, Web Sockets
+- Session voting APIs
+- Setting up local user collection, and use registration
+- Login and JWT generation
+- Protecting endpoints and token verification (authorization)
+- Authorization (based on user roles)
+- Using web sockets for voting on sessions - integration with Angular app

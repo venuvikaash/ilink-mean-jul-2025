@@ -1,0 +1,8 @@
+<div class="alert alert-warning text-center">
+  <h4>Don't miss out!</h4>
+  <ng-container *ngIf="ctaTemplate; else defaultCTA" [ngTemplateOutlet]="ctaTemplate"></ng-container>
+
+  <ng-template #defaultCTA>
+    <button class="btn btn-danger">Sign up now</button>
+  </ng-template>
+</div>
