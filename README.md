@@ -138,8 +138,9 @@
 
 ## Day 13: Authentication, Authorization, CORS, Web Sockets
 - Session voting APIs
-- Setting up local user collection, and use registration
-- Login and JWT generation
-- Protecting endpoints and token verification (authorization)
+- Setting up local user collection, and user registration, hashing password
+- Login, verifying hashed password and JWT generation
+- Protecting endpoints, route-level middleware and token verification (authorization)
 - Authorization (based on user roles)
+- Setting up CORS for frontend to make requests to the backend
 - Using web sockets for voting on sessions - integration with Angular app
