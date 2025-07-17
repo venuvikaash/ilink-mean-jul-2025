@@ -1,11 +1,22 @@
 <div class="container">
     <div class="row">
+        <!-- Pie chart -->
         <div class="col col-md-4">
             <canvas
                 baseChart
                 [data]="example1.chartData"
                 [type]="example1.chartType"
                 [options]="example1.chartOptions"
+            ></canvas>
+        </div>
+
+        <!-- Bar chart -->
+        <div class="col col-md-4">
+            <canvas
+                baseChart
+                [data]="example2.chartData"
+                [type]="example2.chartType"
+                [options]="example2.chartOptions"
             ></canvas>
         </div>
     </div>
