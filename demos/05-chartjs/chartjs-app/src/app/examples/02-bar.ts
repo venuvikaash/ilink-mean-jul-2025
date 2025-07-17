@@ -62,6 +62,22 @@ const chartOptions: ChartOptions<BarChartType> = {
             title: {
                 display: true,
                 text: "Quarter",
+                color: "#333",
+                font: {
+                    size: 14,
+                    weight: "bold",
+                },
+            },
+            ticks: {
+                color: "#666",
+                font: {
+                    size: 12,
+                },
+            },
+            grid: {
+                display: true,
+                color: "#e0e0e0", // grid + axis line
+                lineWidth: 1,
             },
         },
         y: {
@@ -69,6 +85,23 @@ const chartOptions: ChartOptions<BarChartType> = {
             title: {
                 display: true,
                 text: "Sales (in thousands)",
+                color: "#333",
+                font: {
+                    size: 14,
+                    weight: "bold",
+                },
+            },
+            ticks: {
+                color: "#666",
+                font: {
+                    size: 12,
+                },
+                stepSize: 5,
+            },
+            grid: {
+                display: true,
+                color: "#e0e0e0",
+                lineWidth: 1,
             },
         },
     },
