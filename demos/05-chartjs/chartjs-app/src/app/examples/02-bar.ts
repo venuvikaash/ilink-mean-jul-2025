@@ -26,12 +26,35 @@ const chartOptions: ChartOptions<BarChartType> = {
         title: {
             display: true,
             text: "Quarterly Sales Comparison",
+            color: "darkblue",
             font: {
                 size: 18,
+                weight: "bold",
             },
         },
         legend: {
-            position: "top",
+            display: true,
+            position: "bottom",
+            labels: {
+                color: "#333",
+                font: {
+                    size: 12,
+                    weight: "normal",
+                },
+            },
+        },
+        tooltip: {
+            enabled: true,
+            backgroundColor: "#f5f5f5",
+            titleColor: "#000",
+            bodyColor: "#000",
+            borderColor: "#ccc",
+            borderWidth: 1,
+            callbacks: {
+                label: (tooltipItem) => {
+                    return `The quartely sales is ${tooltipItem.raw}`;
+                },
+            },
         },
     },
     scales: {
