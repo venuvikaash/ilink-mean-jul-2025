@@ -8,6 +8,7 @@ import DoughnutExample4 from './examples/04-doughnut';
 import BubbleExample5 from './examples/05-bubble';
 import PolarAreaExample6 from './examples/06-polar-area';
 import AnimationsExample7 from './examples/07-animations';
+import DynamicExample8 from './examples/08-dynamic';
 
 @Component({
   selector: 'app-root',
@@ -27,4 +28,9 @@ export class App {
   public example5 = BubbleExample5;
   public example6 = PolarAreaExample6;
   public example7 = AnimationsExample7;
+  public example8 = DynamicExample8;
+
+  refreshData() {
+    this.example8.updateData();
+  }
 }

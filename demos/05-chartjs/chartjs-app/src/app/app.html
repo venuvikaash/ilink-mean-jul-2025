@@ -69,5 +69,27 @@
                 [options]="example7.chartOptions"
             ></canvas>
         </div>
+
+        <!-- Dynamic Chart Updates -->
+        <div class="col col-md-4 align-items-center justify-content-center">
+            <div class="row">
+                <div class="col-12">
+                    <canvas
+                        baseChart
+                        [data]="example8.chartData()"
+                        [type]="example8.chartType"
+                        [options]="example8.chartOptions"
+                    ></canvas>
+                </div>
+                <div class="col-12 d-flex align-items-center justify-content-center">
+                    <button
+                        class="btn btn-primary btn-sm m-2"
+                        (click)="refreshData()"
+                    >
+                        Update Chart Data
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
