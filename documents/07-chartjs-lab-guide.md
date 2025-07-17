@@ -15,10 +15,10 @@ ng new chartjs-app
      ✔ Which stylesheet format would you like to use? **CSS**  
      ✔ Do you want to enable Server-Side Rendering (SSR) and Static Site Generation (SSG/Prerendering)? **No**
 
--   Install `chart.js` and `ng2-charts`
+-   Install `chart.js` and `ng2-charts` (And `bootstrap` for basic styling)
 
 ```bash
-npm i chart.js ng2-charts
+npm i chart.js ng2-charts npm i bootstrap
 ```
 
 -   Configure Chart JS in the app. In `src/app/app.config.ts`
@@ -58,6 +58,11 @@ import { provideCharts, withDefaultRegisterables } from "ng2-charts";
     bootstrap: [AppComponent],
 })
 export class AppModule {}
+```
+- Add Bootstrap CSS to the project for styling in src/styles.css
+```css
+/* You can add global styles to this file, and also import other style files */
+@import url("bootstrap/dist/css/bootstrap.css");
 ```
 
 ## Step 2: Creating a Basic Chart (using &lt;canvas&gt;)
@@ -123,7 +128,7 @@ export default {
             <canvas
                 baseChart
                 [data]="example1.chartData"
-                [type]="example2.chartType"
+                [type]="example1.chartType"
             ></canvas>
         </div>
     </div>
