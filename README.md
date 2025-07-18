@@ -144,3 +144,12 @@
 - Authorization (based on user roles)
 - Setting up CORS for frontend to make requests to the backend
 - Using web sockets for voting on sessions - integration with Angular app
+
+## Day 14: Chart.js and Signals in Angular
+- Installing Chart.js, ng2-charts, configuring in Angular apps
+- Chart type, data, datasets, options
+- COnfiguring tooltips, title, axes, legends, ticks, grid lines
+- Different types of charts - line, bar, pie, doughnut, polar, bubble
+- Getting started with animations, handling user interactions Dynamic chart updates
+- Plugins, performance optimizations guidelines
+- Signals in Angular
